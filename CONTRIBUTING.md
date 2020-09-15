@@ -4,7 +4,7 @@
 
 This project is licensed under the terms of the Apache License v2.0 with LLVM
 Exceptions license ([LICENSE.txt](llvm/LICENSE.TXT)) to ensure our ability to
-contribute this project to the LLVM "test-suite" project under the same license.
+contribute this project to the LLVM test suite project under the same license.
 
 By contributing to this project, you agree to the Apache License v2.0 with LLVM
 Exceptions and copyright terms there in and release your contribution under

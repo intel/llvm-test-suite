@@ -1,4 +1,4 @@
-LLVM "test-suite" Repository
+LLVM test suite Repository
 ----------------------------
 
 Please see the LLVM testing infrastructure guide:
@@ -9,8 +9,8 @@ for more information on the contents of this repository.
 
 ## Introduction
 
-Intel staging area for llvm-test-suite contribution. Home for oneAPI Data
-Parallel C++ compiler tests extending LLVM "test-suite".
+Intel staging area for LLVM test suite contribution. Home for oneAPI Data
+Parallel C++ compiler tests extending LLVM test suite.
 
 ## License
 
