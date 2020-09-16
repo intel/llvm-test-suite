@@ -1,5 +1,4 @@
-LLVM test suite Repository
-----------------------------
+# LLVM* test suite repository
 
 Please see the LLVM testing infrastructure guide:
 
@@ -20,7 +19,7 @@ See [LICENSE.txt](LICENSE.TXT) for details.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
-## Sub-projects Documentation
+## Related projects documentation
 
 * oneAPI Data Parallel C++ compiler - See
   [DPC++ Documentation](https://intel.github.io/llvm-docs/)
