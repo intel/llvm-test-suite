@@ -8,7 +8,7 @@
 // TODO enable on Windows and Level Zero
 // REQUIRES: linux && gpu && opencl
 // RUN: %clangxx-esimd -fsycl %s -o %t.out
-// RUN: env SYCL_DEVICE_TYPE=HOST %t.out
+// RUN: %HOST_RUN_PLACEHOLDER %t.out
 // RUN: %ESIMD_RUN_PLACEHOLDER %t.out
 
 // This test checks that multi-dimensional sycl::item can be used in ESIMD
