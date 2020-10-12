@@ -1,9 +1,7 @@
 // UNSUPPORTED: cuda
 // REQUIRES: gpu,linux
-// RUN: %clangxx -fsycl %s -DINLINE_ASM -o %t.out
-// RUN: %t.out
-// RUN: %clangxx -fsycl %s -o %t.ref.out
-// RUN: %t.ref.out
+// RUN: %clangxx -fsycl %s -o %t.out
+// RUN: %GPU_RUN_PLACEHOLDER %t.out
 
 #include "include/asmhelper.h"
 #include <CL/sycl.hpp>
@@ -18,15 +16,19 @@ int main() {
 
   cl::sycl::device Device = q.get_device();
 
-  if (!isInlineASMSupported(Device) || !Device.has_extension("cl_intel_required_subgroup_size")) {
+  if (!isInlineASMSupported(Device) ||
+      !Device.has_extension("cl_intel_required_subgroup_size")) {
     std::cout << "Skipping test\n";
     return 0;
   }
 
   auto ctx = q.get_context();
-  int *a = (int *)malloc_shared(sizeof(int) * problem_size, q.get_device(), ctx);
-  int *b = (int *)malloc_shared(sizeof(int) * problem_size, q.get_device(), ctx);
-  int *c = (int *)malloc_shared(sizeof(int) * problem_size, q.get_device(), ctx);
+  int *a =
+      (int *)malloc_shared(sizeof(int) * problem_size, q.get_device(), ctx);
+  int *b =
+      (int *)malloc_shared(sizeof(int) * problem_size, q.get_device(), ctx);
+  int *c =
+      (int *)malloc_shared(sizeof(int) * problem_size, q.get_device(), ctx);
   for (int i = 0; i < problem_size; i++) {
     b[i] = -10;
     a[i] = i;
@@ -35,12 +37,10 @@ int main() {
 
   q.submit([&](cl::sycl::handler &cgh) {
      cgh.parallel_for<kernel_name>(
-         // clang-format off
-         cl::sycl::range<1>(problem_size),
-     [=](cl::sycl::id<1> idx) [[intel::reqd_sub_group_size(32)]] {
-           // clang-format on
+         cl::sycl::range<1>(problem_size), [=
+     ](cl::sycl::id<1> idx) [[intel::reqd_sub_group_size(32)]] {
            int i = idx[0];
-#if defined(INLINE_ASM) && defined(__SYCL_DEVICE_ONLY__)
+#if defined(__SYCL_DEVICE_ONLY__)
            asm volatile(R"a(
     {
         .decl V52 v_type=G type=d num_elts=16 align=GRF
@@ -59,16 +59,14 @@ int main() {
         svm_scatter.4.1 (M1, 16) %1.0 V53.0
     }
     )a" ::"rw"(&b[i]),
-                        // clang-format off
-                            "rw"(&b[i] + 16), "rw"(&a[i]), "rw"(&a[i] + 16), "rw"(&c[i]),
-                            "rw"(&c[i] + 16));
+                        "rw"(&b[i] + 16), "rw"(&a[i]), "rw"(&a[i] + 16),
+                        "rw"(&c[i]), "rw"(&c[i] + 16));
 #else
                b[i] = a[i] * c[i];
 #endif
-             });
+         });
    }).wait();
 
-  // clang-format on
   bool currect = true;
   for (int i = 0; i < problem_size; i++) {
     if (b[i] != a[i] * c[i]) {

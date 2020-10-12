@@ -1,9 +1,7 @@
 // UNSUPPORTED: cuda
 // REQUIRES: gpu,linux
-// RUN: %clangxx -fsycl %s -DINLINE_ASM -o %t.out
-// RUN: %t.out
-// RUN: %clangxx -fsycl %s -o %t.ref.out
-// RUN: %t.ref.out
+// RUN: %clangxx -fsycl %s -o %t.out
+// RUN: %GPU_RUN_PLACEHOLDER %t.out
 
 #include "include/asmhelper.h"
 #include <CL/sycl.hpp>
@@ -12,19 +10,17 @@
 
 using dataType = cl::sycl::cl_int;
 
-template <typename T = dataType>
-struct KernelFunctor : WithOutputBuffer<T> {
+template <typename T = dataType> struct KernelFunctor : WithOutputBuffer<T> {
   KernelFunctor(size_t problem_size) : WithOutputBuffer<T>(problem_size) {}
 
   void operator()(cl::sycl::handler &cgh) {
-    auto C = this->getOutputBuffer().template get_access<cl::sycl::access::mode::write>(cgh);
+    auto C = this->getOutputBuffer()
+                 .template get_access<cl::sycl::access::mode::write>(cgh);
     cgh.parallel_for<KernelFunctor<T>>(
-        // clang-format off
-        cl::sycl::range<1>{this->getOutputBufferSize()},
-    [=](cl::sycl::id<1> wiID) [[intel::reqd_sub_group_size(16)]] {
-          // clang-format on
+        cl::sycl::range<1>{this->getOutputBufferSize()}, [=
+    ](cl::sycl::id<1> wiID) [[intel::reqd_sub_group_size(16)]] {
           C[wiID] = 43;
-#if defined(INLINE_ASM) && defined(__SYCL_DEVICE_ONLY__)
+#if defined(__SYCL_DEVICE_ONLY__)
           asm volatile("");
 #endif
         });

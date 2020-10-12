@@ -1,9 +1,7 @@
 // UNSUPPORTED: cuda
 // REQUIRES: gpu,linux
-// RUN: %clangxx -fsycl %s -DINLINE_ASM -o %t.out
+// RUN: %clangxx -fsycl %s -o %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
-// RUN: %clangxx -fsycl %s -o %t.ref.out
-// RUN: %GPU_RUN_PLACEHOLDER %t.ref.out
 
 #include "include/asmhelper.h"
 #include <CL/sycl.hpp>
@@ -26,12 +24,10 @@ struct KernelFunctor : WithInputBuffers<T, 2>, WithOutputBuffer<T> {
                  .template get_access<cl::sycl::access::mode::read>(CGH);
     auto C = this->getOutputBuffer()
                  .template get_access<cl::sycl::access::mode::write>(CGH);
-    // clang-format off
     CGH.parallel_for<KernelFunctor<T>>(
-        cl::sycl::range<1>{this->getOutputBufferSize()},
-    [=](cl::sycl::id<1> wiID) [[intel::reqd_sub_group_size(8)]] {
-// clang-format on
-#if defined(INLINE_ASM) && defined(__SYCL_DEVICE_ONLY__)
+        cl::sycl::range<1>{this->getOutputBufferSize()}, [=
+    ](cl::sycl::id<1> wiID) [[intel::reqd_sub_group_size(8)]] {
+#if defined(__SYCL_DEVICE_ONLY__)
           asm volatile(".decl P1 v_type=P num_elts=8\n"
                        ".decl P2 v_type=P num_elts=8\n"
                        ".decl temp v_type=G type=d num_elts=8 align=dword\n"
