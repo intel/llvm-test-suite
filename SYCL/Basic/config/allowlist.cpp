@@ -11,9 +11,9 @@
 
 #include <CL/sycl.hpp>
 #include <algorithm>
-#include <iostream>
 #include <cstdlib>
 #include <exception>
+#include <iostream>
 #include <string>
 
 using namespace cl;
