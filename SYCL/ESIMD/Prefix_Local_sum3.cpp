@@ -293,6 +293,10 @@ void hierarchical_prefix(queue &q, unsigned *buf, unsigned elem_stride,
 //************************************
 // Demonstrate summation of arrays both in scalar on CPU and parallel on device
 // This is a ULT test variant of PrefixSum kernel with different implementation
+// to increase test coverage of different usage cases and help isolate bugs.
+// Difference from PrefixSum kernel:
+// - Use gather<>() and gather4<>() to read in data
+// - Use scatter<>() and scatter4<>() to write output
 //************************************
 int main(int argc, char *argv[]) {
 

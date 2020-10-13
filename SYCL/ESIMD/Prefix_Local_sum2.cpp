@@ -104,6 +104,11 @@ void cmk_acum_iterative(unsigned *buf, unsigned h_pos,
 //************************************
 // Demonstrate summation of arrays both in scalar on CPU and parallel on device
 // This is a ULT test variant of PrefixSum kernel with different implementation
+// to increase test coverage of different usage cases and help isolate bugs.
+// Difference from PrefixSum kernel:
+// - Use gather4<>() to read in data
+// - Use format<>() to convert a 1D vector to 2D matrix view
+// - Use reduce<int>(t, std::plus<>()) to do reduction
 //************************************
 int main(int argc, char *argv[]) {
 

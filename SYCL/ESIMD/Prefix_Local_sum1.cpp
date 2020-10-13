@@ -107,6 +107,10 @@ void cmk_sum_tuple_count(unsigned int *buf, unsigned int h_pos) {
 //************************************
 // Demonstrate summation of arrays both in scalar on CPU and parallel on device
 // This is a ULT test variant of PrefixSum kernel with different implementation
+// to increase test coverage of different usage cases and help isolate bugs.
+// Difference from PrefixSum kernel:
+// - Use block_load<>() to read in data
+// - Use scatter<>() to write output
 //************************************
 int main(int argc, char *argv[]) {
 
