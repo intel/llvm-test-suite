@@ -25,7 +25,6 @@ struct KernelFunctor {
 int main() {
   KernelFunctor f;
   launchInlineASMTest(f, /* sg size */ true,
-                      /* exception is expected */ false,
                       /* exception string*/ "syntax error, unexpected FTYPE");
   return 0;
 }

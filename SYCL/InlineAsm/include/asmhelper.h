@@ -119,31 +119,26 @@ bool launchInlineASMTestImpl(F &f, bool requires_particular_sg_size = true) {
 /// \returns false if test wasn't launched (i.e.was skipped) and true otherwise
 template <typename F>
 bool launchInlineASMTest(F &f, bool requires_particular_sg_size = true,
-                         bool need_to_throw_exception = false,
                          std::string exception_string = "") {
-  if (need_to_throw_exception) {
-    return launchInlineASMTestImpl(f, requires_particular_sg_size);
-  } else {
-    bool result = false;
-    try {
-      result = launchInlineASMTestImpl(f, requires_particular_sg_size);
-    } catch (cl::sycl::exception &e) {
-      std::string what = e.what();
-      if (!exception_string.empty()) {
-        if (what.find(exception_string) != std::string::npos) {
-          std::cout << "Caught expected exception: " << what << std::endl;
-        } else {
-          std::cout << "Failed to catch expected exception: "
-                    << exception_string << std::endl;
-          throw e;
-        }
+  bool result = false;
+  try {
+    result = launchInlineASMTestImpl(f, requires_particular_sg_size);
+  } catch (cl::sycl::exception &e) {
+    std::string what = e.what();
+    if (!exception_string.empty()) {
+      if (what.find(exception_string) != std::string::npos) {
+        std::cout << "Caught expected exception: " << what << std::endl;
       } else {
-        std::cout << "Caught unexpected exception: " << std::endl;
+        std::cout << "Failed to catch expected exception: "
+                  << exception_string << std::endl;
         throw e;
       }
+    } else {
+      std::cout << "Caught unexpected exception: " << std::endl;
+      throw e;
     }
-    return result;
   }
+  return result;
 }
 
 template <typename T>
