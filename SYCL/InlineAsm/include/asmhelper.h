@@ -129,8 +129,8 @@ bool launchInlineASMTest(F &f, bool requires_particular_sg_size = true,
       if (what.find(exception_string) != std::string::npos) {
         std::cout << "Caught expected exception: " << what << std::endl;
       } else {
-        std::cout << "Failed to catch expected exception: "
-                  << exception_string << std::endl;
+        std::cout << "Failed to catch expected exception: " << exception_string
+                  << std::endl;
         throw e;
       }
     } else {
