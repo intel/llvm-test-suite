@@ -41,7 +41,6 @@ ESIMD_INLINE void mandelbrot(ACC out_image, int ix, int iy, int crunch,
 
   simd<int, 16> m = 0;
 
-  // SIMT_BEGIN(16, lane) {
   for (auto lane = 0; lane < 16; ++lane) {
     int ix_lane = ix + (lane & 0x7);
     int iy_lane = iy + (lane >> 3);
@@ -63,7 +62,7 @@ ESIMD_INLINE void mandelbrot(ACC out_image, int ix, int iy, int crunch,
 
     m.select<1, 0>(lane) = mtemp;
 
-  } // SIMT_END
+  }
 
   simd<int, 16> color = (((m * 15) & 0xff)) + (((m * 7) & 0xff) * 256) +
                         (((m * 3) & 0xff) * 65536);
