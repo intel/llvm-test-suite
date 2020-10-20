@@ -46,7 +46,7 @@ void kernel2() {
     assert(data[i] == i);
   }
 }
-#else // B_CPP
+#else
 void kernel1() {
   static int data[10];
   {
@@ -68,4 +68,4 @@ int main() {
 
   return 0;
 }
-#endif // B_CPP
+#endif
