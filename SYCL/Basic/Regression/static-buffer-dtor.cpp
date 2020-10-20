@@ -19,10 +19,8 @@
 
 int main() {
   uint8_t *h_A = (uint8_t *)malloc(256);
-  static cl::sycl::buffer<uint8_t> bufs[2] = {
-    cl::sycl::range<1>(256),
-    cl::sycl::range<1>(256)
-  };
+  static cl::sycl::buffer<uint8_t> bufs[2] = {cl::sycl::range<1>(256),
+                                              cl::sycl::range<1>(256)};
   cl::sycl::queue q;
   q.submit([&](cl::sycl::handler &cgh) {
     cgh.copy(h_A, bufs[0].get_access<cl::sycl::access::mode::write>(cgh));

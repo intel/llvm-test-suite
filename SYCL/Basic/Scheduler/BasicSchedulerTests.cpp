@@ -56,7 +56,6 @@ int main() {
     sycl::buffer<int, 1> Buf2(BufSize);
 
     runTest([&](sycl::queue Queue) {
-
       Queue.submit([&](sycl::handler &CGH) {
         auto Buf1Acc = Buf1.get_access<sycl_access_mode::read_write>(CGH);
         auto Buf2Acc = Buf2.get_access<sycl_access_mode::read_write>(CGH);

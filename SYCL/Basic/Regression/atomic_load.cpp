@@ -7,15 +7,13 @@
 #include <CL/sycl.hpp>
 using namespace cl::sycl;
 
-template <typename T>
-class foo;
+template <typename T> class foo;
 
-template<typename T>
-void kernel_func(T val) {
+template <typename T> void kernel_func(T val) {
   queue testQueue;
 
   T data = val;
-  buffer<T,1> buf(&data, range<1>(1));
+  buffer<T, 1> buf(&data, range<1>(1));
 
   testQueue.submit([&](handler &cgh) {
     auto GlobAcc = buf.template get_access<access::mode::atomic>(cgh);

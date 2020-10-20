@@ -28,17 +28,15 @@ int main() {
 
   Q.submit([&](cl::sycl::handler &CGH) {
     auto Acc = Buf.get_access<cl::sycl::access::mode::write>(CGH);
-    CGH.single_task([=]() {
-      Acc[0] = 1;
-    });
+    CGH.single_task([=]() { Acc[0] = 1; });
   });
 
   Q.wait_and_throw();
 
   auto Acc = Buf.get_access<cl::sycl::access::mode::read>();
   if (1 != Acc[0]) {
-    std::cerr << "Incorrect result, got: " << Acc[0]
-              << ", expected: 1" << std::endl;
+    std::cerr << "Incorrect result, got: " << Acc[0] << ", expected: 1"
+              << std::endl;
     return 1;
   }
 

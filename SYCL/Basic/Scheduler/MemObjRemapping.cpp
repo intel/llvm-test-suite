@@ -11,8 +11,9 @@ using namespace cl::sycl;
 class Foo;
 class Bar;
 
-// This test checks that memory objects are remapped on requesting an access mode
-// incompatible with the current mapping. Write access is mapped as read-write.
+// This test checks that memory objects are remapped on requesting an access
+// mode incompatible with the current mapping. Write access is mapped as
+// read-write.
 int main() {
   queue Q;
 
@@ -70,9 +71,7 @@ int main() {
   // CHECK-NEXT: : 3
   HostQ.submit([&](handler &Cgh) {
     auto AccB = BufB.get_access<access::mode::write>(Cgh);
-    Cgh.parallel_for<Bar>(Range, [=](id<1> Idx) {
-      AccB[Idx] = 2 * Idx[0];
-    });
+    Cgh.parallel_for<Bar>(Range, [=](id<1> Idx) { AccB[Idx] = 2 * Idx[0]; });
   });
 
   // CHECK-NOT: piEnqueueMemBufferMap

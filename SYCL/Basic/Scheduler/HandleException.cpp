@@ -29,8 +29,8 @@ bool run_kernel(const unsigned wg_size) {
       deviceQueue.submit([&](handler &cgh) {
         auto accessorIdx = bufferIdx.get_access<sycl_read>(cgh);
         cgh.parallel_for<class kernelCompute>(
-            nd_range<1>(range<1>(N), range<1>(wg_size)),
-            [=](nd_item<1> ID) [[cl::reqd_work_group_size(1, 1, MAX_WG_SIZE)]] {
+            nd_range<1>(range<1>(N), range<1>(wg_size)), [=
+        ](nd_item<1> ID) [[cl::reqd_work_group_size(1, 1, MAX_WG_SIZE)]] {
               (void)accessorIdx[ID.get_global_id(0)];
             });
       });

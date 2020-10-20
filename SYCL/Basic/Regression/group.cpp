@@ -192,8 +192,7 @@ bool group__async_work_group_copy() {
             AccLocal(LocalRange, cgh);
 
         cgh.parallel_for<class group__async_work_group_copy>(
-            nd_range<2>{GlobalRange, LocalRange},
-            [=](nd_item<DIMS> I) {
+            nd_range<2>{GlobalRange, LocalRange}, [=](nd_item<DIMS> I) {
               const auto Group = I.get_group();
               const auto NumElem = AccLocal.get_count();
               const auto Off = Group[0] * I.get_group_range(1) * NumElem +

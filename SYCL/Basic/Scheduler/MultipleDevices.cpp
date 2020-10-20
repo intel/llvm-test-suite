@@ -35,7 +35,7 @@ int multidevice_test(queue MyQueue1, queue MyQueue2) {
         range<1>{N}, [=](id<1> index) { B[index[0]] = N - index[0]; });
   });
 
-  MyQueue2.submit([&](handler& cgh) {
+  MyQueue2.submit([&](handler &cgh) {
     auto A = BufA.get_access<access::mode::read>(cgh);
     auto B = BufB.get_access<access::mode::read_write>(cgh);
     auto C = BufC.get_access<access::mode::write>(cgh);
@@ -51,7 +51,7 @@ int multidevice_test(queue MyQueue1, queue MyQueue2) {
                                    [=](id<1> index) { D[index[0]] = 1; });
   });
 
-  MyQueue1.submit([&](handler& cgh) {
+  MyQueue1.submit([&](handler &cgh) {
     auto B = BufB.get_access<access::mode::read>(cgh);
     auto C = BufC.get_access<access::mode::read>(cgh);
     auto D = BufD.get_access<access::mode::read_write>(cgh);
@@ -80,9 +80,8 @@ int multidevice_test(queue MyQueue1, queue MyQueue2) {
     int Expected = D;
 
     if (FinalD[i] != D) {
-      std::cout << "Wrong value for element " << i
-                << " Expected: " << Expected << " Got: " << FinalD[i]
-                << std::endl;
+      std::cout << "Wrong value for element " << i << " Expected: " << Expected
+                << " Got: " << FinalD[i] << std::endl;
       return -1;
     }
   }
@@ -101,7 +100,7 @@ int main() {
     queue MyQueue1(hostSelector);
     queue MyQueue2(hostSelector);
     Result &= multidevice_test(MyQueue1, MyQueue2);
-  } catch(cl::sycl::runtime_error &) {
+  } catch (cl::sycl::runtime_error &) {
     std::cout << "Skipping host and host" << std::endl;
   }
 
@@ -109,7 +108,7 @@ int main() {
     queue MyQueue1(hostSelector);
     queue MyQueue2(CPUSelector);
     Result &= multidevice_test(MyQueue1, MyQueue2);
-  } catch(cl::sycl::runtime_error &) {
+  } catch (cl::sycl::runtime_error &) {
     std::cout << "Skipping host and CPU" << std::endl;
   }
 
@@ -117,7 +116,7 @@ int main() {
     queue MyQueue1(CPUSelector);
     queue MyQueue2(CPUSelector);
     Result &= multidevice_test(MyQueue1, MyQueue2);
-  } catch(cl::sycl::runtime_error &) {
+  } catch (cl::sycl::runtime_error &) {
     std::cout << "Skipping CPU and CPU" << std::endl;
   }
 
@@ -125,7 +124,7 @@ int main() {
     queue MyQueue1(CPUSelector);
     queue MyQueue2(GPUSelector);
     Result &= multidevice_test(MyQueue1, MyQueue2);
-  } catch(cl::sycl::runtime_error &) {
+  } catch (cl::sycl::runtime_error &) {
     std::cout << "Skipping CPU and GPU" << std::endl;
   } catch (cl::sycl::compile_program_error &) {
     std::cout << "Skipping CPU and GPU" << std::endl;
@@ -135,7 +134,7 @@ int main() {
     queue MyQueue1(hostSelector);
     queue MyQueue2(GPUSelector);
     Result &= multidevice_test(MyQueue1, MyQueue2);
-  } catch(cl::sycl::runtime_error &) {
+  } catch (cl::sycl::runtime_error &) {
     std::cout << "Skipping host and GPU" << std::endl;
   } catch (cl::sycl::compile_program_error &) {
     std::cout << "Skipping CPU and GPU" << std::endl;

@@ -12,11 +12,9 @@
 using namespace sycl;
 using namespace sycl::ONEAPI;
 
-template <typename T>
-class store_kernel;
+template <typename T> class store_kernel;
 
-template <typename T>
-void store_test(queue q, size_t N) {
+template <typename T> void store_test(queue q, size_t N) {
   T initial = T(N);
   T store = initial;
   {

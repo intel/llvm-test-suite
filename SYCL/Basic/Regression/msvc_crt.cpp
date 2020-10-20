@@ -32,16 +32,15 @@ int main() {
     queue q;
     q.submit([&](handler &cgh) {
       auto B = b.get_access<access::mode::write>(cgh);
-      cgh.parallel_for<class test>(range<1>(3), [=](id<1> idx) {
-        B[idx] = 1;
-      });
+      cgh.parallel_for<class test>(range<1>(3), [=](id<1> idx) { B[idx] = 1; });
     });
   }
 
   bool isSuccess = true;
 
   for (int i = 0; i < 3; i++)
-    if (data[i] != 1) isSuccess = false;
+    if (data[i] != 1)
+      isSuccess = false;
 
   if (!isSuccess)
     return -1;

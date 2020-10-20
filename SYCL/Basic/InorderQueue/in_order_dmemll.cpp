@@ -88,7 +88,7 @@ int main() {
     const int want = i * 4 + 43;
     if (h_cur.Num != want) {
       std::cout << "Result mismatches " << h_cur.Num << " vs expected "
-                  << i * 4 + 43 << " for index " << i << std::endl;
+                << i * 4 + 43 << " for index " << i << std::endl;
       return -1;
     }
     d_cur = h_cur.pNext;

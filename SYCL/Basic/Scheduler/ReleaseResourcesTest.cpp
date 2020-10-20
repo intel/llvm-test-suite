@@ -33,8 +33,8 @@ int main() {
 
     Queue.submit([&](sycl::handler &CGH) {
       auto BufAcc = Buf.get_access<sycl_access_mode::read_write>(CGH);
-      CGH.parallel_for<class init_a>(
-          BufSize, [=](sycl::id<1> Id) { (void)BufAcc[Id]; });
+      CGH.parallel_for<class init_a>(BufSize,
+                                     [=](sycl::id<1> Id) { (void)BufAcc[Id]; });
     });
 
     auto BufHostAcc = Buf.get_access<sycl_access_mode::read>();

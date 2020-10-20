@@ -12,9 +12,8 @@ int main() {
   buffer<uint64_t, 1> t1(10);
   q.submit([&](handler &cgh) {
     auto table = t1.get_access<access::mode::write>(cgh);
-    cgh.parallel_for<class kernel>(10, [=](id<1> gtid) {
-      table[gtid] = gtid[0];
-    });
+    cgh.parallel_for<class kernel>(10,
+                                   [=](id<1> gtid) { table[gtid] = gtid[0]; });
   });
   q.wait();
 }

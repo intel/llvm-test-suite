@@ -23,13 +23,9 @@
 int bar(int b);
 
 SYCL_EXTERNAL
-int foo(int a, int b) {
-  return a + bar(b);
-}
+int foo(int a, int b) { return a + bar(b); }
 
-int bar(int b) {
-  return b + 5;
-}
+int bar(int b) { return b + 5; }
 #endif // SOURCE1
 
 #ifdef SOURCE2

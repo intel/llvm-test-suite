@@ -23,8 +23,8 @@ using namespace cl::sycl;
 
 class TestFnObj {
 public:
-  TestFnObj(buffer<int> &buf, handler &cgh) :
-    data(buf.get_access<access::mode::write>(cgh)) {}
+  TestFnObj(buffer<int> &buf, handler &cgh)
+      : data(buf.get_access<access::mode::write>(cgh)) {}
   accessor<int, 1, access::mode::write, access::target::global_buffer> data;
   void operator()(id<1> item) const { data[item] = item[0]; }
 };
@@ -37,7 +37,7 @@ void kernel2() {
   {
     buffer<int> b(data, range<1>(256));
     queue q;
-    q.submit([&](handler &cgh){
+    q.submit([&](handler &cgh) {
       TestFnObj kernel(b, cgh);
       cgh.parallel_for(range<1>(256), kernel);
     });
@@ -52,7 +52,7 @@ void kernel1() {
   {
     buffer<int> b(data, range<1>(10));
     queue q;
-    q.submit([&](cl::sycl::handler &cgh){
+    q.submit([&](cl::sycl::handler &cgh) {
       TestFnObj kernel(b, cgh);
       cgh.parallel_for(range<1>(10), kernel);
     });

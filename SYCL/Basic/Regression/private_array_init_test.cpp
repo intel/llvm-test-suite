@@ -20,9 +20,7 @@ class A {
 public:
   A() : _arr{0, 0, 0} {}
 
-  size_t size() {
-    return sizeof(_arr) / sizeof(_arr[0]);
-  }
+  size_t size() { return sizeof(_arr) / sizeof(_arr[0]); }
 
 private:
   size_t _arr[3];

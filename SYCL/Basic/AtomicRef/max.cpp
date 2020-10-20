@@ -13,8 +13,7 @@
 using namespace sycl;
 using namespace sycl::ONEAPI;
 
-template <typename T>
-void max_test(queue q, size_t N) {
+template <typename T> void max_test(queue q, size_t N) {
   T initial = std::numeric_limits<T>::lowest();
   T val = initial;
   std::vector<T> output(N);
@@ -25,7 +24,8 @@ void max_test(queue q, size_t N) {
 
     q.submit([&](handler &cgh) {
       auto val = val_buf.template get_access<access::mode::read_write>(cgh);
-      auto out = output_buf.template get_access<access::mode::discard_write>(cgh);
+      auto out =
+          output_buf.template get_access<access::mode::discard_write>(cgh);
       cgh.parallel_for(range<1>(N), [=](item<1> it) {
         int gid = it.get_id(0);
         auto atm = atomic_ref<T, ONEAPI::memory_order::relaxed,

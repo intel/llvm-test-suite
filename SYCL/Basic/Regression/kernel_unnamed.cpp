@@ -63,5 +63,5 @@ struct Wrapper {
 int main() {
   nm::Wrapper w;
   int res = w.test();
-  assert (res == GOLD * NumTestCases && "Wrong result");
+  assert(res == GOLD * NumTestCases && "Wrong result");
 }

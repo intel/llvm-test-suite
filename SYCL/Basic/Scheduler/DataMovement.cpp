@@ -27,10 +27,10 @@ using sycl_access_mode = cl::sycl::access::mode;
 template <typename T> class CustomAllocator {
 public:
   using value_type = T;
-  using pointer = T*;
-  using const_pointer = const T*;
-  using reference = T&;
-  using const_reference = const T&;
+  using pointer = T *;
+  using const_pointer = const T *;
+  using reference = T &;
+  using const_reference = const T &;
 
 public:
   template <typename U> struct rebind { typedef CustomAllocator<U> other; };

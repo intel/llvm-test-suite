@@ -9,7 +9,6 @@
 // RUN: %GPU_RUN_PLACEHOLDER %t.ext.out
 // RUN: %ACC_RUN_PLACEHOLDER %t.ext.out
 
-
 //==-- kernel_name_class.cpp - SYCL kernel naming variants test ------------==//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.

@@ -53,11 +53,9 @@ int main() {
   device dev{cl::sycl::default_selector{}};
   context ctx{dev};
 
-  auto exception_handler = [](cl::sycl::exception_list exceptions) {
-  };
+  auto exception_handler = [](cl::sycl::exception_list exceptions) {};
 
-  queue q2{
-      ctx, dev, exception_handler, {sycl::property::queue::in_order()}};
+  queue q2{ctx, dev, exception_handler, {sycl::property::queue::in_order()}};
 
   res = CheckQueueOrder(q2);
   if (res != 0)
