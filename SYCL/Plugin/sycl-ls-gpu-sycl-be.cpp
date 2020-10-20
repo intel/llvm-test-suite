@@ -15,7 +15,8 @@
 // CHECK-BUILTIN-GPU-CUDA: gpu_selector(){{.*}}GPU : CUDA
 // CHECK-CUSTOM-GPU-CUDA: custom_selector(gpu){{.*}}GPU : CUDA
 
-//==---- sycl-ls-gpu-sycl-be.cpp - SYCL test for discovered/selected devices --==//
+//==---- sycl-ls-gpu-sycl-be.cpp - SYCL test for discovered/selected devices
+//--==//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.

@@ -22,8 +22,10 @@ int main(int argc, char **argv) {
 
   // select the default SYCL device
   cl::sycl::device device{cl::sycl::default_selector{}};
-  std::cout << "Running on SYCL device " << device.get_info<cl::sycl::info::device::name>()
-            << ", driver version " << device.get_info<cl::sycl::info::device::driver_version>()
+  std::cout << "Running on SYCL device "
+            << device.get_info<cl::sycl::info::device::name>()
+            << ", driver version "
+            << device.get_info<cl::sycl::info::device::driver_version>()
             << std::endl;
 
   // create a queue
@@ -40,11 +42,11 @@ int main(int argc, char **argv) {
     // get write only access to the buffer on a device
     auto accessor = buffer.get_access<cl::sycl::access::mode::write>(cgh);
     // executing the kernel
-    cgh.parallel_for<class FillBuffer>(
-        NumOfWorkItems, [=](cl::sycl::id<1> WIid) {
-          // fill the buffer with indexes
-          accessor[WIid] = WIid.get(0);
-        });
+    cgh.parallel_for<class FillBuffer>(NumOfWorkItems,
+                                       [=](cl::sycl::id<1> WIid) {
+                                         // fill the buffer with indexes
+                                         accessor[WIid] = WIid.get(0);
+                                       });
   });
 
   // get read-only access to the buffer on the host
