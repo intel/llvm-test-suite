@@ -15,7 +15,7 @@
 //
 //===------------------------------------------------------------------------===//
 
-#include "../../sub_group/helper.hpp"
+#include "../../SubGroup/helper.hpp"
 #include <CL/sycl.hpp>
 
 #include <cassert>
