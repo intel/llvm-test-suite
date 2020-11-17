@@ -56,9 +56,9 @@ argument to for the lit-runner.py script.
 ***CMAKE_CXX_COMPILER*** should point to the SYCL compiler
 
 ***SYCL_RT_LIBRARY_DIR*** (optional) if present sets location for DPC++ runtime
- libraries to be used on the test execution. The test built is done with
- libraries which are part of the DPC++ compiler. This parameter can be used to
- verify DPC++ compiler and runtime cross-build compatibility.
+ libraries to be used during tests execution. Tests are built with libraries
+ which are part of the DPC++ compiler. This parameter can be used to verify
+ DPC++ compiler and runtime cross-build compatibility.
 
 ***SYCL_TARGET_DEVICES*** defines comma separated target device types (default
 value is cpu,gpu,acc,host). Supported target_devices values are:
@@ -147,8 +147,8 @@ ninja check
    added to test environment. Can be also set by LIT_EXTRA_ENVIRONMENT variable
    in cmake.
  * **sycl_rt_library_dir** - the directory containing SYCL libraries to be used
-   for SYCL applications execution. This parameter can be used to verify SYCL
-   compiler and runtime cross-build compatibility.
+   for SYCL tests execution. This parameter can be used to verify SYCL compiler
+   and runtime cross-build compatibility.
 
 # LIT features which can be used to configure test execution:
  * **windows**, **linux** - host OS;
