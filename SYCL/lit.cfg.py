@@ -49,7 +49,6 @@ if platform.system() == "Linux":
 elif platform.system() == "Windows":
     config.available_features.add('windows')
     llvm_config.with_system_environment('LIB')
-    llvm_config.with_environment('LIB', config.sycl_libs_dir, append_path=True)
     llvm_config.with_environment('PATH', config.sycl_libs_dir, append_path=True)
     llvm_config.with_environment('LIB', os.path.join(config.dpcpp_root_dir, 'lib'), append_path=True)
 

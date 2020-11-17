@@ -55,6 +55,11 @@ argument to for the lit-runner.py script.
 
 ***CMAKE_CXX_COMPILER*** should point to the DPCPP compiler
 
+***DPCPP_RT_LIBRARY_DIR*** (optional) if present sets location for DPC++ runtime
+ libraries to be used on the test execution. The test built is done with
+ libraries which are part of the DPC++ compiler. This parameter can be used to
+ verify DPC++ compiler and runtime cross-build compatibility.
+
 ***SYCL_TARGET_DEVICES*** defines comma separated target device types (default
 value is cpu,gpu,acc,host). Supported target_devices values are:
  - **cpu**  - CPU device available in OpenCL backend only;
@@ -134,13 +139,16 @@ ninja check
 
 # LIT parameters accepted by LIT executor:
  * **dpcpp_compiler** - full path to dpcpp compiler;
- * **target_device** - comma-separated list of target devices (cpu, gpu, acc,
+ * **target_devices** - comma-separated list of target devices (cpu, gpu, acc,
    host);
  * **sycl_be** - SYCL backend to be used (PI_OPENCL, PI_LEVEL_ZERO, PI_CUDA);
  * **dump_ir** - if IR dumping is supported for compiler (True, False);
  * **extra_environment** - comma-separated list of variables with values to be
    added to test environment. Can be also set by LIT_EXTRA_ENVIRONMENT variable
    in cmake.
+ * **dpcpp_rt_library_dir** - the directory containing DPC++ libraries to be
+   used for DPC++ applications execution. This parameter can be used to verify
+   DPC++ compiler and runtime cross-build compatibility.
 
 # LIT features which can be used to configure test execution:
  * **windows**, **linux** - host OS;

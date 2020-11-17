@@ -14,6 +14,9 @@ config.sycl_tools_dir = config.llvm_tools_dir
 config.sycl_include = os.path.join(config.dpcpp_root_dir, 'include', 'sycl')
 config.sycl_obj_root = "@CMAKE_CURRENT_BINARY_DIR@"
 config.sycl_libs_dir =  os.path.join(config.dpcpp_root_dir, ('bin' if platform.system() == "Windows" else 'lib'))
+# Use DPC++ RT library different from the one in compiler build if
+# corresponding LIT or CMake parameter is present.
+config.sycl_libs_dir = lit_config.params.get("dpcpp_rt_library_dir", "@DPCPP_RT_LIBRARY_DIR@" if "@DPCPP_RT_LIBRARY_DIR@" else config.sycl_libs_dir)
 config.target_triple = "x86_64-unknown-unknown-gnu"
 config.host_triple = "x86_64-unknown-unknown-gnu" 
 
