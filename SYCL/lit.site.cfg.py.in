@@ -4,19 +4,19 @@ import sys
 import platform
 
 
-config.dpcpp_compiler = lit_config.params.get("dpcpp_compiler", "@CMAKE_CXX_COMPILER@")
-config.dpcpp_root_dir= os.path.dirname(os.path.dirname(config.dpcpp_compiler))
+config.sycl_compiler = lit_config.params.get("sycl_compiler", "@CMAKE_CXX_COMPILER@")
+config.sycl_root_dir= os.path.dirname(os.path.dirname(config.sycl_compiler))
 
-config.llvm_tools_dir = os.path.join(config.dpcpp_root_dir, 'bin')
+config.llvm_tools_dir = os.path.join(config.sycl_root_dir, 'bin')
 config.lit_tools_dir = os.path.dirname("@TEST_SUITE_LIT@")
 config.dump_ir_supported = lit_config.params.get("dump_ir", ("@DUMP_IR_SUPPORTED@" if "@DUMP_IR_SUPPORTED@" else False))
 config.sycl_tools_dir = config.llvm_tools_dir
-config.sycl_include = os.path.join(config.dpcpp_root_dir, 'include', 'sycl')
+config.sycl_include = os.path.join(config.sycl_root_dir, 'include', 'sycl')
 config.sycl_obj_root = "@CMAKE_CURRENT_BINARY_DIR@"
-config.sycl_libs_dir =  os.path.join(config.dpcpp_root_dir, ('bin' if platform.system() == "Windows" else 'lib'))
+config.sycl_libs_dir =  os.path.join(config.sycl_root_dir, ('bin' if platform.system() == "Windows" else 'lib'))
 # Use DPC++ RT library different from the one in compiler build if
 # corresponding LIT or CMake parameter is present.
-config.sycl_libs_dir = lit_config.params.get("dpcpp_rt_library_dir", "@DPCPP_RT_LIBRARY_DIR@" if "@DPCPP_RT_LIBRARY_DIR@" else config.sycl_libs_dir)
+config.sycl_libs_dir = lit_config.params.get("sycl_rt_library_dir", "@SYCL_RT_LIBRARY_DIR@" if "@SYCL_RT_LIBRARY_DIR@" else config.sycl_libs_dir)
 config.target_triple = "x86_64-unknown-unknown-gnu"
 config.host_triple = "x86_64-unknown-unknown-gnu" 
 

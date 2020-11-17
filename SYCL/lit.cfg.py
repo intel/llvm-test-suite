@@ -48,9 +48,8 @@ if platform.system() == "Linux":
 
 elif platform.system() == "Windows":
     config.available_features.add('windows')
-    llvm_config.with_system_environment('LIB')
+    llvm_config.with_system_environment('PATH')
     llvm_config.with_environment('PATH', config.sycl_libs_dir, append_path=True)
-    llvm_config.with_environment('LIB', os.path.join(config.dpcpp_root_dir, 'lib'), append_path=True)
 
 elif platform.system() == "Darwin":
     # FIXME: surely there is a more elegant way to instantiate the Xcode directories.
@@ -103,12 +102,12 @@ else:
 if "opencl" in config.available_features:
     esimd_run_substitute = " env SYCL_BE=PI_OPENCL SYCL_DEVICE_TYPE=GPU SYCL_PROGRAM_COMPILE_OPTIONS=-vc-codegen"
     config.substitutions.append( ('%ESIMD_RUN_PLACEHOLDER',  esimd_run_substitute) )
-    config.substitutions.append( ('%clangxx-esimd',  config.dpcpp_compiler +
+    config.substitutions.append( ('%clangxx-esimd',  config.sycl_compiler +
                                   ' ' + '-fsycl-explicit-simd' + ' ' +
                                   config.cxx_flags ) )
 
-config.substitutions.append( ('%clangxx', ' '+ config.dpcpp_compiler + ' ' + config.cxx_flags ) )
-config.substitutions.append( ('%clang', ' ' + config.dpcpp_compiler + ' ' + config.c_flags ) )
+config.substitutions.append( ('%clangxx', ' '+ config.syclcompiler + ' ' + config.cxx_flags ) )
+config.substitutions.append( ('%clang', ' ' + config.sycl_compiler + ' ' + config.c_flags ) )
 config.substitutions.append( ('%threads_lib', config.sycl_threads_lib) )
 
 
