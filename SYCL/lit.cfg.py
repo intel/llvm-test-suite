@@ -106,7 +106,7 @@ if "opencl" in config.available_features:
                                   ' ' + '-fsycl-explicit-simd' + ' ' +
                                   config.cxx_flags ) )
 
-config.substitutions.append( ('%clangxx', ' '+ config.syclcompiler + ' ' + config.cxx_flags ) )
+config.substitutions.append( ('%clangxx', ' '+ config.sycl_compiler + ' ' + config.cxx_flags ) )
 config.substitutions.append( ('%clang', ' ' + config.sycl_compiler + ' ' + config.c_flags ) )
 config.substitutions.append( ('%threads_lib', config.sycl_threads_lib) )
 
