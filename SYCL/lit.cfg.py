@@ -37,8 +37,8 @@ config.test_exec_root = config.sycl_obj_root
 config.substitutions.append( ('%clangxx-esimd',  config.dpcpp_compiler +
                               ' ' + '-fsycl-explicit-simd' + ' ' +
                               config.cxx_flags ) )
-config.substitutions.append( ('%clangxx', ' '+ config.dpcpp_compiler + ' ' + config.cxx_flags ) )
-config.substitutions.append( ('%clang', ' ' + config.dpcpp_compiler + ' ' + config.c_flags ) )
+#config.substitutions.append( ('%clangxx', ' '+ config.dpcpp_compiler + ' ' + config.cxx_flags ) )
+#config.substitutions.append( ('%clang', ' ' + config.dpcpp_compiler + ' ' + config.c_flags ) )
 
 llvm_config.use_clang()
 
