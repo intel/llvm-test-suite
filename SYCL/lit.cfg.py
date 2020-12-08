@@ -37,9 +37,7 @@ config.test_exec_root = config.sycl_obj_root
 config.substitutions.append( ('%clangxx-esimd',  config.dpcpp_compiler +
                               ' ' + '-fsycl-explicit-simd' + ' ' +
                               config.cxx_flags ) )
-#config.substitutions.append( ('%clangxx', ' '+ config.dpcpp_compiler + ' ' + config.cxx_flags ) )
-#config.substitutions.append( ('%clang', ' ' + config.dpcpp_compiler + ' ' + config.c_flags ) )
-
+llvm_config.with_environment('CLANG', config.dpcpp_compiler)
 llvm_config.use_clang()
 
 # Propagate some variables from the host environment.
@@ -115,8 +113,6 @@ else:
 esimd_run_substitute = "env SYCL_BE={SYCL_BE} SYCL_DEVICE_TYPE=GPU SYCL_PROGRAM_COMPILE_OPTIONS=-vc-codegen".format(SYCL_BE=config.sycl_be)
 config.substitutions.append( ('%ESIMD_RUN_PLACEHOLDER',  esimd_run_substitute) )
 
-config.substitutions.append( ('%clangxx', ' '+ config.dpcpp_compiler + ' ' + config.cxx_flags ) )
-config.substitutions.append( ('%clang', ' ' + config.dpcpp_compiler + ' ' + config.c_flags ) )
 config.substitutions.append( ('%threads_lib', config.sycl_threads_lib) )
 
 
