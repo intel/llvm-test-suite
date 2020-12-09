@@ -13,10 +13,12 @@ int main() {
   return 0;
 }
 
-//CHECK: ---> piEnqueueKernelLaunch(
-//CHECK: ---> piQueueRelease(
-//CHECK: ---> piEventRelease(
-//CHECK: ---> piContextRelease(
-//CHECK: ---> piKernelRelease(
-//CHECK: ---> piProgramRelease(
-//CHECK: ---> piDeviceRelease(
+//CHECK: piEnqueueKernelLaunch(
+//CHECK: piEventsWait(
+//CHECK: piEventRelease(
+//CHECK: piQueueRelease(
+//CHECK: piContextRelease(
+//CHECK: piKernelRelease(
+//CHECK: piProgramRelease(
+//CHECK: piDeviceRelease(
+
