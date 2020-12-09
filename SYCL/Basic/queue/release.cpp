@@ -21,4 +21,3 @@ int main() {
 //CHECK: piKernelRelease(
 //CHECK: piProgramRelease(
 //CHECK: piDeviceRelease(
-
