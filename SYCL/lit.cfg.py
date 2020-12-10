@@ -34,11 +34,23 @@ config.test_source_root = os.path.dirname(__file__)
 # test_exec_root: The root path where tests should be run.
 config.test_exec_root = config.sycl_obj_root
 
-config.substitutions.append( ('%clangxx-esimd',  config.dpcpp_compiler +
-                              ' ' + '-fsycl-explicit-simd' + ' ' +
-                              config.cxx_flags ) )
-llvm_config.with_environment('CLANG', config.dpcpp_compiler)
-llvm_config.use_clang()
+# Cleanup environment variables which may affect tests
+possibly_dangerous_env_vars = ['COMPILER_PATH', 'RC_DEBUG_OPTIONS',
+                               'CINDEXTEST_PREAMBLE_FILE', 'LIBRARY_PATH',
+                               'CPATH', 'C_INCLUDE_PATH', 'CPLUS_INCLUDE_PATH',
+                               'OBJC_INCLUDE_PATH', 'OBJCPLUS_INCLUDE_PATH',
+                               'LIBCLANG_TIMING', 'LIBCLANG_OBJTRACKING',
+                               'LIBCLANG_LOGGING', 'LIBCLANG_BGPRIO_INDEX',
+                               'LIBCLANG_BGPRIO_EDIT', 'LIBCLANG_NOTHREADS',
+                               'LIBCLANG_RESOURCE_USAGE',
+                               'LIBCLANG_CODE_COMPLETION_LOGGING']
+# Clang/Win32 may refer to %INCLUDE%. vsvarsall.bat sets it.
+if platform.system() != 'Windows':
+    possibly_dangerous_env_vars.append('INCLUDE')
+
+for name in possibly_dangerous_env_vars:
+    if name in llvm_config.config.environment:
+        del llvm_config.config.environment[name]
 
 # Propagate some variables from the host environment.
 llvm_config.with_system_environment(['PATH', 'OCL_ICD_FILENAMES',
@@ -113,8 +125,12 @@ else:
 esimd_run_substitute = "env SYCL_BE={SYCL_BE} SYCL_DEVICE_TYPE=GPU SYCL_PROGRAM_COMPILE_OPTIONS=-vc-codegen".format(SYCL_BE=config.sycl_be)
 config.substitutions.append( ('%ESIMD_RUN_PLACEHOLDER',  esimd_run_substitute) )
 
+config.substitutions.append( ('%clangxx-esimd',  config.dpcpp_compiler +
+                              ' ' + '-fsycl-explicit-simd' + ' ' +
+                              config.cxx_flags ) )
+config.substitutions.append( ('%clangxx', ' '+ config.dpcpp_compiler + ' ' + config.cxx_flags ) )
+config.substitutions.append( ('%clang', ' ' + config.dpcpp_compiler + ' ' + config.c_flags ) )
 config.substitutions.append( ('%threads_lib', config.sycl_threads_lib) )
-
 
 # Configure device-specific substitutions based on availability of corresponding
 # devices/runtimes
