@@ -99,10 +99,11 @@ cl_options=False
 sp = subprocess.getstatusoutput(config.dpcpp_compiler+' /help')
 if sp[0] == 0:
     cl_options=True
+    config.available_features.add('cl_options')
 
 if config.opencl_libs_dir:
     if cl_options:
-        config.substitutions.append( ('%opencl_lib',  '/LIBPATH:'+config.opencl_libs_dir+' OpenCL.lib') )
+        config.substitutions.append( ('%opencl_lib',  ' '+config.opencl_libs_dir+'/OpenCL.lib') )
     else:
         config.substitutions.append( ('%opencl_lib',  '-L'+config.opencl_libs_dir+' -lOpenCL') )
     config.available_features.add('opencl_icd')
