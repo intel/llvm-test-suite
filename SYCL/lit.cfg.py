@@ -93,9 +93,19 @@ if config.extra_environment:
 
 config.substitutions.append( ('%sycl_libs_dir',  config.sycl_libs_dir ) )
 config.substitutions.append( ('%sycl_include',  config.sycl_include ) )
+
+# check if compiler supports CL command line options
+cl_options=False
+sp = subprocess.getstatusoutput(config.dpcpp_compiler+' /help')
+if sp[0] == 0:
+    cl_options=True
+
 if config.opencl_libs_dir:
-  config.substitutions.append( ('%opencl_libs_dir',  config.opencl_libs_dir) )
-  config.available_features.add('opencl_icd')
+    if cl_options:
+        config.substitutions.append( ('%opencl_lib',  '/LIBPATH:'+config.opencl_libs_dir+' OpenCL.lib') )
+    else:
+        config.substitutions.append( ('%opencl_lib',  '-L'+config.opencl_libs_dir+' -lOpenCL') )
+    config.available_features.add('opencl_icd')
 config.substitutions.append( ('%opencl_include_dir',  config.opencl_include_dir) )
 
 llvm_config.add_tool_substitutions(['llvm-spirv'], [config.sycl_tools_dir])
