@@ -17,6 +17,8 @@
 // - the program is JITted only once per a unique set of specialization
 //   constants values.
 
+#include "esimd_test_utils.hpp"
+
 #include <CL/sycl.hpp>
 #include <CL/sycl/INTEL/esimd.hpp>
 
@@ -28,52 +30,6 @@ class SC1;
 class KernelAAA;
 
 using namespace sycl;
-
-namespace esimd_test {
-// This is the class provided to SYCL runtime by the application to decide
-// on which device to run, or whether to run at all.
-// When selecting a device, SYCL runtime first takes (1) a selector provided by
-// the program or a default one and (2) the set of all available devices. Then
-// it passes each device to the '()' operator of the selector. Device, for
-// which '()' returned the highest number, is selected. If a negative number
-// was returned for all devices, then the selection process will cause an
-// exception.
-class ESIMDSelector : public device_selector {
-  // Require GPU device unless HOST is requested in SYCL_DEVICE_TYPE env
-  virtual int operator()(const device &device) const {
-    if (const char *dev_type = getenv("SYCL_DEVICE_TYPE")) {
-      if (!strcmp(dev_type, "GPU"))
-        return device.is_gpu() ? 1000 : -1;
-      if (!strcmp(dev_type, "HOST"))
-        return device.is_host() ? 1000 : -1;
-      std::cerr << "Supported 'SYCL_DEVICE_TYPE' env var values are 'GPU' and "
-        "'HOST', '"
-        << dev_type << "' is not.\n";
-      return -1;
-    }
-    // If "SYCL_DEVICE_TYPE" not defined, only allow gpu device
-    return device.is_gpu() ? 1000 : -1;
-  }
-};
-inline auto createExceptionHandler() {
-  return [](exception_list l) {
-    for (auto ep : l) {
-      try {
-        std::rethrow_exception(ep);
-      }
-      catch (sycl::exception &e0) {
-        std::cout << "sycl::exception: " << e0.what() << std::endl;
-      }
-      catch (std::exception &e) {
-        std::cout << "std::exception: " << e.what() << std::endl;
-      }
-      catch (...) {
-        std::cout << "generic exception\n";
-      }
-    }
-  };
-}
-} // esimd_test
 
 int val = 0;
 
@@ -141,9 +97,7 @@ int main(int argc, char **argv) {
 }
 
 // --- Check that only two JIT compilation happened:
-// CHECK-NOT: ---> piProgramBuild
-// CHECK: ---> piProgramBuild
-// CHECK: ---> piProgramBuild
+// CHECK-COUNT-2: ---> piProgramBuild
 // CHECK-NOT: ---> piProgramBuild
 // --- Check that the test completed with expected results:
 // CHECK: passed
