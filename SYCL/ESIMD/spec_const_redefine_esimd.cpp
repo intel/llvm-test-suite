@@ -73,8 +73,7 @@ int main(int argc, char **argv) {
       q.submit([&](sycl::handler &cgh) {
         auto acc = buf.get_access<sycl::access::mode::write>(cgh);
         cgh.single_task<KernelAAA>(
-            program.get_kernel<KernelAAA>(),
-            [=]() SYCL_ESIMD_KERNEL {
+            program.get_kernel<KernelAAA>(), [=]() SYCL_ESIMD_KERNEL {
               sycl::INTEL::gpu::scalar_store(acc, i, sc0.get() + sc1.get());
             });
       });
@@ -88,7 +87,8 @@ int main(int argc, char **argv) {
     std::cout << "val = " << val << " gold = " << gold << "\n";
 
     if (val != gold) {
-      std::cout << "*** ERROR[" << i << "]: " << val << " != " << gold << "(gold)\n";
+      std::cout << "*** ERROR[" << i << "]: " << val << " != " << gold
+                << "(gold)\n";
       passed = false;
     }
   }
