@@ -8,8 +8,9 @@
 // TODO enable on Windows
 // REQUIRES: linux && gpu
 // RUN: %clangxx-esimd -fsycl %s -o %t.out
-// RUN: %HOST_RUN_PLACEHOLDER %t.out
-// RUNx: %ESIMD_RUN_PLACEHOLDER %t.out
+// RUN: %ESIMD_RUN_PLACEHOLDER %t.out
+// TODO : Enable test for new GPU device
+// XFAIL: *
 
 #include "esimd_test_utils.hpp"
 
