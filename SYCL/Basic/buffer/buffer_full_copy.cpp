@@ -5,6 +5,7 @@
 // RUN: %CPU_RUN_PLACEHOLDER %t2.out
 // RUN: %GPU_RUN_PLACEHOLDER %t2.out
 // RUN: %ACC_RUN_PLACEHOLDER %t2.out
+// UNSUPPORTED: cl_options
 
 //==------------- buffer_full_copy.cpp - SYCL buffer basic test ------------==//
 //

@@ -5,6 +5,7 @@
 // RUN: %CPU_RUN_PLACEHOLDER %t2.out
 // RUN: %GPU_RUN_PLACEHOLDER %t2.out
 // RUN: %ACC_RUN_PLACEHOLDER %t2.out
+// UNSUPPORTED: cl_options
 //
 //==-------image_constructors.cpp - SYCL image constructors basic test------==//
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
