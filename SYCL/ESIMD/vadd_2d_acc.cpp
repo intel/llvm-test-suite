@@ -34,7 +34,7 @@ int main(void) {
     C[i] = 0.0f;
   }
 
-  {
+  try {
     buffer<float, 1> bufa(A, range<1>(Size));
     buffer<float, 1> bufb(B, range<1>(Size));
     buffer<float, 1> bufc(C, range<1>(Size));
@@ -72,6 +72,9 @@ int main(void) {
           });
     });
     e.wait();
+  } catch (sycl::exception e) {
+    std::cerr << "SYCL exception caught: " << e.what() << "\n";
+    return 1;
   }
 
   int err_cnt = 0;
