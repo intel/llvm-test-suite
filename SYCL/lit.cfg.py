@@ -94,7 +94,7 @@ if config.extra_environment:
 config.substitutions.append( ('%sycl_libs_dir',  config.sycl_libs_dir ) )
 config.substitutions.append( ('%sycl_include',  config.sycl_include ) )
 
-if lit_config.params.get('gpu-intel-dg1', False)
+if lit_config.params.get('gpu-intel-dg1', False):
     config.available_features.add('gpu-intel-dg1')
 
 # check if compiler supports CL command line options
