@@ -27,9 +27,16 @@ using namespace cl::sycl;
 
 template <typename T, int N> void check(queue &Queue) {
   const int G = 1024, L = 128;
+
+  // Pad arrays based on sub-group size to ensure no out-of-bounds accesses
+  // Workaround for info::device::sub_group_sizes support on some devices
+  size_t max_sg_size = 128;
+  //auto sg_sizes = Queue.get_device().get_info<info::device::sub_group_sizes>();
+  //size_t max_sg_size = *std::max_element(sg_sizes.begin(), sg_sizes.end());
+
   try {
     nd_range<1> NdRange(G, L);
-    buffer<T> syclbuf(G);
+    buffer<T> syclbuf(G + max_sg_size * N);
     buffer<size_t> sgsizebuf(1);
     {
       auto acc = syclbuf.template get_access<access::mode::read_write>();
@@ -42,7 +49,7 @@ template <typename T, int N> void check(queue &Queue) {
       auto acc = syclbuf.template get_access<access::mode::read_write>(cgh);
       auto sgsizeacc = sgsizebuf.get_access<access::mode::read_write>(cgh);
       accessor<T, 1, access::mode::read_write, access::target::local> LocalMem(
-          {L}, cgh);
+          {L + max_sg_size * N}, cgh);
       cgh.parallel_for<sycl_subgr<T, N>>(NdRange, [=](nd_item<1> NdItem) {
         ONEAPI::sub_group SG = NdItem.get_sub_group();
         if (SG.get_group_id().get(0) % N == 0) {
