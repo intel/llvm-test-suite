@@ -28,8 +28,10 @@ template <typename T, int N> void check(queue &Queue) {
   // Pad arrays based on sub-group size to ensure no out-of-bounds accesses
   // Workaround for info::device::sub_group_sizes support on some devices
   size_t max_sg_size = 128;
-  //auto sg_sizes = Queue.get_device().get_info<info::device::sub_group_sizes>();
-  //size_t max_sg_size = *std::max_element(sg_sizes.begin(), sg_sizes.end());
+#if 0
+  auto sg_sizes = Queue.get_device().get_info<info::device::sub_group_sizes>();
+  size_t max_sg_size = *std::max_element(sg_sizes.begin(), sg_sizes.end());
+#endif
 
   try {
     nd_range<1> NdRange(G, L);
