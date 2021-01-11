@@ -1,7 +1,4 @@
-
-// XFAIL: cuda
 // UNSUPPORTED: cpu
-// CUDA compilation and runtime do not yet support sub-groups.
 // #2252 Disable until all variants of built-ins are available in OpenCL CPU
 // runtime for every supported ISA
 //
@@ -168,13 +165,14 @@ template <typename T> void check(queue &Queue) {
 
 int main() {
   queue Queue;
-  if (!Queue.get_device().has_extension("cl_intel_subgroups") &&
-      !Queue.get_device().has_extension("cl_intel_subgroups_short") &&
-      !Queue.get_device().has_extension("cl_intel_subgroups_long")) {
+  if (Queue.get_device().is_host()) {
     std::cout << "Skipping test\n";
     return 0;
   }
-  if (Queue.get_device().has_extension("cl_intel_subgroups")) {
+  std::string PlatformName =
+      Queue.get_device().get_platform().get_info<info::platform::name>();
+  if (Queue.get_device().has_extension("cl_intel_subgroups") ||
+      PlatformName.find("CUDA") != std::string::npos) {
     typedef bool aligned_char __attribute__((aligned(16)));
     check<aligned_char>(Queue);
     typedef int aligned_int __attribute__((aligned(16)));
@@ -196,14 +194,16 @@ int main() {
     check<aligned_float, 4>(Queue);
     check<aligned_float, 8>(Queue);
   }
-  if (Queue.get_device().has_extension("cl_intel_subgroups_short")) {
+  if (Queue.get_device().has_extension("cl_intel_subgroups_short") ||
+      PlatformName.find("CUDA") != std::string::npos) {
     typedef short aligned_short __attribute__((aligned(16)));
     check<aligned_short>(Queue);
     check<aligned_short, 1>(Queue);
     check<aligned_short, 2>(Queue);
     check<aligned_short, 4>(Queue);
     check<aligned_short, 8>(Queue);
-    if (Queue.get_device().has_extension("cl_khr_fp16")) {
+    if (Queue.get_device().has_extension("cl_khr_fp16") ||
+        PlatformName.find("CUDA") != std::string::npos) {
       typedef half aligned_half __attribute__((aligned(16)));
       check<aligned_half>(Queue);
       check<aligned_half, 1>(Queue);
@@ -212,7 +212,8 @@ int main() {
       check<aligned_half, 8>(Queue);
     }
   }
-  if (Queue.get_device().has_extension("cl_intel_subgroups_long")) {
+  if (Queue.get_device().has_extension("cl_intel_subgroups_long") ||
+      PlatformName.find("CUDA") != std::string::npos) {
     typedef long aligned_long __attribute__((aligned(16)));
     check<aligned_long>(Queue);
     check<aligned_long, 1>(Queue);
