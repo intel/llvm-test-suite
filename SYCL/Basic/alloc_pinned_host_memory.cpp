@@ -1,4 +1,4 @@
-// XFAIL: opencl || cuda
+// REQUIRES: level_zero
 
 // RUN: %clangxx %s -o %t1.out -lsycl -I %sycl_include
 // RUN: %HOST_RUN_PLACEHOLDER %t1.out
