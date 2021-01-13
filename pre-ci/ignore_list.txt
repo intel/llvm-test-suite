@@ -1,0 +1,21 @@
+#platform: linux and win (i.e., [linux skip] and [win skip])
+#build type: opencl, levelzero (i.e., [opencl_list], [l0_list])
+#please append ignore test to corresponding list without blank space 
+
+[linux skip]
+opencl_list = ["SYCL::Basic/free_function_queries/free_function_queries.cpp"
+            ,"SYCL::InlineAsm/asm_if.cpp"
+            ,"SYCL::InlineAsm/asm_loop.cpp"
+            ,"SYCL::InlineAsm/asm_switch.cpp"]
+
+l0_list = ["SYCL::InlineAsm/asm_if.cpp"
+            ,"SYCL::InlineAsm/asm_loop.cpp"
+            ,"SYCL::InlineAsm/asm_switch.cpp"
+            ,"SYCL::Scheduler/InOrderQueueDeps.cpp"]
+
+[win skip]
+opencl_list = ["SYCL::Basic/free_function_queries/free_function_queries.cpp"]
+
+l0_list = ["SYCL::Scheduler/InOrderQueueDeps.cpp"]
+
+
