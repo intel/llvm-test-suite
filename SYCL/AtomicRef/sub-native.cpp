@@ -3,10 +3,9 @@
 // RUN: %HOST_RUN_PLACEHOLDER %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // RUN: %CPU_RUN_PLACEHOLDER %t.out
-// TODO: Remove XFAIL/UNSUPPORTED once corresponding backends support
-// "native" SPIR-V
-// XFAIL: cpu
-// UNSUPPORTED: cuda
+// TODO: Remove items from XFAIL once corresponding backends support "native"
+// implementation
+// XFAIL: cpu && cuda
 
 #include <CL/sycl.hpp>
 #include <algorithm>
