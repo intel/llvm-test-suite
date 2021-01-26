@@ -55,19 +55,19 @@ for more information.
 
 - Create a pull request for your changes following [Creating a pull request
 instructions](https://help.github.com/articles/creating-a-pull-request/).
-- CI will run checks which are prerequisits for submitting PR:
+- CI will run checks which are prerequisites for submitting PR:
   - clang-format-check/build checks that the patch matches coding style
     (see [clang-format](https://clang.llvm.org/docs/ClangFormat.html));
-  - Jenkins/pre-ci-cuda - run all related tests on CUDA backend for GPU device
+  - Jenkins/pre-ci-cuda - runs all related tests on CUDA backend for GPU device
     on Ubuntu 18.04;
-  - Jenkins/pre-ci-linux - run all related tests on Ubuntu 18.04 machine with
+  - Jenkins/pre-ci-linux - runs all related tests on Ubuntu 18.04 machine with
   Level_Zero backend (GPU device) and OpenCL backend (CPU, GPU and FPGA
   emulator devices);
-  - Jenkins/pre-ci-windows - run all related tests on Windows Server 2019 with
+  - Jenkins/pre-ci-windows - runs all related tests on Windows Server 2019 with
   Level_Zero backend (GPU device) and OpenCL backend (CPU, GPU and FPGA
   emulator devices).
 
-The last three checks are done for the latest available nightly build for DPCpp
+The last three checks are done for the latest available nightly build for DPC++
 compiler and runtime from [intel/llvm](https://github.com/intel/llvm). The
 build happens around 18:00 UTC if there are new commits since previous build.
 
