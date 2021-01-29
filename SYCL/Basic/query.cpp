@@ -1,6 +1,8 @@
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %s -o %t.out
 // RUN: env CreateMultipleSubDevices=2 env EnableTimestampPacket=1 \
 // RUN: env NEOReadDebugKeys=1 env SYCL_DEVICE_FILTER="gpu" %t.out
+//
+// UNSUPPORTED: gpu-intel-dg1
 
 #include <CL/sycl.hpp>
 
