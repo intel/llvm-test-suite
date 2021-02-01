@@ -93,7 +93,6 @@ int main(int argc, char **argv) {
 #endif // RUN_KERNELS
   }
 
-#ifdef COMPILE_CM_KERNEL
   // TODO: this test is temporarily turned off because CI buildbots do not set
   // PATHs to clangFEWrapper library properly.
   { // Compile a trivial CM kernel.
@@ -109,7 +108,6 @@ int main(int argc, char **argv) {
       return 1;
     }
   }
-#endif // COMPILE_CM_KERNEL
 
   { // Compile a source with syntax errors.
     std::cout << "Test case4\n";
