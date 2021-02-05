@@ -61,10 +61,9 @@ int main(int argc, char **argv) {
 
       auto e = q.submit([&](sycl::handler &cgh) {
         auto acc = buf.get_access<sycl::access::mode::write>(cgh);
-        cgh.single_task<TestKernel>(prg.get_kernel<TestKernel>(),
-                                    [=]() SYCL_ESIMD_KERNEL {
-                                      do_store(acc, i, spec_const.get());
-                                    });
+        cgh.single_task<TestKernel>(
+            prg.get_kernel<TestKernel>(),
+            [=]() SYCL_ESIMD_KERNEL { do_store(acc, i, spec_const.get()); });
       });
 
       e.wait();
