@@ -29,7 +29,7 @@ ESIMD_INLINE void do_store(AccessorTy acc, int i, spec_const_t val) {
   // block
   block_store(acc, i, simd<spec_const_t, 2>{val});
 #elif STORE == 2
-  // scatter
+  // scalar
   scalar_store(acc, i, val);
 #endif
 }
