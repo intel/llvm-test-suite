@@ -13,19 +13,9 @@
 
 #define DEF_VAL 0xdeaddeaf4badbeaf
 #define REDEF_VAL 0x4cafebad00112233
+#define STORE 1
 
 typedef unsigned long spec_const_t;
 typedef unsigned long container_t;
-
-#include "esimd_test_utils.hpp"
-
-#include <CL/sycl.hpp>
-#include <CL/sycl/INTEL/esimd.hpp>
-
-template <typename AccessorTy>
-ESIMD_INLINE void do_the_store(AccessorTy acc, int i, spec_const_t val) {
-  using namespace sycl::INTEL::gpu;
-  block_store(acc, i, simd<spec_const_t, 2>{val}); // 2 long int per 1 oword
-}
 
 #include "Inputs/spec_const_common.hpp"

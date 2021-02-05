@@ -9,10 +9,30 @@
 // basic types, particularly a specialization constant can be redifined and
 // correct new value is used after redefinition.
 
+#include "esimd_test_utils.hpp"
+
+#include <CL/sycl.hpp>
+#include <CL/sycl/INTEL/esimd.hpp>
+
 #include <iostream>
 #include <vector>
 
-using namespace sycl;
+using namespace cl::sycl;
+
+template <typename AccessorTy>
+ESIMD_INLINE void do_store(AccessorTy acc, int i, spec_const_t val) {
+  using namespace sycl::INTEL::gpu;
+#if STORE == 0
+  // bool
+  scalar_store(acc, i, val ? 1 : 0);
+#elif STORE == 1
+  // block
+  block_store(acc, i, simd<spec_const_t, 2>{val});
+#elif STORE == 2
+  // scatter
+  scalar_store(acc, i, val);
+#endif
+}
 
 class ConstID;
 class TestKernel;
@@ -43,7 +63,7 @@ int main(int argc, char **argv) {
         auto acc = buf.get_access<sycl::access::mode::write>(cgh);
         cgh.single_task<TestKernel>(prg.get_kernel<TestKernel>(),
                                     [=]() SYCL_ESIMD_KERNEL {
-                                      do_the_store(acc, i, spec_const.get());
+                                      do_store(acc, i, spec_const.get());
                                     });
       });
 

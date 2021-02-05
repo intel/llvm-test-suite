@@ -13,19 +13,9 @@
 
 #define DEF_VAL 0xdeadcafe
 #define REDEF_VAL 0x4badbeaf
+#define STORE 2
 
 typedef unsigned int spec_const_t;
 typedef unsigned int container_t;
-
-#include "esimd_test_utils.hpp"
-
-#include <CL/sycl.hpp>
-#include <CL/sycl/INTEL/esimd.hpp>
-
-template <typename AccessorTy>
-ESIMD_INLINE void do_the_store(AccessorTy acc, int i, spec_const_t val) {
-  using namespace sycl::INTEL::gpu;
-  scalar_store(acc, i, val);
-}
 
 #include "Inputs/spec_const_common.hpp"

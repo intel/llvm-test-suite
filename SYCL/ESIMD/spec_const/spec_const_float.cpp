@@ -13,19 +13,9 @@
 
 #define DEF_VAL -1.456789e-5
 #define REDEF_VAL 2.9865432e+5
+#define STORE 2
 
 typedef float spec_const_t;
 typedef float container_t;
-
-#include "esimd_test_utils.hpp"
-
-#include <CL/sycl.hpp>
-#include <CL/sycl/INTEL/esimd.hpp>
-
-template <typename AccessorTy>
-ESIMD_INLINE void do_the_store(AccessorTy acc, int i, spec_const_t val) {
-  using namespace sycl::INTEL::gpu;
-  scalar_store(acc, i, val);
-}
 
 #include "Inputs/spec_const_common.hpp"
