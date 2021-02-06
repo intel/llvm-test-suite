@@ -39,8 +39,9 @@ class TestKernel;
 
 int main(int argc, char **argv) {
   queue q(esimd_test::ESIMDSelector{}, esimd_test::createExceptionHandler());
+
   auto dev = q.get_device();
-  auto ctx = q.get_context();
+  std::cout << "Running on " << dev.get_info<info::device::name>() << "\n";
 
   const int n_times = 2;
   std::vector<container_t> output(n_times);
@@ -80,8 +81,8 @@ int main(int argc, char **argv) {
   if (passed) {
     std::cout << "passed" << std::endl;
     return 0;
-  } else {
-    std::cout << "FAILED" << std::endl;
-    return 1;
   }
+
+  std::cout << "FAILED" << std::endl;
+  return 1;
 }
