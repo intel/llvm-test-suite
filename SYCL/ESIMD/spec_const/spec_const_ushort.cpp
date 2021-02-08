@@ -8,8 +8,9 @@
 // TODO enable on Windows
 // REQUIRES: linux && gpu
 // RUN: %clangxx-esimd -fsycl -I%S/.. %s -o %t.out
-// RUN: %ESIMD_RUN_PLACEHOLDER %t.out
+// RUN: %GPU_RUN_PLACEHOLDER %t.out
 // UNSUPPORTED: cuda
+// XFAIL: *
 
 #define DEF_VAL 0xcafe
 #define REDEF_VAL 0xdeaf
