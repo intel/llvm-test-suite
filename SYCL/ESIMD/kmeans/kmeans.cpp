@@ -5,12 +5,11 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-// TODO enable on Windows
-// REQUIRES: linux && gpu
+// REQUIRES: gpu
 // UNSUPPORTED: cuda
 // RUN: %clangxx-esimd -fsycl %s -I%S/.. -o %t.out
 // RUN: %HOST_RUN_PLACEHOLDER %t.out %S/points.big.json
-// RUN: %ESIMD_RUN_PLACEHOLDER %t.out %S/points.big.json
+// RUN: %GPU_RUN_PLACEHOLDER %t.out %S/points.big.json
 //
 
 #include "kmeans.h"

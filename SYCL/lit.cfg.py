@@ -147,9 +147,6 @@ if config.sycl_be not in ['host', 'opencl','cuda', 'level_zero']:
                      config.sycl_be +
                      "' supported values are opencl, cuda, level_zero")
 
-esimd_run_substitute = "env SYCL_DEVICE_FILTER={SYCL_PLUGIN}:gpu SYCL_PROGRAM_COMPILE_OPTIONS=-vc-codegen".format(SYCL_PLUGIN=config.sycl_be)
-config.substitutions.append( ('%ESIMD_RUN_PLACEHOLDER',  esimd_run_substitute) )
-
 config.substitutions.append( ('%clangxx-esimd',  config.dpcpp_compiler +
                               ' ' + '-fsycl-explicit-simd' + ' ' +
                               config.cxx_flags ) )
@@ -253,10 +250,8 @@ config.substitutions.append( ('%ACC_CHECK_PLACEHOLDER',  acc_check_substitute) )
 
 if config.sycl_be == 'cuda':
     config.substitutions.append( ('%sycl_triple',  "nvptx64-nvidia-cuda-sycldevice" ) )
-    config.substitutions.append( ('%gpu_atomics_config', "-D__SYCL_EMULATE_FLOAT_ATOMICS__=1") )
 else:
     config.substitutions.append( ('%sycl_triple',  "spir64-unknown-linux-sycldevice" ) )
-    config.substitutions.append( ('%gpu_atomics_config', "") )
 
 if find_executable('sycl-ls'):
     config.available_features.add('sycl-ls')

@@ -5,11 +5,10 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-// TODO enable on Windows
-// REQUIRES: linux && gpu
+// REQUIRES: gpu
 // UNSUPPORTED: cuda
 // RUN: %clangxx-esimd -fsycl %s -o %t.out
-// RUN: %ESIMD_RUN_PLACEHOLDER %t.out
+// RUN: %GPU_RUN_PLACEHOLDER %t.out
 
 #include "esimd_test_utils.hpp"
 
@@ -51,7 +50,7 @@ ESIMD_INLINE void histogram_atomic(const uint32_t *input_ptr, uint32_t *output,
 #pragma unroll
     for (int j = 0; j < BLOCK_WIDTH * sizeof(int); j += 16) {
       // Accumulate local histogram for each pixel value
-      auto dataOffset = convert<uint, uchar, 16>(in.select<16, 1>(j).read());
+      simd<uint, 16> dataOffset = in.select<16, 1>(j).read();
       dataOffset *= sizeof(int);
       slm_atomic<EsimdAtomicOpType::ATOMIC_INC, uint, 16>(dataOffset, 1);
     }

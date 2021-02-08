@@ -5,12 +5,11 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-// TODO enable on Windows
-// REQUIRES: linux && gpu
+// REQUIRES: gpu
 // UNSUPPORTED: cuda
 // RUN: %clangxx-esimd -fsycl %s -I%S/.. -o %t.out
 // RUN: %HOST_RUN_PLACEHOLDER %t.out %S/linear_in.bmp %S/linear_gold_hw.bmp
-// RUN: %ESIMD_RUN_PLACEHOLDER %t.out %S/linear_in.bmp %S/linear_gold_hw.bmp
+// RUN: %GPU_RUN_PLACEHOLDER %t.out %S/linear_in.bmp %S/linear_gold_hw.bmp
 
 #include "bitmap_helpers.h"
 #include "esimd_test_utils.hpp"
@@ -105,7 +104,7 @@ int main(int argc, char *argv[]) {
             in = media_block_load<unsigned char, 8, 32>(accInput, h_pos * 24,
                                                         v_pos * 6);
 
-            simd<float, 8 * 32> vin_float = convert<float>(vin);
+            simd<float, 8 * 32> vin_float = vin;
             auto in_float = vin_float.format<float, 8, 32>();
             m = in_float.select<6, 1, 24, 1>(1, 3);
             m += in_float.select<6, 1, 24, 1>(0, 0);
@@ -118,7 +117,7 @@ int main(int argc, char *argv[]) {
             m += in_float.select<6, 1, 24, 1>(2, 6);
             m = m * 0.111f;
 
-            vout = convert<unsigned char>(vm);
+            vout = vm;
 
             media_block_store<unsigned char, 6, 24>(accOutput, h_pos * 24,
                                                     v_pos * 6, out);
