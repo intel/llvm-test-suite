@@ -5,8 +5,8 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-// REQUIRES: gpu
-// XFAIL: *
+// TODO enable on Windows
+// REQUIRES: linux && gpu
 // RUN: %clangxx-esimd -fsycl -I%S/.. %s -o %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // UNSUPPORTED: cuda
