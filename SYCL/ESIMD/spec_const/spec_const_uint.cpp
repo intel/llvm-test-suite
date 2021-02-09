@@ -11,11 +11,13 @@
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // UNSUPPORTED: cuda
 
+#include<cstdint>
+
 #define DEF_VAL 0xdeadcafe
 #define REDEF_VAL 0x4badbeaf
 #define STORE 2
 
-typedef unsigned int spec_const_t;
-typedef unsigned int container_t;
+using spec_const_t = uint32_t;
+using container_t = uint32_t;
 
 #include "Inputs/spec_const_common.hpp"

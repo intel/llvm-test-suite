@@ -22,13 +22,16 @@ using namespace cl::sycl;
 template <typename AccessorTy>
 ESIMD_INLINE void do_store(AccessorTy acc, int i, spec_const_t val) {
   using namespace sycl::INTEL::gpu;
-#if STORE == 0
+  // scatter function, that is used in scalar_store, can only process types
+  // whose size is no more than 4 bytes.
+#if (STORE == 0)
   // bool
   scalar_store(acc, i, val ? 1 : 0);
-#elif STORE == 1
+#elif (STORE == 1)
   // block
   block_store(acc, i, simd<spec_const_t, 2>{val});
-#elif STORE == 2
+#else
+  static_assert(STORE == 2, "Unspecified store");
   // scalar
   scalar_store(acc, i, val);
 #endif
@@ -43,14 +46,23 @@ int main(int argc, char **argv) {
   auto dev = q.get_device();
   std::cout << "Running on " << dev.get_info<info::device::name>() << "\n";
 
-  const int n_times = 2;
-  std::vector<container_t> output(n_times);
   std::vector<container_t> etalon = {DEF_VAL, REDEF_VAL};
+  const size_t n_times = etalon.size();
+  std::vector<container_t> output(n_times);
 
   bool passed = true;
   for (int i = 0; i < n_times; i++) {
     sycl::program prg(q.get_context());
 
+    // Checking that already initialized constant can be overwritten.
+    // According to standards proposals:
+    //   A cl::sycl::experimental::spec_constant object is considered
+    //   initialized once the result of a cl::sycl::program::set_spec_constant
+    //   is assigned to it.
+    //   A specialization constant value can be overwritten if the program was
+    //   not built before by recalling set_spec_constant with the same ID and
+    //   the new value. Although the type T of the specialization constant must
+    //   remain the same.
     auto spec_const = prg.set_spec_constant<ConstID>((spec_const_t)DEF_VAL);
     if (i % 2 != 0)
       spec_const = prg.set_spec_constant<ConstID>((spec_const_t)REDEF_VAL);

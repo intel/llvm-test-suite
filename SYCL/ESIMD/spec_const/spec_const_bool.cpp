@@ -11,13 +11,15 @@
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // UNSUPPORTED: cuda
 
+#include<cstdint>
+
 #define DEF_VAL true
 #define REDEF_VAL false
 #define STORE 0
 
 // In this case container type is set to unsigned char to be able to use
 // esimd memory interfaces to pollute container.
-typedef bool spec_const_t;
-typedef unsigned char container_t;
+using spec_const_t = bool;
+using container_t = uint8_t;
 
 #include "Inputs/spec_const_common.hpp"

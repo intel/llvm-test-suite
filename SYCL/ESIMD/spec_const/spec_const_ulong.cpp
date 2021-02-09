@@ -6,16 +6,17 @@
 //
 //===----------------------------------------------------------------------===//
 // REQUIRES: gpu
-// XFAIL: windows
 // RUN: %clangxx-esimd -fsycl -I%S/.. %s -o %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // UNSUPPORTED: cuda
 
-#define DEF_VAL 0xdeaddeaf4badbeaf
-#define REDEF_VAL 0x4cafebad00112233
+#include<cstdint>
+
+#define DEF_VAL 0xdeaddeaf4badbeafull
+#define REDEF_VAL 0x4cafebad00112233ull
 #define STORE 1
 
-typedef unsigned long spec_const_t;
-typedef unsigned long container_t;
+using spec_const_t = uint64_t;
+using container_t = uint64_t;
 
 #include "Inputs/spec_const_common.hpp"
