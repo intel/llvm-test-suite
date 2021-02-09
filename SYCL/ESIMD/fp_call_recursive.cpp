@@ -43,10 +43,10 @@ int main(int argc, char **argv) {
   unsigned in2 = 21;
   unsigned in3 = 3;
 
-  {
+  try {
     buffer<unsigned, 1> buf(output, range<1>(1));
 
-    auto e = q.submit([&](handler &cgh) {
+    q.submit([&](handler &cgh) {
       auto acc = buf.get_access<access::mode::write>(cgh);
 
       cgh.parallel_for<KernelID>(sycl::range<1>{1},
@@ -59,7 +59,9 @@ int main(int argc, char **argv) {
                                    scalar_store(acc, 0, res);
                                  });
     });
-    e.wait();
+  } catch (cl::sycl::exception const &e) {
+    std::cout << "SYCL exception caught: " << e.what() << std::endl;
+    return e.get_cl_code();
   }
 
   int etalon = in1;

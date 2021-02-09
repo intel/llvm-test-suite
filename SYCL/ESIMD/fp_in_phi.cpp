@@ -38,11 +38,11 @@ bool test(queue q, bool flag) {
   int in1 = 233;
   int in2 = 1;
 
-  {
+  try {
     buffer<int, 1> o_buf(output, range<1>(1));
     buffer<int, 1> y_buf(Y.data(), Y.size());
 
-    auto e = q.submit([&](handler &cgh) {
+    q.submit([&](handler &cgh) {
       auto o_acc = o_buf.get_access<access::mode::write>(cgh);
       auto y_acc = y_buf.get_access<access::mode::write>(cgh);
 
@@ -62,7 +62,9 @@ bool test(queue q, bool flag) {
                                    scalar_store(o_acc, 0, res);
                                  });
     });
-    e.wait();
+  } catch (cl::sycl::exception const &e) {
+    std::cout << "SYCL exception caught: " << e.what() << std::endl;
+    return e.get_cl_code();
   }
 
   int etalon = in1 + (flag ? 3 : 1) + in2 + 2;

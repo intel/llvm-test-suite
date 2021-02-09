@@ -33,10 +33,10 @@ bool test(queue q, bool flag) {
   int in1 = 233;
   int in2 = 100;
 
-  {
+  try {
     buffer<int, 1> buf(output, range<1>(1));
 
-    auto e = q.submit([&](handler &cgh) {
+    q.submit([&](handler &cgh) {
       auto acc = buf.get_access<access::mode::write>(cgh);
 
       cgh.parallel_for<KernelID>(sycl::range<1>{1},
@@ -49,7 +49,9 @@ bool test(queue q, bool flag) {
                                    scalar_store(acc, 0, res);
                                  });
     });
-    e.wait();
+  } catch (cl::sycl::exception const &e) {
+    std::cout << "SYCL exception caught: " << e.what() << std::endl;
+    return false;
   }
 
   int etalon = flag ? in1 + in2 : in1 - in2;

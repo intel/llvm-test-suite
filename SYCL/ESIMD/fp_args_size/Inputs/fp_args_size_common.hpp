@@ -55,8 +55,8 @@ int main(void) {
       sycl::malloc_shared(SIZE * sizeof(c_data_t), dev, ctx));
   memset(C, 0, SIZE * sizeof(c_data_t));
 
-  {
-    auto e = q.submit([&](handler &cgh) {
+  try {
+    q.submit([&](handler &cgh) {
       cgh.parallel_for<KernelID>(
           sycl::range<1>{1}, [=](id<1> i) SYCL_ESIMD_KERNEL {
             using namespace sycl::INTEL::gpu;
@@ -76,7 +76,12 @@ int main(void) {
               block_store<c_data_t, VL>(C + j * VL, vc.select<VL, 1>(j * VL));
           });
     });
-    e.wait();
+  } catch (cl::sycl::exception const &e) {
+    std::cout << "SYCL exception caught: " << e.what() << std::endl;
+    sycl::free(A, ctx);
+    sycl::free(B, ctx);
+    sycl::free(C, ctx);
+    return e.get_cl_code();
   }
 
   unsigned err_cnt = 0;

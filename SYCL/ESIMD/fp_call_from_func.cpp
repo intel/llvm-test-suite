@@ -6,7 +6,6 @@
 //
 //===----------------------------------------------------------------------===//
 // REQUIRES: gpu
-// XFAIL: *
 // UNSUPPORTED: cuda
 // RUN: %clangxx-esimd -Xclang -fsycl-allow-func-ptr -std=c++14 -fsycl %s -o %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
@@ -25,7 +24,7 @@ class KernelID;
 
 ESIMD_NOINLINE int add(int A, int B) { return A + B; }
 
-template <typename AccTy> ESIMD_NOINLINE int test(AccTy acc, int A, int B) {
+template <typename AccTy> ESIMD_NOINLINE void test(AccTy acc, int A, int B) {
   using namespace sycl::INTEL::gpu;
 
   auto foo = &add;
@@ -46,17 +45,19 @@ int main(int argc, char **argv) {
   int in1 = 100;
   int in2 = 233;
 
-  {
+  try {
     buffer<int, 1> buf(output, range<1>(1));
 
-    auto e = q.submit([&](handler &cgh) {
+    q.submit([&](handler &cgh) {
       auto acc = buf.get_access<access::mode::write>(cgh);
 
       cgh.parallel_for<KernelID>(
           sycl::range<1>{1},
           [=](id<1> i) SYCL_ESIMD_KERNEL { test(acc, in1, in2); });
     });
-    e.wait();
+  } catch (cl::sycl::exception const &e) {
+    std::cout << "SYCL exception caught: " << e.what() << std::endl;
+    return e.get_cl_code();
   }
 
   if (result != (in1 + in2)) {
