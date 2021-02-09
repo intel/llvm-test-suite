@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
+//
 // The test checks that ESIMD kernels support use of function pointers from main
 // function with different total arguments size and retval size.
 // Cases:
