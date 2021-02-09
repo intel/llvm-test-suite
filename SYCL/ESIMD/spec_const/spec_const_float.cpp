@@ -11,7 +11,7 @@
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // UNSUPPORTED: cuda
 
-#include<cstdint>
+#include <cstdint>
 
 #define DEF_VAL -1.456789e-5
 #define REDEF_VAL 2.9865432e+5
