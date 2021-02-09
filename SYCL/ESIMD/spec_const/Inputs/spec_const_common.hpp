@@ -57,17 +57,18 @@ int main(int argc, char **argv) {
 
     prg.build_with_kernel_type<TestKernel>();
 
-    {
+    try {
       sycl::buffer<container_t, 1> buf(output.data(), output.size());
 
-      auto e = q.submit([&](sycl::handler &cgh) {
+      q.submit([&](sycl::handler &cgh) {
         auto acc = buf.get_access<sycl::access::mode::write>(cgh);
         cgh.single_task<TestKernel>(
             prg.get_kernel<TestKernel>(),
             [=]() SYCL_ESIMD_KERNEL { do_store(acc, i, spec_const.get()); });
       });
-
-      e.wait();
+    } catch (cl::sycl::exception const &e) {
+      std::cout << "SYCL exception caught: " << e.what() << '\n';
+      return e.get_cl_code();
     }
 
     if (output[i] != etalon[i]) {
