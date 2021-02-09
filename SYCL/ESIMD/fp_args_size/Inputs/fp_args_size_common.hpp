@@ -30,7 +30,9 @@ using namespace cl::sycl;
 class KernelID;
 
 template <typename TA, typename TB, typename TC>
-ESIMD_NOINLINE TC add(TA A, TB B) { return (TC)A + (TC)B; }
+ESIMD_NOINLINE TC add(TA A, TB B) {
+  return (TC)A + (TC)B;
+}
 
 int main(void) {
   queue q(esimd_test::ESIMDSelector{}, esimd_test::createExceptionHandler());
@@ -39,18 +41,18 @@ int main(void) {
   std::cout << "Running on " << dev.get_info<info::device::name>() << "\n";
   auto ctx = q.get_context();
 
-  a_data_t *A =
-      static_cast<a_data_t *>(sycl::malloc_shared(SIZE * sizeof(a_data_t), dev, ctx));
-  for(int i = 0; i < SIZE; i++)
+  a_data_t *A = static_cast<a_data_t *>(
+      sycl::malloc_shared(SIZE * sizeof(a_data_t), dev, ctx));
+  for (int i = 0; i < SIZE; i++)
     A[i] = (a_data_t)1;
 
-  b_data_t *B =
-      static_cast<b_data_t *>(sycl::malloc_shared(SIZE * sizeof(b_data_t), dev, ctx));
-  for(int i = 0; i < SIZE; i++)
+  b_data_t *B = static_cast<b_data_t *>(
+      sycl::malloc_shared(SIZE * sizeof(b_data_t), dev, ctx));
+  for (int i = 0; i < SIZE; i++)
     B[i] = (b_data_t)i;
 
-  c_data_t *C =
-      static_cast<c_data_t *>(sycl::malloc_shared(SIZE * sizeof(c_data_t), dev, ctx));
+  c_data_t *C = static_cast<c_data_t *>(
+      sycl::malloc_shared(SIZE * sizeof(c_data_t), dev, ctx));
   memset(C, 0, SIZE * sizeof(c_data_t));
 
   {
@@ -61,15 +63,16 @@ int main(void) {
 
             simd<a_data_t, SIZE> va(0);
             simd<b_data_t, SIZE> vb(0);
-            for(int j = 0; j < ROWS; j++) {
+            for (int j = 0; j < ROWS; j++) {
               va.select<VL, 1>(j * VL) = block_load<a_data_t, VL>(A + j * VL);
               vb.select<VL, 1>(j * VL) = block_load<b_data_t, VL>(B + j * VL);
             }
 
-            auto foo = &add<simd<a_data_t, SIZE>, simd<b_data_t, SIZE>, simd<c_data_t, SIZE>>;
+            auto foo = &add<simd<a_data_t, SIZE>, simd<b_data_t, SIZE>,
+                            simd<c_data_t, SIZE>>;
             auto vc = foo(va, vb);
 
-            for(int j = 0; j < ROWS; j++)
+            for (int j = 0; j < ROWS; j++)
               block_store<c_data_t, VL>(C + j * VL, vc.select<VL, 1>(j * VL));
           });
     });
@@ -77,8 +80,9 @@ int main(void) {
   }
 
   unsigned err_cnt = 0;
-  for(int i = 0; i < SIZE; i++)
-    if (C[i] != A[i] + B[i]) err_cnt++;
+  for (int i = 0; i < SIZE; i++)
+    if (C[i] != A[i] + B[i])
+      err_cnt++;
 
   sycl::free(A, ctx);
   sycl::free(B, ctx);

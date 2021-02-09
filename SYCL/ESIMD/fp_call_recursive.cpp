@@ -23,7 +23,8 @@
 class KernelID;
 
 ESIMD_NOINLINE unsigned add(unsigned A, unsigned B, unsigned C) {
-  if (B == 0) return A;
+  if (B == 0)
+    return A;
 
   auto foo = &add;
   return (B % C == 0) ? foo(A + 1, B - 1, C) : foo(A - C, B - 2, C);
@@ -48,21 +49,21 @@ int main(int argc, char **argv) {
     auto e = q.submit([&](handler &cgh) {
       auto acc = buf.get_access<access::mode::write>(cgh);
 
-      cgh.parallel_for<KernelID>(
-        sycl::range<1> {1}, [=](id<1> i) SYCL_ESIMD_KERNEL {
-          using namespace sycl::INTEL::gpu;
+      cgh.parallel_for<KernelID>(sycl::range<1>{1},
+                                 [=](id<1> i) SYCL_ESIMD_KERNEL {
+                                   using namespace sycl::INTEL::gpu;
 
-          auto foo = &add;
-          auto res = foo(in1, in2, in3);
+                                   auto foo = &add;
+                                   auto res = foo(in1, in2, in3);
 
-          scalar_store(acc, 0, res);
-        });
+                                   scalar_store(acc, 0, res);
+                                 });
     });
     e.wait();
   }
 
   int etalon = in1;
-  while(in2 > 0) {
+  while (in2 > 0) {
     if (in2 % in3 == 0) {
       etalon += 1;
       in2 -= 1;

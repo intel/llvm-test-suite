@@ -25,13 +25,12 @@ class KernelID;
 
 ESIMD_NOINLINE int add(int A, int B) { return A + B; }
 
-template <typename AccTy>
-ESIMD_NOINLINE int test(AccTy acc, int A, int B) {
+template <typename AccTy> ESIMD_NOINLINE int test(AccTy acc, int A, int B) {
   using namespace sycl::INTEL::gpu;
-  
+
   auto foo = &add;
   auto res = foo(A, B);
-  
+
   scalar_store(acc, 0, res);
 }
 
@@ -54,9 +53,8 @@ int main(int argc, char **argv) {
       auto acc = buf.get_access<access::mode::write>(cgh);
 
       cgh.parallel_for<KernelID>(
-        sycl::range<1> {1}, [=](id<1> i) SYCL_ESIMD_KERNEL {
-          test(acc, in1, in2);
-        });
+          sycl::range<1>{1},
+          [=](id<1> i) SYCL_ESIMD_KERNEL { test(acc, in1, in2); });
     });
     e.wait();
   }

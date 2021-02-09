@@ -23,17 +23,11 @@
 
 class KernelID;
 
-ESIMD_NOINLINE int f1(int x) {
-  return x + 1;
-}
+ESIMD_NOINLINE int f1(int x) { return x + 1; }
 
-ESIMD_NOINLINE int f2(int x) {
-  return x + 2;
-}
+ESIMD_NOINLINE int f2(int x) { return x + 2; }
 
-ESIMD_NOINLINE int f3(int x) {
-  return x + 3;
-}
+ESIMD_NOINLINE int f3(int x) { return x + 3; }
 
 bool test(queue q, bool flag) {
   int result = 0;
@@ -52,21 +46,21 @@ bool test(queue q, bool flag) {
       auto o_acc = o_buf.get_access<access::mode::write>(cgh);
       auto y_acc = y_buf.get_access<access::mode::write>(cgh);
 
-      cgh.parallel_for<KernelID>(
-        sycl::range<1> {1}, [=](id<1> i) SYCL_ESIMD_KERNEL {
-          using namespace sycl::INTEL::gpu;
-          using f = int(*)(int);
+      cgh.parallel_for<KernelID>(sycl::range<1>{1},
+                                 [=](id<1> i) SYCL_ESIMD_KERNEL {
+                                   using namespace sycl::INTEL::gpu;
+                                   using f = int (*)(int);
 
-          f a[] = {f1, f2};
-          if (flag) {
-            a[0] = f3;
-            scalar_store(y_acc, 0, 2);
-          }
+                                   f a[] = {f1, f2};
+                                   if (flag) {
+                                     a[0] = f3;
+                                     scalar_store(y_acc, 0, 2);
+                                   }
 
-          auto res = a[0](in1) + a[1](in2);
+                                   auto res = a[0](in1) + a[1](in2);
 
-          scalar_store(o_acc, 0, res);
-        });
+                                   scalar_store(o_acc, 0, res);
+                                 });
     });
     e.wait();
   }

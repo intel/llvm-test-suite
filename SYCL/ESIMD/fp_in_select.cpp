@@ -22,13 +22,9 @@
 
 class KernelID;
 
-ESIMD_NOINLINE int add(int a, int b) {
-  return a + b;
-}
+ESIMD_NOINLINE int add(int a, int b) { return a + b; }
 
-ESIMD_NOINLINE int sub(int a, int b) {
-  return a - b;
-}
+ESIMD_NOINLINE int sub(int a, int b) { return a - b; }
 
 bool test(queue q, bool flag) {
   int result = 0;
@@ -43,15 +39,15 @@ bool test(queue q, bool flag) {
     auto e = q.submit([&](handler &cgh) {
       auto acc = buf.get_access<access::mode::write>(cgh);
 
-      cgh.parallel_for<KernelID>(
-        sycl::range<1> {1}, [=](id<1> i) SYCL_ESIMD_KERNEL {
-          using namespace sycl::INTEL::gpu;
+      cgh.parallel_for<KernelID>(sycl::range<1>{1},
+                                 [=](id<1> i) SYCL_ESIMD_KERNEL {
+                                   using namespace sycl::INTEL::gpu;
 
-          auto foo = flag ? &add : &sub;
-          auto res = foo(in1, in2);
+                                   auto foo = flag ? &add : &sub;
+                                   auto res = foo(in1, in2);
 
-          scalar_store(acc, 0, res);
-        });
+                                   scalar_store(acc, 0, res);
+                                 });
     });
     e.wait();
   }
