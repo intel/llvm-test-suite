@@ -6,6 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 // REQUIRES: gpu
+// XFAIL: windows
 // UNSUPPORTED: cuda
 // RUN: %clangxx-esimd -Xclang -fsycl-allow-func-ptr -std=c++14 -fsycl %s -o %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
