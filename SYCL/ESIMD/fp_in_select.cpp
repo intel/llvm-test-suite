@@ -52,9 +52,6 @@ bool test(queue q, bool flag) {
   } catch (cl::sycl::exception const &e) {
     std::cout << "SYCL exception caught: " << e.what() << std::endl;
     return false;
-  } catch (std::exception const &e) {
-    std::cout << "General exception caught: " << e.what() << std::endl;
-    return 2;
   }
 
   int etalon = flag ? in1 + in2 : in1 - in2;
