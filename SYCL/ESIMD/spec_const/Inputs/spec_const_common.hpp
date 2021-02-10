@@ -52,24 +52,24 @@ int main(int argc, char **argv) {
 
   bool passed = true;
   for (int i = 0; i < n_times; i++) {
-    sycl::program prg(q.get_context());
-
-    // Checking that already initialized constant can be overwritten.
-    // According to standards proposals:
-    //   A cl::sycl::experimental::spec_constant object is considered
-    //   initialized once the result of a cl::sycl::program::set_spec_constant
-    //   is assigned to it.
-    //   A specialization constant value can be overwritten if the program was
-    //   not built before by recalling set_spec_constant with the same ID and
-    //   the new value. Although the type T of the specialization constant must
-    //   remain the same.
-    auto spec_const = prg.set_spec_constant<ConstID>((spec_const_t)DEF_VAL);
-    if (i % 2 != 0)
-      spec_const = prg.set_spec_constant<ConstID>((spec_const_t)REDEF_VAL);
-
-    prg.build_with_kernel_type<TestKernel>();
-
     try {
+      sycl::program prg(q.get_context());
+
+      // Checking that already initialized constant can be overwritten.
+      // According to standards proposals:
+      //   A cl::sycl::experimental::spec_constant object is considered
+      //   initialized once the result of a cl::sycl::program::set_spec_constant
+      //   is assigned to it.
+      //   A specialization constant value can be overwritten if the program was
+      //   not built before by recalling set_spec_constant with the same ID and
+      //   the new value. Although the type T of the specialization constant
+      //   must remain the same.
+      auto spec_const = prg.set_spec_constant<ConstID>((spec_const_t)DEF_VAL);
+      if (i % 2 != 0)
+        spec_const = prg.set_spec_constant<ConstID>((spec_const_t)REDEF_VAL);
+
+      prg.build_with_kernel_type<TestKernel>();
+
       sycl::buffer<container_t, 1> buf(output.data(), output.size());
 
       q.submit([&](sycl::handler &cgh) {
@@ -81,9 +81,6 @@ int main(int argc, char **argv) {
     } catch (cl::sycl::exception const &e) {
       std::cout << "SYCL exception caught: " << e.what() << '\n';
       return e.get_cl_code();
-    } catch (std::exception const &e) {
-      std::cout << "General exception caught: " << e.what() << '\n';
-      return 2;
     }
 
     if (output[i] != etalon[i]) {
