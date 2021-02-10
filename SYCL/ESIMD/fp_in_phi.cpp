@@ -6,7 +6,6 @@
 //
 //===----------------------------------------------------------------------===//
 // REQUIRES: gpu
-// XFAIL: windows
 // UNSUPPORTED: cuda
 // RUN: %clangxx-esimd -Xclang -fsycl-allow-func-ptr -std=c++14 -fsycl %s -o %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
@@ -66,6 +65,9 @@ bool test(queue q, bool flag) {
   } catch (cl::sycl::exception const &e) {
     std::cout << "SYCL exception caught: " << e.what() << std::endl;
     return e.get_cl_code();
+  } catch (std::exception const &e) {
+    std::cout << "General exception caught: " << e.what() << std::endl;
+    return 2;
   }
 
   int etalon = in1 + (flag ? 3 : 1) + in2 + 2;
