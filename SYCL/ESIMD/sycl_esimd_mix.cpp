@@ -28,7 +28,8 @@ bool checkResult(const std::vector<float> &A, int Inc) {
   for (unsigned i = 0; i < Size; ++i) {
     if (A[i] != i + Inc)
       if (++err_cnt < 10)
-        std::cerr << "failed at A[" << i << "]: " << A[i] << " != " << i + Inc << "\n";
+        std::cerr << "failed at A[" << i << "]: " << A[i] << " != " << i + Inc
+                  << "\n";
   }
 
   if (err_cnt > 0) {
@@ -65,10 +66,8 @@ int main(void) {
 
     auto e = q.submit([&](handler &cgh) {
       auto PA = bufa.get_access<access::mode::read_write>(cgh);
-      cgh.parallel_for<class SyclKernel>(
-          GlobalRange * LocalRange, [=](id<1> i) {
-            PA[i] = PA[i] + 1;
-          });
+      cgh.parallel_for<class SyclKernel>(GlobalRange * LocalRange,
+                                         [=](id<1> i) { PA[i] = PA[i] + 1; });
     });
     e.wait();
   } catch (cl::sycl::exception const &e) {
@@ -78,8 +77,7 @@ int main(void) {
 
   if (checkResult(A, 1)) {
     std::cout << "SYCL kernel passed\n";
-  }
-  else {
+  } else {
     std::cout << "SYCL kernel failed\n";
     return 1;
   }
@@ -116,8 +114,7 @@ int main(void) {
 
   if (checkResult(A, 2)) {
     std::cout << "ESIMD kernel passed\n";
-  }
-  else {
+  } else {
     std::cout << "ESIMD kernel failed\n";
     return 1;
   }
