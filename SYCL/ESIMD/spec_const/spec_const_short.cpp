@@ -6,7 +6,10 @@
 //
 //===----------------------------------------------------------------------===//
 // REQUIRES: gpu
-// XFAIL: level_zero || windows
+// Windows fail: XDEPS-1100
+// UNSUPPORTED: windows
+// Linux Level Zero fail: VMIT-8680
+// XFAIL: level_zero
 // RUN: %clangxx-esimd -fsycl -I%S/.. %s -o %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // UNSUPPORTED: cuda
