@@ -81,6 +81,9 @@ int main(int argc, char **argv) {
     } catch (cl::sycl::exception const &e) {
       std::cout << "SYCL exception caught: " << e.what() << '\n';
       return e.get_cl_code();
+    } catch (std::exception const &e) {
+      std::cout << "General exception caught: " << e.what() << '\n';
+      return 2;
     }
 
     if (output[i] != etalon[i]) {
