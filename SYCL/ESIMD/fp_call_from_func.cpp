@@ -5,14 +5,15 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-// TODO: Support Windows Level Zero - this test timeouts
 // REQUIRES: gpu
-// UNSUPPORTED: cuda || (windows && level_zero)
+// Test timeouts on Windows Level Zero
+// UNSUPPORTED: windows && level_zero
 // RUN: %clangxx-esimd -Xclang -fsycl-allow-func-ptr -std=c++14 -fsycl %s -o %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
+// UNSUPPORTED: cuda
 //
 // The test checks that ESIMD kernels support use of function pointers from
-// functions.
+// within other functions.
 
 #include "esimd_test_utils.hpp"
 

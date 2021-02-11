@@ -84,16 +84,8 @@ int main(int argc, char **argv) {
   std::cout << "Running on " << dev.get_info<info::device::name>() << "\n";
 
   bool passed = true;
-  try {
-    passed &= test(q, true);
-    passed &= test(q, false);
-  } catch (cl::sycl::exception const &e) {
-    std::cout << "SYCL exception caught: " << e.what() << std::endl;
-    return e.get_cl_code();
-  } catch (std::exception const &e) {
-    std::cout << "General exception caught: " << e.what() << std::endl;
-    return -1;
-  }
+  passed &= test(q, true);
+  passed &= test(q, false);
 
   return passed ? 0 : 1;
 }
