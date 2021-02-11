@@ -1,40 +1,89 @@
-// RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %s -o %t.out
+// RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple -fsycl-unnamed-lambda %s -o %t.out
 // RUN: %CPU_RUN_PLACEHOLDER %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // RUN: %ACC_RUN_PLACEHOLDER %t.out
 
 // This test checks that if the custom type supports operations like +=, then
-// such operations can be used for the reduction objects in kernels..
+// such operations can be used for the reduction objects in kernels.
 
 #include <CL/sycl.hpp>
+#include <cmath>
 #include <iostream>
-#include <random>
 
 using namespace sycl;
 using namespace sycl::ONEAPI;
 
 struct XY {
-  XY() : X(0), Y(0) {}
-  XY(float X, float Y) : X(X), Y(Y) {}
-  float X;
-  float Y;
-  float x() const { return X; };
-  float y() const { return Y; };
-  XY &operator+=(const XY &RHS) {
-    X += RHS.X;
-    Y += RHS.Y;
-    return *this;
+  constexpr XY() : X(0), Y(0) {}
+  constexpr XY(int64_t X, int64_t Y) : X(X), Y(Y) {}
+  int64_t X;
+  int64_t Y;
+  int64_t x() const { return X; };
+  int64_t y() const { return Y; };
+};
+
+enum OperationEqual {
+  PlusEq,
+  MultipliesEq,
+  BitwiseOREq,
+  BitwiseXOREq,
+  BitwiseANDEq
+};
+
+namespace std {
+template<>
+struct plus<XY> {
+  using result_type = XY;
+  using first_argument_type = XY;
+  using second_argument_type = XY;
+  constexpr XY operator()(const XY &lhs, const XY &rhs) const {
+    return XY(lhs.X + rhs.X, lhs.Y + rhs.Y);
   }
 };
 
-void setXY(float2 &Data, float X, float Y) { Data = {X, Y}; }
-void setXY(XY &Data, float X, float Y) {
-  Data.X = X;
-  Data.Y = Y;
-}
+template<>
+struct multiplies<XY> {
+  using result_type = XY;
+  using first_argument_type = XY;
+  using second_argument_type = XY;
+  constexpr XY operator()(const XY &lhs, const XY &rhs) const {
+    return XY(lhs.X * rhs.X, lhs.Y * rhs.Y);
+  }
+};
 
-template <typename Name, typename T, typename BinaryOperation>
-int test(T Identity, BinaryOperation BOp) {
+template<>
+struct bit_or<XY> {
+  using result_type = XY;
+  using first_argument_type = XY;
+  using second_argument_type = XY;
+  constexpr XY operator()(const XY &lhs, const XY &rhs) const {
+    return XY(lhs.X | rhs.X, lhs.Y | rhs.Y);
+  }
+};
+
+template<>
+struct bit_xor<XY> {
+  using result_type = XY;
+  using first_argument_type = XY;
+  using second_argument_type = XY;
+  constexpr XY operator()(const XY &lhs, const XY &rhs) const {
+    return XY(lhs.X ^ rhs.X, lhs.Y ^ rhs.Y);
+  }
+};
+
+template<>
+struct bit_and<XY> {
+  using result_type = XY;
+  using first_argument_type = XY;
+  using second_argument_type = XY;
+  constexpr XY operator()(const XY &lhs, const XY &rhs) const {
+    return XY(lhs.X & rhs.X, lhs.Y & rhs.Y);
+  }
+};
+} // namespace std
+
+template <typename T, typename BinaryOperation, OperationEqual OpEq, bool IsFP = false>
+int test(T Identity) {
   constexpr size_t N = 16;
   constexpr size_t L = 4;
 
@@ -42,38 +91,91 @@ int test(T Identity, BinaryOperation BOp) {
   T *Data = malloc_shared<T>(N, Q);
   T *Res = malloc_shared<T>(1, Q);
   T Expected = Identity;
-  for (size_t I = 0; I < N; I++) {
-    setXY(Data[I], I, I + 1);
-    setXY(Expected, Expected.x() + I, Expected.y() + I + 1);
+  BinaryOperation BOp;
+  for (int I = 0; I < N; I++) {
+    Data[I] = T{I, I + 1};
+    Expected = BOp(Expected, T{I, I + 1});
   }
 
   *Res = Identity;
   auto Red = reduction(Res, Identity, BOp);
-  Q.submit([&](handler &H) {
-     H.parallel_for<Name>(nd_range<1>{N, L}, Red,
-                          [=](nd_item<1> ID, auto &Sum) {
-                            size_t GID = ID.get_global_id(0);
-                            Sum += Data[GID];
-                          });
-   }).wait();
+  nd_range<1> NDR{N, L};
+  if constexpr (OpEq == PlusEq) {
+    auto Lambda = [=](nd_item<1> ID, auto &Sum) {
+                              Sum += Data[ID.get_global_id(0)];
+                              };
+    Q.submit([&](handler &H) {H.parallel_for(NDR, Red, Lambda);}).wait();
+  } else if constexpr (OpEq == MultipliesEq) {
+    auto Lambda = [=](nd_item<1> ID, auto &Sum) {
+                              Sum *= Data[ID.get_global_id(0)];
+                              };
+    Q.submit([&](handler &H) {H.parallel_for(NDR, Red, Lambda);}).wait();
+  } else if constexpr (OpEq == BitwiseOREq) {
+    auto Lambda = [=](nd_item<1> ID, auto &Sum) {
+                              Sum |= Data[ID.get_global_id(0)];
+                              };
+    Q.submit([&](handler &H) {H.parallel_for(NDR, Red, Lambda);}).wait();
+  } else if constexpr (OpEq == BitwiseXOREq) {
+    auto Lambda = [=](nd_item<1> ID, auto &Sum) {
+                              Sum ^= Data[ID.get_global_id(0)];
+                              };
+    Q.submit([&](handler &H) {H.parallel_for(NDR, Red, Lambda);}).wait();
+  } else if constexpr (OpEq == BitwiseANDEq) {
+    auto Lambda = [=](nd_item<1> ID, auto &Sum) {
+                              Sum &= Data[ID.get_global_id(0)];
+                              };
+    Q.submit([&](handler &H) {H.parallel_for(NDR, Red, Lambda);}).wait();
+  }
 
   int Error = 0;
-  if (Expected.x() != Res->x() || Expected.y() != Res->y()) {
+  if constexpr (IsFP) {
+    T Diff = (Expected / *Res) - T{1};
+    Error = (std::abs(Diff.x()) > 0.5 || std::abs(Diff.y()) > 0.5) ? 1 : 0;
+  } else {
+    Error = (Expected.x() != Res->x() || Expected.y() != Res->y()) ? 1 : 0;
+  }
+  if (Error)
     std::cerr << "Error: expected = (" << Expected.x() << ", " << Expected.y()
               << "); computed = (" << Res->x() << ", " << Res->y() << ")\n";
-    Error = 1;
-  }
+
   free(Res, Q);
   free(Data, Q);
   return Error;
 }
 
+template <typename T>
+int testFPPack() {
+  int Error = 0;
+  Error += test<T, std::plus<>, PlusEq, true>(T{});
+  Error += test<T, std::plus<T>, PlusEq, true>(T{});
+  Error += test<T, std::multiplies<>, MultipliesEq, true>(T{1, 1});
+  Error += test<T, std::multiplies<T>, MultipliesEq, true>(T{1, 1});
+  return Error;
+}
+
+template <typename T>
+int testINTPack() {
+  int Error = 0;
+  Error += test<T, std::plus<T>, PlusEq>(T{});
+  Error += test<T, std::multiplies<T>, MultipliesEq>(T{1, 1});
+  Error += test<T, std::bit_or<T>, BitwiseOREq>(T{});
+  Error += test<T, std::bit_xor<T>, BitwiseXOREq>(T{});
+  Error += test<T, std::bit_and<T>, BitwiseANDEq>(T{~0, ~0});
+  return Error;
+}
+
 int main() {
   int Error = 0;
-  Error += test<class A, float2>(float2{}, std::plus<>{});
-  Error += test<class B, XY>(
-      XY{}, [](auto A, auto B) { return XY(A.X + B.X, A.Y + B.Y); });
-  if (!Error)
-    std::cout << "Passed.\n";
+  Error += testFPPack<float2>();
+  Error += testINTPack<XY>();
+
+  // TODO: enable this test for int vetors as well.
+  // This test revealed an existing/unrelated problem with the type trait
+  // known_identity_impl. It returns true for 'int2' type, but the
+  // corrsponding functionality returning identity value is not implemented
+  // correctly.
+  // Error += testINTPack<int2>();
+
+  std::cout << (Error ? "Failed\n" : "Passed.\n");
   return Error;
 }
