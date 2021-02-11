@@ -6,9 +6,12 @@
 //
 //===----------------------------------------------------------------------===//
 // REQUIRES: gpu
-// Windows fail: XDEPS-1100
+// On Windows vector compute backend (as a part of IGC) uses llvm-7 and llvm-7 based spirv translator.
+// This translator doesn't have the ability to overwrite the default specialization constant value.
+// That is why the support in Windows driver is disabled at all.
+// This feature will start working on Windows when the llvm version is switched to 9.
 // UNSUPPORTED: windows
-// Linux Level Zero fail: VMIT-8680
+// Linux Level Zero fail with assertion in SPIRV about specialization constant type size.
 // XFAIL: level_zero
 // RUN: %clangxx-esimd -fsycl -I%S/.. %s -o %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
