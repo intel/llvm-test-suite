@@ -31,8 +31,7 @@ enum OperationEqual {
 };
 
 namespace std {
-template<>
-struct plus<XY> {
+template <> struct plus<XY> {
   using result_type = XY;
   using first_argument_type = XY;
   using second_argument_type = XY;
@@ -41,8 +40,7 @@ struct plus<XY> {
   }
 };
 
-template<>
-struct multiplies<XY> {
+template <> struct multiplies<XY> {
   using result_type = XY;
   using first_argument_type = XY;
   using second_argument_type = XY;
@@ -51,8 +49,7 @@ struct multiplies<XY> {
   }
 };
 
-template<>
-struct bit_or<XY> {
+template <> struct bit_or<XY> {
   using result_type = XY;
   using first_argument_type = XY;
   using second_argument_type = XY;
@@ -61,8 +58,7 @@ struct bit_or<XY> {
   }
 };
 
-template<>
-struct bit_xor<XY> {
+template <> struct bit_xor<XY> {
   using result_type = XY;
   using first_argument_type = XY;
   using second_argument_type = XY;
@@ -71,8 +67,7 @@ struct bit_xor<XY> {
   }
 };
 
-template<>
-struct bit_and<XY> {
+template <> struct bit_and<XY> {
   using result_type = XY;
   using first_argument_type = XY;
   using second_argument_type = XY;
@@ -82,7 +77,8 @@ struct bit_and<XY> {
 };
 } // namespace std
 
-template <typename T, typename BinaryOperation, OperationEqual OpEq, bool IsFP = false>
+template <typename T, typename BinaryOperation, OperationEqual OpEq,
+          bool IsFP = false>
 int test(T Identity) {
   constexpr size_t N = 16;
   constexpr size_t L = 4;
@@ -102,29 +98,29 @@ int test(T Identity) {
   nd_range<1> NDR{N, L};
   if constexpr (OpEq == PlusEq) {
     auto Lambda = [=](nd_item<1> ID, auto &Sum) {
-                              Sum += Data[ID.get_global_id(0)];
-                              };
-    Q.submit([&](handler &H) {H.parallel_for(NDR, Red, Lambda);}).wait();
+      Sum += Data[ID.get_global_id(0)];
+    };
+    Q.submit([&](handler &H) { H.parallel_for(NDR, Red, Lambda); }).wait();
   } else if constexpr (OpEq == MultipliesEq) {
     auto Lambda = [=](nd_item<1> ID, auto &Sum) {
-                              Sum *= Data[ID.get_global_id(0)];
-                              };
-    Q.submit([&](handler &H) {H.parallel_for(NDR, Red, Lambda);}).wait();
+      Sum *= Data[ID.get_global_id(0)];
+    };
+    Q.submit([&](handler &H) { H.parallel_for(NDR, Red, Lambda); }).wait();
   } else if constexpr (OpEq == BitwiseOREq) {
     auto Lambda = [=](nd_item<1> ID, auto &Sum) {
-                              Sum |= Data[ID.get_global_id(0)];
-                              };
-    Q.submit([&](handler &H) {H.parallel_for(NDR, Red, Lambda);}).wait();
+      Sum |= Data[ID.get_global_id(0)];
+    };
+    Q.submit([&](handler &H) { H.parallel_for(NDR, Red, Lambda); }).wait();
   } else if constexpr (OpEq == BitwiseXOREq) {
     auto Lambda = [=](nd_item<1> ID, auto &Sum) {
-                              Sum ^= Data[ID.get_global_id(0)];
-                              };
-    Q.submit([&](handler &H) {H.parallel_for(NDR, Red, Lambda);}).wait();
+      Sum ^= Data[ID.get_global_id(0)];
+    };
+    Q.submit([&](handler &H) { H.parallel_for(NDR, Red, Lambda); }).wait();
   } else if constexpr (OpEq == BitwiseANDEq) {
     auto Lambda = [=](nd_item<1> ID, auto &Sum) {
-                              Sum &= Data[ID.get_global_id(0)];
-                              };
-    Q.submit([&](handler &H) {H.parallel_for(NDR, Red, Lambda);}).wait();
+      Sum &= Data[ID.get_global_id(0)];
+    };
+    Q.submit([&](handler &H) { H.parallel_for(NDR, Red, Lambda); }).wait();
   }
 
   int Error = 0;
@@ -143,8 +139,7 @@ int test(T Identity) {
   return Error;
 }
 
-template <typename T>
-int testFPPack() {
+template <typename T> int testFPPack() {
   int Error = 0;
   Error += test<T, std::plus<>, PlusEq, true>(T{});
   Error += test<T, std::plus<T>, PlusEq, true>(T{});
@@ -153,8 +148,7 @@ int testFPPack() {
   return Error;
 }
 
-template <typename T>
-int testINTPack() {
+template <typename T> int testINTPack() {
   int Error = 0;
   Error += test<T, std::plus<T>, PlusEq>(T{});
   Error += test<T, std::multiplies<T>, MultipliesEq>(T{1, 1});
