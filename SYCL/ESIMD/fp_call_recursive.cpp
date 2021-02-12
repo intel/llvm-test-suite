@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
   }
 
   if (result != etalon) {
-    std::cout << "Failed: " << result << std::endl;
+    std::cout << "Failed with result: " << result << std::endl;
     return 1;
   }
 

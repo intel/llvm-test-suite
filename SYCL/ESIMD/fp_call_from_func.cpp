@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
   }
 
   if (result != (in1 + in2)) {
-    std::cout << "Failed" << std::endl;
+    std::cout << "Failed with result: " << result << std::endl;
     return 1;
   }
 
