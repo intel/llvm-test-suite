@@ -68,7 +68,8 @@ int main(void) {
               vb.select<VL, 1>(j * VL) = block_load<b_data_t, VL>(B + j * VL);
             }
 
-            simd<c_data_t, SIZE> vc = add(va, vb);
+            auto vc = add<simd<a_data_t, SIZE>, simd<b_data_t, SIZE>,
+                          simd<c_data_t, SIZE>>(va, vb);
 
             for (int j = 0; j < ROWS; j++)
               block_store<c_data_t, VL>(C + j * VL, vc.select<VL, 1>(j * VL));
