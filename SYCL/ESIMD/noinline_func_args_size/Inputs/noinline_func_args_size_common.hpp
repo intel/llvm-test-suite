@@ -6,9 +6,8 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// The test checks that ESIMD kernels support call of noinline function from main
-// function with different total arguments size and retval size.
-// Cases:
+// The test checks that ESIMD kernels support call of noinline function from
+// main function with different total arguments size and retval size. Cases:
 //   Total arguments size < %arg register size (32 GRFs)
 //   Total arguments size == %arg register size
 //   Total arguments size > %arg register size (i.e. stack mem is required)
