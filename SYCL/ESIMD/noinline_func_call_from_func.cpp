@@ -48,12 +48,12 @@ int main(int argc, char **argv) {
     buffer<int, 1> buf(output, range<1>(1));
 
     q.submit([&](handler &cgh) {
-        auto acc = buf.get_access<access::mode::write>(cgh);
+      auto acc = buf.get_access<access::mode::write>(cgh);
 
-        cgh.parallel_for<KernelID>(
-            sycl::range<1>{1},
-            [=](id<1> i) SYCL_ESIMD_KERNEL { test(acc, in1, in2); });
-        });
+      cgh.parallel_for<KernelID>(
+          sycl::range<1>{1},
+          [=](id<1> i) SYCL_ESIMD_KERNEL { test(acc, in1, in2); });
+    });
   } catch (cl::sycl::exception const &e) {
     std::cout << "SYCL exception caught: " << e.what() << std::endl;
     return e.get_cl_code();
