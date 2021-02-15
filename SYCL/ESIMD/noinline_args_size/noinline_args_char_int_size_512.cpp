@@ -1,4 +1,4 @@
-//=- noinline_func_args_char_int_size_192.cpp  - DPC++ ESIMD on-device test -=//
+//===-- noinline_args_char_int_size_512.cpp  - DPC++ ESIMD on-device test -===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -13,9 +13,9 @@
 #include <cstdint>
 
 constexpr unsigned VL = 16;
-constexpr unsigned SIZE = 192;
+constexpr unsigned SIZE = 512;
 
-using a_data_t = int32_t;
+using a_data_t = int8_t;
 using b_data_t = int32_t;
 using c_data_t = int32_t;
 

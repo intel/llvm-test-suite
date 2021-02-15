@@ -1,4 +1,4 @@
-//==---- noinline_func_call_from_func.cpp  - DPC++ ESIMD on-device test ----==//
+//===------ noinline_call_from_func.cpp  - DPC++ ESIMD on-device test -----===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -6,9 +6,11 @@
 //
 //===----------------------------------------------------------------------===//
 // REQUIRES: gpu
-// UNSUPPORTED: cuda
+// Test currently timeouts on Windows Level Zero
+// UNSUPPORTED: windows && level_zero
 // RUN: %clangxx-esimd -fsycl %s -o %t.out
 // RUN: env IGC_FunctionControl=3 IGC_ForceInlineStackCallWithImplArg=1 %GPU_RUN_PLACEHOLDER %t.out
+// UNSUPPORTED: cuda
 //
 // The test checks that ESIMD kernels support call of noinline function from
 // within other functions.

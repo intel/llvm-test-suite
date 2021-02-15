@@ -1,4 +1,4 @@
-//==--- noinline_func_args_size_common.hpp  - DPC++ ESIMD on-device test ---==//
+//===------ noinline_args_size_common.hpp  - DPC++ ESIMD on-device test ---===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
