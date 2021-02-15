@@ -19,4 +19,4 @@ using a_data_t = int32_t;
 using b_data_t = int32_t;
 using c_data_t = int32_t;
 
-#include "Inputs/noinline_func_args_size_common.hpp"
+#include "Inputs/noinline_args_size_common.hpp"
