@@ -1,5 +1,5 @@
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %s -o %t.out
-// RUN: %RUN_ON_HOST %t.out %HOST_CHECK_PLACEHOLDER
+// RUN: %HOST_RUN_PLACEHOLDER %t.out %HOST_CHECK_PLACEHOLDER
 
 // GPU does not correctly interpolate when using clamp.  Waiting on fix.
 // Both OCL and LevelZero have this issue.
