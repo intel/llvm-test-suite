@@ -1,17 +1,17 @@
-// UNSUPPORTED: cuda,cl_options
+// UNSUPPORTED: cuda
 // CUDA does not support SPIR-V.
 //
 // >> ---- compile src1
 // >> device compilation...
-// RUN: %clangxx -fsycl-device-only -Xclang -fsycl-int-header=sycl_ihdr_a.h %s -c -o a_kernel.bc -I %sycl_include -Wno-sycl-strict
+// RUN: %clangxx -fsycl-device-only -Xclang -fsycl-int-header=sycl_ihdr_a.h %s -c -o a_kernel.bc -Wno-sycl-strict
 // >> host compilation...
-// RUN: %clangxx -include sycl_ihdr_a.h -g -c %s -o a.o -I %sycl_include -Wno-sycl-strict
+// RUN: %clangxx -include sycl_ihdr_a.h -g -c %s -o a.o %sycl_options -Wno-sycl-strict
 //
 // >> ---- compile src2
 // >> device compilation...
-// RUN: %clangxx -DB_CPP=1 -fsycl-device-only -Xclang -fsycl-int-header=sycl_ihdr_b.h %s -c -o b_kernel.bc -I %sycl_include -Wno-sycl-strict
+// RUN: %clangxx -DB_CPP=1 -fsycl-device-only -Xclang -fsycl-int-header=sycl_ihdr_b.h %s -c -o b_kernel.bc -Wno-sycl-strict
 // >> host compilation...
-// RUN: %clangxx -DB_CPP=1 -include sycl_ihdr_b.h -g -c %s -o b.o -I %sycl_include -Wno-sycl-strict
+// RUN: %clangxx -DB_CPP=1 -include sycl_ihdr_b.h -g -c %s -o b.o %sycl_options -Wno-sycl-strict
 //
 // >> ---- bundle .o with .spv
 // >> run bundler
