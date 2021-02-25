@@ -35,8 +35,6 @@ void outputPixel(sycl::uint4 somePixel) {
             << "," << somePixel[3] << "} ";
 }
 
-// some constants.
-
 // 4 pixels on a side. 1D at the moment
 constexpr long width = 4;
 
