@@ -138,9 +138,9 @@ if cl_options:
     config.substitutions.append( ('%include_option',  '/FI' ) )
     config.substitutions.append( ('%debug_option',  '/DEBUG' ) )
 else:
-    config.substitutions.append( ('%sycl_options', '-lsycl -I'+config.sycl_include ) )
-    config.substitutions.append( ('%include_option',  '/FI' ) )
-    config.substitutions.append( ('%debug_option',  '/DEBUG' ) )
+    config.substitutions.append( ('%sycl_options', ' -lsycl -I'+config.sycl_include ) )
+    config.substitutions.append( ('%include_option',  '-include' ) )
+    config.substitutions.append( ('%debug_option',  '-g' ) )
 
 llvm_config.add_tool_substitutions(['llvm-spirv'], [config.sycl_tools_dir])
 
