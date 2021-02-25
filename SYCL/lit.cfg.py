@@ -112,14 +112,13 @@ with open(check_l0_file, 'w') as fp:
 config.level_zero_libs_dir=lit_config.params.get("level_zero_libs_dir", config.level_zero_libs_dir)
 config.level_zero_include=lit_config.params.get("level_zero_include", (config.level_zero_include if config.level_zero_include else os.path.join(config.sycl_include, '..')))
 
-level_zero_options=level_zero_options = ' -L'+config.level_zero_libs_dir+' -lze_loader '+' -I'+config.level_zero_include
+level_zero_options=level_zero_options = (' -L'+config.level_zero_libs_dir if config.level_zero_libs_dir else '')+' -lze_loader '+' -I'+config.level_zero_include
 if cl_options:
-    level_zero_options = ' '+config.level_zero_libs_dir+'/ze_loader.lib '+' /I'+config.level_zero_include
+    level_zero_options = ' '+( config.level_zero_libs_dir+'/ze_loader.lib ' if config.level_zero_libs_dir else 'ze_loader.lib')+' /I'+config.level_zero_include
 
 config.substitutions.append( ('%level_zero_options', level_zero_options) )
 
-sp = subprocess.getstatusoutput('echo '+config.dpcpp_compiler+' -fsycl  ' + check_l0_file + level_zero_options)
-print (sp[1])
+sp = subprocess.getstatusoutput(config.dpcpp_compiler+' -fsycl  ' + check_l0_file + level_zero_options)
 if sp[0] == 0:
     config.available_features.add('level_zero_dev_kit')
     config.substitutions.append( ('%level_zero_options', level_zero_options) )
@@ -135,9 +134,13 @@ if config.opencl_libs_dir:
 config.substitutions.append( ('%opencl_include_dir',  config.opencl_include_dir) )
 
 if cl_options:
-    config.substitutions.append( ('%sycl_options',  ' '+config.sycl_libs_dir+'/sycl.lib /I'+config.sycl_include ) )
+    config.substitutions.append( ('%sycl_options',  ' sycl.lib /I'+config.sycl_include ) )
+    config.substitutions.append( ('%include_option',  '/FI' ) )
+    config.substitutions.append( ('%debug_option',  '/DEBUG' ) )
 else:
     config.substitutions.append( ('%sycl_options', '-lsycl -I'+config.sycl_include ) )
+    config.substitutions.append( ('%include_option',  '/FI' ) )
+    config.substitutions.append( ('%debug_option',  '/DEBUG' ) )
 
 llvm_config.add_tool_substitutions(['llvm-spirv'], [config.sycl_tools_dir])
 
