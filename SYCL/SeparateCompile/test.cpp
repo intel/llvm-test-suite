@@ -36,7 +36,7 @@
 // RUN: %clangxx -c wrapper.bc -o wrapper.o
 //
 // >> ---- link the full hetero app
-// RUN: %clangxx wrapper.o a.o b.o -o app.exe -lsycl
+// RUN: %clangxx wrapper.o a.o b.o -o app.exe %sycl_options
 // RUN: %BE_RUN_PLACEHOLDER ./app.exe | FileCheck %s
 // CHECK: pass
 

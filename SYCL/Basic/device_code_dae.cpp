@@ -10,7 +10,7 @@
 // RUN: echo -e -n "[Code|Properties]\nlinked_device_code.spv|linked_device_code_0.prop" > table.txt
 // RUN: clang-offload-wrapper -o wrapper.bc -host=x86_64 -kind=sycl -target=spir64 -batch table.txt
 // RUN: %clangxx -c wrapper.bc -o wrapper.o
-// RUN: %clangxx wrapper.o host_code.o -o app.exe -lsycl
+// RUN: %clangxx wrapper.o host_code.o -o app.exe %sycl_options
 // RUN: %BE_RUN_PLACEHOLDER ./app.exe
 
 //==---------device_code_dae.cpp - dead argument elimination test ----------==//
