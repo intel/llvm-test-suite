@@ -88,7 +88,7 @@ void check(queue &Queue, size_t G = 256, size_t L = 64) {
   check_op<sycl_subgr<SpecializationKernelName, class KernelName_bPPlfvdGShi>,
            T>(Queue, T(0), ONEAPI::maximum<T>(), true, G, L);
 
-#if __cplusplus >= 201402L
+  // Transparent operator functors.
   check_op<sycl_subgr<SpecializationKernelName,
                       class KernelName_fkOyLRYirfMnvBcnbRFy>,
            T>(Queue, T(L), ONEAPI::plus<>(), false, G, L);
@@ -107,5 +107,17 @@ void check(queue &Queue, size_t G = 256, size_t L = 64) {
   check_op<
       sycl_subgr<SpecializationKernelName, class KernelName_BaCGaWDMFeMFqvotbk>,
       T>(Queue, T(0), ONEAPI::maximum<>(), true, G, L);
-#endif
+
+  // Use small sub-groups to avoid overflow effects for int multiply operations
+  // and avoid rounding issues for FP multiply.
+  L = 4;
+  check_op<sycl_subgr<SpecializationKernelName, class KernelName_MulF>, T>(
+      Queue, T(G), ONEAPI::multiplies<T>(), false, G, L);
+  check_op<sycl_subgr<SpecializationKernelName, class KernelName_MulT>, T>(
+      Queue, T(1), ONEAPI::multiplies<T>(), true, G, L);
+
+  check_op<sycl_subgr<SpecializationKernelName, class KernelName_MulFV>, T>(
+      Queue, T(G), ONEAPI::multiplies<>(), false, G, L);
+  check_op<sycl_subgr<SpecializationKernelName, class KernelName_MulTV>, T>(
+      Queue, T(1), ONEAPI::multiplies<>(), true, G, L);
 }
