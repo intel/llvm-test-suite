@@ -143,8 +143,10 @@ int main() {
     // RGBA) the _int16/fp16 channels are two bytes per channel, or eight bytes
     // per pixel (for RGBA) the _int32/fp32  channels are four bytes per
     // channel, or sixteen bytes per pixel (for RGBA).
+    // CUDA has limited support for image_channel_type, so the tests use
+    // unsigned_int32
     test_normalized_none_linear_sampler(image_channel_order::rgba,
-                                        image_channel_type::unsigned_int8);
+                                        image_channel_type::unsigned_int32);
   } else {
     std::cout << "device does not support image operations" << std::endl;
   }
