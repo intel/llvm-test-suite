@@ -2,6 +2,10 @@
 // RUN: %HOST_RUN_PLACEHOLDER %t.out %HOST_CHECK_PLACEHOLDER
 // RUN: %CPU_RUN_PLACEHOLDER %t.out %CPU_CHECK_PLACEHOLDER
 // RUN: %GPU_RUN_PLACEHOLDER %t.out %GPU_CHECK_PLACEHOLDER
+// XFAIL: cuda
+
+// CUDA is not handling repeat or mirror correctly with normalized coordinates.
+// Waiting on a fix.
 
 /*
     This file sets up an image, initializes it with data,

@@ -2,12 +2,13 @@
 // RUN: %HOST_RUN_PLACEHOLDER %t.out %HOST_CHECK_PLACEHOLDER
 // RUN: %CPU_RUN_PLACEHOLDER %t.out %CPU_CHECK_PLACEHOLDER
 // RUN: %GPU_RUN_PLACEHOLDER %t.out %GPU_CHECK_PLACEHOLDER
-// XFAIL: gpu && (level_zero || opencl)
+// XFAIL: gpu && (level_zero || opencl || cuda)
 // XFAIL: cpu
 
 // GPU does not correctly interpolate when using clamp.  Waiting on fix.
 // Both OCL and LevelZero have this issue.
 // CPU failing all linear interpolation at moment. Waiting on fix.
+// CUDA failing all linear interpolation at moment. Waiting on fix.
 
 /*
     This file sets up an image, initializes it with data,

@@ -3,8 +3,10 @@
 // RUN: %GPU_RUN_PLACEHOLDER %t.out %GPU_CHECK_PLACEHOLDER
 // RUN: %CPU_RUN_PLACEHOLDER %t.out %CPU_CHECK_PLACEHOLDER
 // XFAIL: cpu
+// XFAIL: cuda
 
 // CPU failing all linear interpolation at moment. Waiting on fix.
+// CUDA failing all linear interpolation at moment. Waiting on fix.
 
 /*
     This file sets up an image, initializes it with data,
