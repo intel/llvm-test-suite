@@ -150,10 +150,10 @@ void check(queue &Queue, size_t G = 256, size_t L = 64) {
         T>(Queue, std::numeric_limits<T>::min(), ONEAPI::maximum<>(), true, G,
            L);
   }
+}
 
-  // Use small sub-groups to avoid overflow effects for int multiply operations
-  // and avoid rounding issues for FP multiply.
-  L = 4;
+template <typename SpecializationKernelName, typename T>
+void check_mul(queue &Queue, size_t G = 256, size_t L = 4) {
   check_op<sycl_subgr<SpecializationKernelName, class KernelName_MulF>, T>(
       Queue, T(L), ONEAPI::multiplies<T>(), false, G, L);
   check_op<sycl_subgr<SpecializationKernelName, class KernelName_MulT>, T>(
@@ -163,4 +163,38 @@ void check(queue &Queue, size_t G = 256, size_t L = 64) {
       Queue, T(L), ONEAPI::multiplies<T>(), false, G, L);
   check_op<sycl_subgr<SpecializationKernelName, class KernelName_MulTV>, T>(
       Queue, T(1), ONEAPI::multiplies<>(), true, G, L);
+}
+
+template <typename SpecializationKernelName, typename T>
+void check_bit_ops(queue &Queue, size_t G = 256, size_t L = 4) {
+  check_op<sycl_subgr<SpecializationKernelName, class KernelName_ORF>, T>(
+      Queue, T(L), ONEAPI::bit_or<T>(), false, G, L);
+  check_op<sycl_subgr<SpecializationKernelName, class KernelName_ORT>, T>(
+      Queue, T(0), ONEAPI::bit_or<T>(), true, G, L);
+
+  check_op<sycl_subgr<SpecializationKernelName, class KernelName_XORF>, T>(
+      Queue, T(L), ONEAPI::bit_xor<T>(), false, G, L);
+  check_op<sycl_subgr<SpecializationKernelName, class KernelName_XORT>, T>(
+      Queue, T(0), ONEAPI::bit_xor<T>(), true, G, L);
+
+  check_op<sycl_subgr<SpecializationKernelName, class KernelName_ANDF>, T>(
+      Queue, T(L), ONEAPI::bit_and<T>(), false, G, L);
+  check_op<sycl_subgr<SpecializationKernelName, class KernelName_ANDT>, T>(
+      Queue, ~T(0), ONEAPI::bit_and<T>(), true, G, L);
+
+  // Transparent operator functors.
+  check_op<sycl_subgr<SpecializationKernelName, class KernelName_ORFV>, T>(
+      Queue, T(L), ONEAPI::bit_or<>(), false, G, L);
+  check_op<sycl_subgr<SpecializationKernelName, class KernelName_ORTV>, T>(
+      Queue, T(0), ONEAPI::bit_or<>(), true, G, L);
+
+  check_op<sycl_subgr<SpecializationKernelName, class KernelName_XORFV>, T>(
+      Queue, T(L), ONEAPI::bit_xor<>(), false, G, L);
+  check_op<sycl_subgr<SpecializationKernelName, class KernelName_XORTV>, T>(
+      Queue, T(0), ONEAPI::bit_xor<>(), true, G, L);
+
+  check_op<sycl_subgr<SpecializationKernelName, class KernelName_ANDFV>, T>(
+      Queue, T(L), ONEAPI::bit_and<>(), false, G, L);
+  check_op<sycl_subgr<SpecializationKernelName, class KernelName_ANDTV>, T>(
+      Queue, ~T(0), ONEAPI::bit_and<>(), true, G, L);
 }
