@@ -4,9 +4,11 @@
 // RUN: %CPU_RUN_PLACEHOLDER %t.out %CPU_CHECK_PLACEHOLDER
 // XFAIL: cpu
 // XFAIL: cuda
+// UNSUPPORTED: level_zero && windows
 
 // CPU failing all linear interpolation at moment. Waiting on fix.
 // CUDA failing all linear interpolation at moment. Waiting on fix.
+// LevelZero on Windows hangs with normalized coordinates. Waiting on fix.
 
 /*
     This file sets up an image, initializes it with data,

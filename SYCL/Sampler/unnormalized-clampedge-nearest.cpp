@@ -2,6 +2,10 @@
 // RUN: %HOST_RUN_PLACEHOLDER %t.out %HOST_CHECK_PLACEHOLDER
 // RUN: %CPU_RUN_PLACEHOLDER %t.out %CPU_CHECK_PLACEHOLDER
 // RUN: %GPU_RUN_PLACEHOLDER %t.out %GPU_CHECK_PLACEHOLDER
+// XFAIL: level_zero && windows
+
+// On Windows, LevelZero returns wrong value for clampedge
+// out of bounds. Waiting on fix.
 
 /*
     This file sets up an image, initializes it with data,
