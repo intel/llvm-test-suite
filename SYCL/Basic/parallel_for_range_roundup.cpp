@@ -1,7 +1,7 @@
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple  %s -o %t.out
 // RUN: env SYCL_PARALLEL_FOR_RANGE_ROUNDING_TRACE=1 %GPU_RUN_PLACEHOLDER %t.out %GPU_CHECK_PLACEHOLDER
 
-// Issue #164 The test if failin sporadically on Windows
+// Issue #164 The test is failing sporadically on Windows
 // UNSUPPORTED: windows
 #include <CL/sycl.hpp>
 
