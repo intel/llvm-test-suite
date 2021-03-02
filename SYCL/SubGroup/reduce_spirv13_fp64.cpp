@@ -17,7 +17,8 @@
 
 int main() {
   queue Queue;
-  if (!core_sg_supported(Queue.get_device())) {
+  if (!core_sg_supported(Queue.get_device()) ||
+      !Queue.get_device().has_extension("cl_khr_fp64")) {
     std::cout << "Skipping test\n";
     return 0;
   }
