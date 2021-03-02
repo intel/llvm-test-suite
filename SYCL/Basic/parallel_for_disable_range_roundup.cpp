@@ -45,18 +45,18 @@ int try_rounding_off(size_t size) {
 int main() {
   int x;
 
-  x = 10;
+  x = 1500;
   try_rounding_off(x);
 
   return 0;
 }
 
 // CHECK-DISABLED:  Run parallel_for
-// CHECK-DISABLED-NOT: parallel_for range adjusted from 10
-// CHECK-DISABLED:  Size seen by user = 10
-// CHECK-DISABLED-NEXT:  Counter = 10
+// CHECK-DISABLED-NOT: parallel_for range adjusted from 1500
+// CHECK-DISABLED:  Size seen by user = 1500
+// CHECK-DISABLED-NEXT:  Counter = 1500
 
 // CHECK-ENABLED:  Run parallel_for
-// CHECK-ENABLED-NEXT: parallel_for range adjusted from 10
-// CHECK-ENABLED-NEXT:  Size seen by user = 10
-// CHECK-ENABLED-NEXT:  Counter = 10
+// CHECK-ENABLED-NEXT: parallel_for range adjusted from 1500
+// CHECK-ENABLED-NEXT:  Size seen by user = 1500
+// CHECK-ENABLED-NEXT:  Counter = 1500
