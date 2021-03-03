@@ -105,6 +105,7 @@ int main() {
         // CHECK-NEXT: {{(0x)?[0-9a-fA-F]+$}}
       });
     });
+    Queue.wait();
   }
 
   {
@@ -116,17 +117,18 @@ int main() {
         ONEAPI::experimental::printf(format_hello_world_2, (uint64_t)i.get(0));
       });
     });
+    Queue.wait();
+    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
+    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
+    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
+    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
+    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
+    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
+    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
+    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
+    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
+    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
   }
-  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
-  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
-  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
-  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
-  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
-  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
-  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
-  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
-  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
-  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
 
   // FIXME: strictly check output order once the bug mentioned above is fixed
   // CHECK: {{(Hello, World!)?}}
