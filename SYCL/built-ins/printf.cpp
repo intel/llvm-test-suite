@@ -116,17 +116,17 @@ int main() {
         ONEAPI::experimental::printf(format_hello_world_2, (uint64_t)i.get(0));
       });
     });
-    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
-    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
-    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
-    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
-    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
-    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
-    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
-    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
-    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
-    // CHECK-NEXT: {{[0-9]+}}: Hello, World!
   }
+  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
+  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
+  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
+  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
+  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
+  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
+  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
+  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
+  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
+  // CHECK-NEXT: {{[0-9]+}}: Hello, World!
 
   // FIXME: strictly check output order once the bug mentioned above is fixed
   // CHECK: {{(Hello, World!)?}}
