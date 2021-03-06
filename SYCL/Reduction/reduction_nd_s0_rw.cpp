@@ -1,8 +1,12 @@
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %s -o %t.out
-// RUNx: %HOST_RUN_PLACEHOLDER %t.out
 // RUN: %CPU_RUN_PLACEHOLDER %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // RUN: %ACC_RUN_PLACEHOLDER %t.out
+
+// RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple -DTEST_SYCL2020_REDUCTIONS %s -o %t2020.out
+// RUN: %CPU_RUN_PLACEHOLDER %t2020.out
+// RUN: %GPU_RUN_PLACEHOLDER %t2020.out
+// RUN: %ACC_RUN_PLACEHOLDER %t2020.out
 
 // This test performs basic checks of parallel_for(nd_range, reduction, func)
 // with reductions initialized with 0-dimensional read_write accessor.
@@ -13,11 +17,15 @@
 
 using namespace cl::sycl;
 
+// This allocator is needed only for the purpose of testing buffers
+// with allocator that is not same_as sycl::buffer_allocator.
+struct CustomAllocator : public sycl::buffer_allocator {};
+
 template <typename SpecializationKernelName, typename T, int Dim,
           class BinaryOperation>
 void test(T Identity, size_t WGSize, size_t NWItems) {
   buffer<T, 1> InBuf(NWItems);
-  buffer<T, 1> OutBuf(1);
+  buffer<T, 1, CustomAllocator> OutBuf(1);
 
   // Initialize.
   BinaryOperation BOp;
@@ -30,9 +38,13 @@ void test(T Identity, size_t WGSize, size_t NWItems) {
   queue Q;
   Q.submit([&](handler &CGH) {
     auto In = InBuf.template get_access<access::mode::read>(CGH);
+#ifdef TEST_SYCL2020_REDUCTIONS
+    auto Redu = sycl::reduction(OutBuf, CGH, Identity, BOp);
+#else
     accessor<T, Dim, access::mode::read_write, access::target::global_buffer>
         Out(OutBuf, CGH);
     auto Redu = ONEAPI::reduction(Out, Identity, BOp);
+#endif
 
     range<1> GlobalRange(NWItems);
     range<1> LocalRange(WGSize);

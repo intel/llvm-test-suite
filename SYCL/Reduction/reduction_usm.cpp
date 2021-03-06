@@ -3,7 +3,13 @@
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // RUN: %ACC_RUN_PLACEHOLDER %t.out
 
+// RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple -DTEST_SYCL2020_REDUCTIONS %s -o %t2020.out
+// RUN: %CPU_RUN_PLACEHOLDER %t2020.out
+// RUN: %GPU_RUN_PLACEHOLDER %t2020.out
+// RUN: %ACC_RUN_PLACEHOLDER %t2020.out
+
 // RUNx: %HOST_RUN_PLACEHOLDER %t.out
+// RUNx: %HOST_RUN_PLACEHOLDER %t2020.out
 // TODO: Enable the test for HOST when it supports ONEAPI::reduce() and
 // barrier()
 
@@ -58,7 +64,11 @@ void test(T Identity, size_t WGSize, size_t NWItems, usm::alloc AllocType) {
   // Compute.
   Q.submit([&](handler &CGH) {
     auto In = InBuf.template get_access<access::mode::read>(CGH);
+#ifdef TEST_SYCL2020_REDUCTIONS
+    auto Redu = sycl::reduction(ReduVarPtr, Identity, BOp);
+#else
     auto Redu = ONEAPI::reduction(ReduVarPtr, Identity, BOp);
+#endif
     range<1> GlobalRange(NWItems);
     range<1> LocalRange(WGSize);
     nd_range<1> NDRange(GlobalRange, LocalRange);

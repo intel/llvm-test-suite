@@ -12,6 +12,11 @@
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // RUN: %ACC_RUN_PLACEHOLDER %t.out
 
+// RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple -DTEST_SYCL2020_REDUCTIONS %s -o %t2020.out
+// RUN: %CPU_RUN_PLACEHOLDER %t2020.out
+// RUN: %GPU_RUN_PLACEHOLDER %t2020.out
+// RUN: %ACC_RUN_PLACEHOLDER %t2020.out
+
 // This test checks handling of parallel_for() accepting nd_range and
 // two or more reductions.
 
@@ -125,9 +130,21 @@ int runTest(T1 IdentityVal1, T1 InitVal1, BinaryOperation1 BOp1,
      auto In3 = InBuf3.template get_access<access::mode::read>(CGH);
      auto In4 = InBuf4.template get_access<access::mode::read>(CGH);
 
+#ifdef TEST_SYCL2020_REDUCTIONS
+     auto Redu1 = sycl::reduction(OutBuf1, CGH, IdentityVal1, BOp1);
+     auto Redu2 = sycl::reduction(OutBuf2, CGH, IdentityVal2, BOp2);
+     auto Redu3 = sycl::reduction(OutBuf3, CGH, IdentityVal3, BOp3);
+     auto Redu4 = sycl::reduction(Out4, IdentityVal4, BOp4);
+#else
      auto Out1 = OutBuf1.template get_access<Mode1>(CGH);
      auto Out2 = OutBuf2.template get_access<Mode2>(CGH);
      accessor<T3, 0, Mode3, access::target::global_buffer> Out3(OutBuf3, CGH);
+
+     auto Redu1 = ONEAPI::reduction(Out1, IdentityVal1, BOp1);
+     auto Redu2 = ONEAPI::reduction(Out2, IdentityVal2, BOp2);
+     auto Redu3 = ONEAPI::reduction(Out3, IdentityVal3, BOp3);
+     auto Redu4 = ONEAPI::reduction(Out4, IdentityVal4, BOp4);
+#endif
 
      auto Lambda = [=](nd_item<1> NDIt, auto &Sum1, auto &Sum2, auto &Sum3,
                        auto &Sum4) {
@@ -137,15 +154,6 @@ int runTest(T1 IdentityVal1, T1 InitVal1, BinaryOperation1 BOp1,
        Sum3.combine(In3[I]);
        Sum4.combine(In4[I]);
      };
-
-     auto Redu1 =
-         ONEAPI::reduction<T1, BinaryOperation1>(Out1, IdentityVal1, BOp1);
-     auto Redu2 =
-         ONEAPI::reduction<T2, BinaryOperation2>(Out2, IdentityVal2, BOp2);
-     auto Redu3 =
-         ONEAPI::reduction<T3, BinaryOperation3>(Out3, IdentityVal3, BOp3);
-     auto Redu4 =
-         ONEAPI::reduction<T4, BinaryOperation4>(Out4, IdentityVal4, BOp4);
 
      auto NDR = nd_range<1>{range<1>(NWorkItems), range<1>{WGSize}};
      CGH.parallel_for<ReductionExample>(NDR, Redu1, Redu2, Redu3, Redu4,
@@ -186,17 +194,23 @@ int runTest(T1 IdentityVal1, T1 InitVal1, BinaryOperation1 BOp1,
 }
 
 int main() {
-  int Error =
-      runTest<class ReduFloatPlus16x1, float, access::mode::discard_write, int,
-              access::mode::read_write, short, access::mode::read_write, int>(
-          0, 1000, std::plus<float>{}, 0, 2000, std::plus<>{}, 0, 4000,
-          std::bit_or<>{}, 0, 8000, std::bit_xor<>{}, usm::alloc::shared, 16,
-          16);
+  constexpr access::mode ReadWriteMode = access::mode::read_write;
+#ifdef TEST_SYCL2020_REDUCTIONS
+  // TODO: property::reduction::initialize_to_identity is not supported yet.
+  // Thus only read_write mode is tested now.
+  constexpr access::mode DiscardWriteMode = access::mode::read_write;
+#else
+  constexpr access::mode DiscardWriteMode = access::mode::discard_write;
+#endif
+
+  int Error = runTest<class ReduFloatPlus16x1, float, DiscardWriteMode, int,
+                      ReadWriteMode, short, ReadWriteMode, int>(
+      0, 1000, std::plus<float>{}, 0, 2000, std::plus<>{}, 0, 4000,
+      std::bit_or<>{}, 0, 8000, std::bit_xor<>{}, usm::alloc::shared, 16, 16);
 
   auto Add = [](auto x, auto y) { return (x + y); };
-  Error += runTest<class ReduFloatPlus5x257, float, access::mode::read_write,
-                   int, access::mode::read_write, short,
-                   access::mode::discard_write, int>(
+  Error += runTest<class ReduFloatPlus5x257, float, ReadWriteMode, int,
+                   ReadWriteMode, short, DiscardWriteMode, int>(
       0, 1000, std::plus<float>{}, 0, 2000, std::plus<>{}, 0, 4000, Add, 0,
       8000, std::bit_xor<int>{}, usm::alloc::device, 5 * (256 + 1), 5);
 

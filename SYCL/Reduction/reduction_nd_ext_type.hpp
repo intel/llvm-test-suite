@@ -26,8 +26,12 @@ void test(T Identity, size_t WGSize, size_t NWItems) {
   queue Q;
   Q.submit([&](handler &CGH) {
     auto In = InBuf.template get_access<access::mode::read>(CGH);
+#ifdef TEST_SYCL2020_REDUCTIONS
+    auto Redu = sycl::reduction(OutBuf, CGH, Identity, BOp);
+#else
     accessor<T, Dim, Mode, access::target::global_buffer> Out(OutBuf, CGH);
     auto Redu = ONEAPI::reduction(Out, Identity, BOp);
+#endif
 
     range<1> GlobalRange(NWItems);
     range<1> LocalRange(WGSize);
@@ -59,25 +63,29 @@ template <typename T> int runTests(const string_class &ExtensionName) {
     return 0;
   }
 
+  constexpr access::mode ReadWriteMode = access::mode::read_write;
+#ifdef TEST_SYCL2020_REDUCTIONS
+  // TODO: property::reduction::initialize_to_identity is not supported yet.
+  // Thus only read_write mode is tested now.
+  constexpr access::mode DiscardWriteMode = access::mode::read_write;
+#else
+  constexpr access::mode DiscardWriteMode = access::mode::discard_write;
+#endif
+
   // Check some less standards WG sizes and corner cases first.
-  test<class KernelName_oTh, T, 1, access::mode::read_write,
-       std::multiplies<T>>(0, 4, 4);
-  test<class KernelName_QUQnMARQT, T, 0, access::mode::discard_write,
-       ONEAPI::plus<T>>(0, 4, 64);
+  test<class A, T, 1, ReadWriteMode, std::multiplies<T>>(0, 4, 4);
+  test<class B, T, 0, DiscardWriteMode, ONEAPI::plus<T>>(0, 4, 64);
 
-  test<class KernelName_xGixNo, T, 0, access::mode::read_write,
-       ONEAPI::minimum<T>>(getMaximumFPValue<T>(), 7, 7);
-  test<class KernelName_qXNFw, T, 1, access::mode::discard_write,
-       ONEAPI::maximum<T>>(getMinimumFPValue<T>(), 7, 7 * 5);
+  test<class C, T, 0, ReadWriteMode, ONEAPI::minimum<T>>(getMaximumFPValue<T>(),
+                                                         7, 7);
+  test<class D, T, 1, access::mode::discard_write, ONEAPI::maximum<T>>(
+      getMinimumFPValue<T>(), 7, 7 * 5);
 
-#if __cplusplus >= 201402L
-  test<class KernelName_lXdWtzANdDcvm, T, 1, access::mode::read_write,
-       ONEAPI::plus<>>(1, 3, 3 * 5);
-  test<class KernelName_FDQalsDxmbi, T, 1, access::mode::discard_write,
-       ONEAPI::minimum<>>(getMaximumFPValue<T>(), 3, 3);
-  test<class KernelName_TaNRRxDRXbzYrFImPYC, T, 0, access::mode::discard_write,
-       ONEAPI::maximum<>>(getMinimumFPValue<T>(), 3, 3);
-#endif // __cplusplus >= 201402L
+  test<class E, T, 1, ReadWriteMode, ONEAPI::plus<>>(1, 3, 3 * 5);
+  test<class F, T, 1, DiscardWriteMode, ONEAPI::minimum<>>(
+      getMaximumFPValue<T>(), 3, 3);
+  test<class G, T, 0, DiscardWriteMode, ONEAPI::maximum<>>(
+      getMinimumFPValue<T>(), 3, 3);
 
   std::cout << "Test passed\n";
   return 0;

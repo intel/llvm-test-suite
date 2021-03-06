@@ -3,8 +3,13 @@
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // RUN: %ACC_RUN_PLACEHOLDER %t.out
 
-// This test checks that if the custom type supports operations like +=, then
-// such operations can be used for the reduction objects in kernels.
+// RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple -fsycl-unnamed-lambda -DTEST_SYCL2020_REDUCTIONS %s -o %t2020.out
+// RUN: %CPU_RUN_PLACEHOLDER %t2020.out
+// RUN: %GPU_RUN_PLACEHOLDER %t2020.out
+// RUN: %ACC_RUN_PLACEHOLDER %t2020.out
+
+// This test checks that operators ++, +=, *=, |=, &=, ^= are supported
+// whent the corresponding std::plus<>, std::multiplies, etc are defined.
 
 #include <CL/sycl.hpp>
 #include <cmath>
@@ -22,6 +27,8 @@ struct XY {
 };
 
 enum OperationEqual {
+  PlusPlus,
+  PlusPlusInt,
   PlusEq,
   MultipliesEq,
   BitwiseOREq,
@@ -87,15 +94,29 @@ int test(T Identity) {
   T *Res = malloc_shared<T>(1, Q);
   T Expected = Identity;
   BinaryOperation BOp;
-  for (int I = 0; I < N; I++) {
-    Data[I] = T{I, I + 1};
-    Expected = BOp(Expected, T{I, I + 1});
+  if (OpEq == PlusPlus || OpEq == PlusPlusInt) {
+    Expected = T{N, N};
+  } else {
+    for (int I = 0; I < N; I++) {
+      Data[I] = T{I, I + 1};
+      Expected = BOp(Expected, T{I, I + 1});
+    }
   }
 
   *Res = Identity;
+#ifdef TEST_SYCL2020_REDUCTIONS
+  auto Red = sycl::reduction(Res, Identity, BOp);
+#else
   auto Red = ONEAPI::reduction(Res, Identity, BOp);
+#endif
   nd_range<1> NDR{N, L};
-  if constexpr (OpEq == PlusEq) {
+  if constexpr (OpEq == PlusPlus) {
+    auto Lambda = [=](nd_item<1> ID, auto &Sum) { ++Sum; };
+    Q.submit([&](handler &H) { H.parallel_for(NDR, Red, Lambda); }).wait();
+  } else if constexpr (OpEq == PlusPlusInt) {
+    auto Lambda = [=](nd_item<1> ID, auto &Sum) { Sum++; };
+    Q.submit([&](handler &H) { H.parallel_for(NDR, Red, Lambda); }).wait();
+  } else if constexpr (OpEq == PlusEq) {
     auto Lambda = [=](nd_item<1> ID, auto &Sum) {
       Sum += Data[ID.get_global_id(0)];
     };
@@ -147,8 +168,12 @@ template <typename T> int testFPPack() {
   return Error;
 }
 
-template <typename T> int testINTPack() {
+template <typename T, bool TestPlusPlus> int testINTPack() {
   int Error = 0;
+  if constexpr (TestPlusPlus) {
+    Error += test<T, std::plus<T>, PlusPlus>(T{});
+    Error += test<T, std::plus<>, PlusPlusInt>(T{});
+  }
   Error += test<T, std::plus<T>, PlusEq>(T{});
   Error += test<T, std::multiplies<T>, MultipliesEq>(T{1, 1});
   Error += test<T, std::bit_or<T>, BitwiseOREq>(T{});
@@ -160,14 +185,8 @@ template <typename T> int testINTPack() {
 int main() {
   int Error = 0;
   Error += testFPPack<float2>();
-  Error += testINTPack<XY>();
-
-  // TODO: enable this test for int vetors as well.
-  // This test revealed an existing/unrelated problem with the type trait
-  // known_identity_impl. It returns true for 'int2' type, but the
-  // corrsponding functionality returning identity value is not implemented
-  // correctly.
-  // Error += testINTPack<int2>();
+  Error += testINTPack<int2, true>();
+  Error += testINTPack<XY, false>();
 
   std::cout << (Error ? "Failed\n" : "Passed.\n");
   return Error;
