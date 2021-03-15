@@ -1,9 +1,8 @@
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %s -o %t.out
 // Sub-groups are not suported on Host
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
-// Execution on CPU and FPGA takes 100000 times longer
-// RUNx: %CPU_RUN_PLACEHOLDER %t.out
-// RUNx: %ACC_RUN_PLACEHOLDER %t.out
+// RUN: %CPU_RUN_PLACEHOLDER %t.out
+// RUN: %ACC_RUN_PLACEHOLDER %t.out
 
 #include <CL/sycl.hpp>
 #include <cassert>
