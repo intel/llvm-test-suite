@@ -332,6 +332,9 @@ void dgetrfnp_batch_strided_c(int64_t m, int64_t n, double *a, int64_t lda,
     event.wait();
   } catch (const sycl::exception &e) {
     std::cout << "*** EXCEPTION caught: " << e.what() << "\n";
+    free(a_gpu, context);
+    free(ipiv_gpu, context);
+    free(info_gpu, context);
     return;
   }
 
