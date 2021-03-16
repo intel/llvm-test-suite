@@ -93,11 +93,11 @@ int test(T Identity) {
   constexpr size_t L = 4;
 
   queue Q;
-  T *Data = malloc_shared<T>(N, Q);
-  T *Res = malloc_shared<T>(1, Q);
+  T *Data = malloc_host<T>(N, Q);
+  T *Res = malloc_host<T>(1, Q);
   T Expected = Identity;
   BinaryOperation BOp;
-  if (OpEq == PlusPlus || OpEq == PlusPlusInt) {
+  if constexpr (OpEq == PlusPlus || OpEq == PlusPlusInt) {
     Expected = T{N, N};
   } else {
     for (int I = 0; I < N; I++) {
@@ -168,9 +168,7 @@ int testBoth(T Identity) {
 
 template <typename T> int testFPPack() {
   int Error = 0;
-  Error += testBoth<T, std::plus<>, PlusEq, true>(T{});
   Error += testBoth<T, std::plus<T>, PlusEq, true>(T{});
-  Error += testBoth<T, std::multiplies<>, MultipliesEq, true>(T{1, 1});
   Error += testBoth<T, std::multiplies<T>, MultipliesEq, true>(T{1, 1});
   return Error;
 }
