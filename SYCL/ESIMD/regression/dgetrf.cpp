@@ -12,6 +12,10 @@
 // RUN: %GPU_RUN_PLACEHOLDER %t.ref.out 3 2 1
 // RUN: %GPU_RUN_PLACEHOLDER %t.out 3 2 1
 //
+// This test checks the correctness of ESIMD program for batched LU
+// decomposition without pivoting. The program contains multiple branches
+// corresponding to LU input sizes; all internal functions are inlined.
+//
 #include <CL/sycl.hpp>
 #include <CL/sycl/INTEL/esimd.hpp>
 #include <math.h>
