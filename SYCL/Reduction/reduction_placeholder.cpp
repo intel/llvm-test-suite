@@ -87,7 +87,7 @@ int main() {
   // generic algorithm
   test<class Generic1, int, 0, std::multiplies<int>>(1, 2, 7, 7 * 5);
   test<class Generic2, int, 1, std::multiplies<int>>(1, 3, 8, 16);
-  test<class Generic13, CustomVec<short>, 0, CustomVecPlus<short>>(
+  test<class Generic3, CustomVec<short>, 0, CustomVecPlus<short>>(
       CustomVec<short>(0), CustomVec<short>(4), 8, 8 * 3);
 
   std::cout << "Test passed\n";

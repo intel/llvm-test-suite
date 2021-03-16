@@ -3,11 +3,6 @@
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // RUN: %ACC_RUN_PLACEHOLDER %t.out
 
-// RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple -fsycl-unnamed-lambda -DTEST_SYCL2020_REDUCTIONS %s -o %t2020.out
-// RUN: %CPU_RUN_PLACEHOLDER %t2020.out
-// RUN: %GPU_RUN_PLACEHOLDER %t2020.out
-// RUN: %ACC_RUN_PLACEHOLDER %t2020.out
-
 // This test checks that operators ++, +=, *=, |=, &=, ^= are supported
 // whent the corresponding std::plus<>, std::multiplies, etc are defined.
 
@@ -83,8 +78,16 @@ template <> struct bit_and<XY> {
 };
 } // namespace std
 
-template <typename T, typename BinaryOperation, OperationEqual OpEq,
-          bool IsFP = false>
+template <bool IsSYCL2020Mode, typename T, typename BinaryOperation>
+auto createReduction(T *USMPtr, T Identity, BinaryOperation BOp) {
+  if constexpr (IsSYCL2020Mode)
+    return sycl::reduction(USMPtr, Identity, BOp);
+  else
+    return ONEAPI::reduction(USMPtr, Identity, BOp);
+}
+
+template <typename T, bool IsSYCL2020Mode, typename BinaryOperation,
+          OperationEqual OpEq, bool IsFP>
 int test(T Identity) {
   constexpr size_t N = 16;
   constexpr size_t L = 4;
@@ -104,11 +107,7 @@ int test(T Identity) {
   }
 
   *Res = Identity;
-#ifdef TEST_SYCL2020_REDUCTIONS
-  auto Red = sycl::reduction(Res, Identity, BOp);
-#else
-  auto Red = ONEAPI::reduction(Res, Identity, BOp);
-#endif
+  auto Red = createReduction<IsSYCL2020Mode>(Res, Identity, BOp);
   nd_range<1> NDR{N, L};
   if constexpr (OpEq == PlusPlus) {
     auto Lambda = [=](nd_item<1> ID, auto &Sum) { ++Sum; };
@@ -159,26 +158,34 @@ int test(T Identity) {
   return Error;
 }
 
+template <typename T, typename BinaryOperation, OperationEqual OpEq,
+          bool IsFP = false>
+int testBoth(T Identity) {
+  int Error = test<T, false, BinaryOperation, OpEq, IsFP>(Identity);
+  Error += test<T, true, BinaryOperation, OpEq, IsFP>(Identity);
+  return Error;
+}
+
 template <typename T> int testFPPack() {
   int Error = 0;
-  Error += test<T, std::plus<>, PlusEq, true>(T{});
-  Error += test<T, std::plus<T>, PlusEq, true>(T{});
-  Error += test<T, std::multiplies<>, MultipliesEq, true>(T{1, 1});
-  Error += test<T, std::multiplies<T>, MultipliesEq, true>(T{1, 1});
+  Error += testBoth<T, std::plus<>, PlusEq, true>(T{});
+  Error += testBoth<T, std::plus<T>, PlusEq, true>(T{});
+  Error += testBoth<T, std::multiplies<>, MultipliesEq, true>(T{1, 1});
+  Error += testBoth<T, std::multiplies<T>, MultipliesEq, true>(T{1, 1});
   return Error;
 }
 
 template <typename T, bool TestPlusPlus> int testINTPack() {
   int Error = 0;
   if constexpr (TestPlusPlus) {
-    Error += test<T, std::plus<T>, PlusPlus>(T{});
-    Error += test<T, std::plus<>, PlusPlusInt>(T{});
+    Error += testBoth<T, std::plus<T>, PlusPlus>(T{});
+    Error += testBoth<T, std::plus<>, PlusPlusInt>(T{});
   }
-  Error += test<T, std::plus<T>, PlusEq>(T{});
-  Error += test<T, std::multiplies<T>, MultipliesEq>(T{1, 1});
-  Error += test<T, std::bit_or<T>, BitwiseOREq>(T{});
-  Error += test<T, std::bit_xor<T>, BitwiseXOREq>(T{});
-  Error += test<T, std::bit_and<T>, BitwiseANDEq>(T{~0, ~0});
+  Error += testBoth<T, std::plus<T>, PlusEq>(T{});
+  Error += testBoth<T, std::multiplies<T>, MultipliesEq>(T{1, 1});
+  Error += testBoth<T, std::bit_or<T>, BitwiseOREq>(T{});
+  Error += testBoth<T, std::bit_xor<T>, BitwiseXOREq>(T{});
+  Error += testBoth<T, std::bit_and<T>, BitwiseANDEq>(T{~0, ~0});
   return Error;
 }
 

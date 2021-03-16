@@ -3,13 +3,7 @@
 // RUN: %ACC_RUN_PLACEHOLDER %t.out
 // RUN: %CPU_RUN_PLACEHOLDER %t.out
 
-// RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple -DTEST_SYCL2020_REDUCTIONS %s -o %t2020.out
-// RUN: %CPU_RUN_PLACEHOLDER %t2020.out
-// RUN: %GPU_RUN_PLACEHOLDER %t2020.out
-// RUN: %ACC_RUN_PLACEHOLDER %t2020.out
-
 // RUNx: %HOST_RUN_PLACEHOLDER %t.out
-// RUNx: %HOST_RUN_PLACEHOLDER %t2020.out
 // TODO: Enable the test for HOST when it supports ONEAPI::reduce() and
 // barrier()
 
@@ -19,7 +13,9 @@
 #include <CL/sycl.hpp>
 using namespace sycl;
 
-int main() {
+template <typename T, bool B> class KName;
+
+template <typename Name, bool IsSYCL2020Mode> int test() {
   const size_t NElems = 1024;
   const size_t WGSize = 256;
 
@@ -31,17 +27,17 @@ int main() {
   int *Sum = malloc_shared<int>(1, Q);
   *Sum = 0;
 
-#ifdef TEST_SYCL2020_REDUCTIONS
-  Q.parallel_for<class XYZ>(
-       nd_range<1>{NElems, WGSize}, sycl::reduction(Sum, std::plus<>()),
-       [=](nd_item<1> It, auto &Sum) { Sum += Data[It.get_global_id(0)]; })
-      .wait();
-#else
-  Q.parallel_for<class XYZ>(
-       nd_range<1>{NElems, WGSize}, ONEAPI::reduction(Sum, ONEAPI::plus<>()),
-       [=](nd_item<1> It, auto &Sum) { Sum += Data[It.get_global_id(0)]; })
-      .wait();
-#endif
+  if constexpr (IsSYCL2020Mode) {
+    Q.parallel_for<Name>(
+         nd_range<1>{NElems, WGSize}, sycl::reduction(Sum, std::plus<>()),
+         [=](nd_item<1> It, auto &Sum) { Sum += Data[It.get_global_id(0)]; })
+        .wait();
+  } else {
+    Q.parallel_for<Name>(
+         nd_range<1>{NElems, WGSize}, ONEAPI::reduction(Sum, ONEAPI::plus<>()),
+         [=](nd_item<1> It, auto &Sum) { Sum += Data[It.get_global_id(0)]; })
+        .wait();
+  }
 
   int ExpectedSum = (NElems - 1) * NElems / 2;
   int Error = 0;
@@ -53,5 +49,11 @@ int main() {
 
   free(Data, Q);
   free(Sum, Q);
+  return Error;
+}
+
+int main() {
+  int Error = test<KName<class A, true>, true>();
+  Error += test<KName<class A, false>, false>();
   return Error;
 }
