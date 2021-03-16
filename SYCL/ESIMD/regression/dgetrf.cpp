@@ -320,15 +320,20 @@ void dgetrfnp_batch_strided_c(int64_t m, int64_t n, double *a, int64_t lda,
 
   sycl::nd_range<1> range(sycl::range<1>{static_cast<size_t>(batch)},
                           sycl::range<1>{1});
-  auto event = queue.submit([&](handler &cgh) {
-    cgh.parallel_for<class dgetrfnp_batch_strided>(
-        range, [=](nd_item<1> id) SYCL_ESIMD_KERNEL {
-          int i = id.get_global_id(0);
-          dgetrfnp_esimd(m, n, &a_gpu[i * stride_a], lda,
-                         &ipiv_gpu[i * stride_ipiv], &info_gpu[i]);
-        });
-  });
-  event.wait();
+  try {
+    auto event = queue.submit([&](handler &cgh) {
+      cgh.parallel_for<class dgetrfnp_batch_strided>(
+          range, [=](nd_item<1> id) SYCL_ESIMD_KERNEL {
+            int i = id.get_global_id(0);
+            dgetrfnp_esimd(m, n, &a_gpu[i * stride_a], lda,
+                           &ipiv_gpu[i * stride_ipiv], &info_gpu[i]);
+          });
+    });
+    event.wait();
+  } catch (const sycl::exception &e) {
+    std::cout << "*** EXCEPTION caught: " << e.what() << "\n";
+    return;
+  }
 
   memcpy(a, a_gpu, stride_a * batch * sizeof(double));
   memcpy(ipiv, ipiv_gpu, stride_ipiv * batch * sizeof(int64_t));
