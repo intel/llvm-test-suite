@@ -3,6 +3,14 @@
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // RUN: %ACC_RUN_PLACEHOLDER %t.out
 
+// TODO: this is a temporary solution until the odd performance effect
+// on opencl:cpu is analyzed/fixed. Running 2x more test cases with USM
+// reductions may cause 10x longer execution time right now.
+// RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple -fsycl-unnamed-lambda -DTEST_SYCL2020_REDUCTIONS %s -o %t2020.out
+// RUN: %CPU_RUN_PLACEHOLDER %t2020.out
+// RUN: %GPU_RUN_PLACEHOLDER %t2020.out
+// RUN: %ACC_RUN_PLACEHOLDER %t2020.out
+
 // This test checks that operators ++, +=, *=, |=, &=, ^= are supported
 // whent the corresponding std::plus<>, std::multiplies, etc are defined.
 
@@ -161,8 +169,12 @@ int test(T Identity) {
 template <typename T, typename BinaryOperation, OperationEqual OpEq,
           bool IsFP = false>
 int testBoth(T Identity) {
-  int Error = test<T, false, BinaryOperation, OpEq, IsFP>(Identity);
+  int Error = 0;
+#ifdef TEST_SYCL2020_REDUCTIONS
   Error += test<T, true, BinaryOperation, OpEq, IsFP>(Identity);
+#else
+  Error += test<T, false, BinaryOperation, OpEq, IsFP>(Identity);
+#endif
   return Error;
 }
 

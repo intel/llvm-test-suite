@@ -3,6 +3,14 @@
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // RUN: %ACC_RUN_PLACEHOLDER %t.out
 
+// TODO: this is a temporary solution until the odd performance effect
+// on opencl:cpu is analyzed/fixed. Running 2x more test cases with USM
+// reductions may cause 10x longer execution time right now.
+// RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple -DTEST_SYCL2020_REDUCTIONS %s -o %t2020.out
+// RUN: %CPU_RUN_PLACEHOLDER %t2020.out
+// RUN: %GPU_RUN_PLACEHOLDER %t2020.out
+// RUN: %ACC_RUN_PLACEHOLDER %t2020.out
+
 // RUNx: %HOST_RUN_PLACEHOLDER %t.out
 // TODO: Enable the test for HOST when it supports ONEAPI::reduce() and
 // barrier()
@@ -97,19 +105,21 @@ void test(T Identity, size_t WGSize, size_t NWItems, usm::alloc AllocType) {
 
 template <typename Name, typename T, class BinaryOperation>
 void testUSM(T Identity, size_t WGSize, size_t NWItems) {
-  test<KernelNameGroup<Name, class SharedCase>, false, T, BinaryOperation>(
-      Identity, WGSize, NWItems, usm::alloc::shared);
-  test<KernelNameGroup<Name, class HostCase>, false, T, BinaryOperation>(
-      Identity, WGSize, NWItems, usm::alloc::host);
-  test<KernelNameGroup<Name, class DeviceCase>, false, T, BinaryOperation>(
-      Identity, WGSize, NWItems, usm::alloc::device);
-
+#ifdef TEST_SYCL2020_REDUCTIONS
   test<KernelNameGroup<Name, class SharedCase2020>, true, T, BinaryOperation>(
       Identity, WGSize, NWItems, usm::alloc::shared);
   test<KernelNameGroup<Name, class HostCase2020>, true, T, BinaryOperation>(
       Identity, WGSize, NWItems, usm::alloc::host);
   test<KernelNameGroup<Name, class DeviceCase2020>, true, T, BinaryOperation>(
       Identity, WGSize, NWItems, usm::alloc::device);
+#else
+  test<KernelNameGroup<Name, class SharedCase>, false, T, BinaryOperation>(
+      Identity, WGSize, NWItems, usm::alloc::shared);
+  test<KernelNameGroup<Name, class HostCase>, false, T, BinaryOperation>(
+      Identity, WGSize, NWItems, usm::alloc::host);
+  test<KernelNameGroup<Name, class DeviceCase>, false, T, BinaryOperation>(
+      Identity, WGSize, NWItems, usm::alloc::device);
+#endif
 }
 
 int main() {
