@@ -9,7 +9,7 @@
 // REQUIRES: linux && gpu
 // UNSUPPORTED: cuda
 // RUN: %clangxx-esimd -fsycl %s -o %t.out
-// RUN: %ESIMD_RUN_PLACEHOLDER %t.out 16
+// RUN: %GPU_RUN_PLACEHOLDER %t.out 16
 
 #include "esimd_test_utils.hpp"
 
@@ -38,7 +38,6 @@ ESIMD_INLINE void histogram_atomic(const uint32_t *input_ptr, uint32_t *output,
   slm_offset *= sizeof(int);
   simd<uint, 16> slm_data = 0;
   slm_store<uint, 16>(slm_data, slm_offset);
-  esimd_fence(ESIMD_GLOBAL_COHERENT_FENCE);
   esimd_barrier();
 
   // Each thread handles NUM_BLOCKSxBLOCK_WIDTH pixel blocks
@@ -57,7 +56,6 @@ ESIMD_INLINE void histogram_atomic(const uint32_t *input_ptr, uint32_t *output,
     }
     start_off += BLOCK_WIDTH;
   }
-  esimd_fence(ESIMD_GLOBAL_COHERENT_FENCE);
   esimd_barrier();
 
   // Update global sum by atomically adding each local histogram

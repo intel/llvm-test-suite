@@ -8,7 +8,7 @@
 // REQUIRES: gpu
 // UNSUPPORTED: cuda
 // RUN: %clangxx-esimd -fsycl %s -o %t.out
-// RUN: %ESIMD_RUN_PLACEHOLDER %t.out
+// RUN: %GPU_RUN_PLACEHOLDER %t.out
 
 #include "esimd_test_utils.hpp"
 
@@ -68,7 +68,6 @@ void load_to_slm(uint grpSize, uint localId, uint slmOffset, char *addr,
     vOffsets += (grpSize * 256);
   }
 
-  esimd_fence(ESIMD_GLOBAL_COHERENT_FENCE);
   esimd_barrier();
 }
 
