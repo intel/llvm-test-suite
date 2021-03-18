@@ -226,10 +226,6 @@ int main(int argc, char *argv[]) {
   // Actual execution goes here
 
   unsigned int total_threads = (NUM_POINTS - 1) / POINTS_PER_THREAD + 1;
-  auto GlobalRange = cl::sycl::range<1>(total_threads);
-  cl::sycl::range<1> LocalRange{1};
-  auto GlobalRange1 = cl::sycl::range<1>(NUM_CENTROIDS_ACTUAL);
-  cl::sycl::range<1> LocalRange1 = cl::sycl::range<1>{1};
 
   auto submitJobs = [&]() {
     // kmeans
