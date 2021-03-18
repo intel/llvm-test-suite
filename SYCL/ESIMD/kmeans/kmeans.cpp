@@ -233,9 +233,10 @@ int main(int argc, char *argv[]) {
 
   auto submitJobs = [&]() {
     // kmeans
+    nd_range<1> Range{total_threads, 1};
     auto e = q.submit([&](cl::sycl::handler &cgh) {
       cgh.parallel_for<class kMeans>(
-          GlobalRange * LocalRange, [=](nd_item<1> it) SYCL_ESIMD_KERNEL {
+          Range, [=](nd_item<1> it) SYCL_ESIMD_KERNEL {
             simd<float, 2 * NUM_CENTROIDS_ALLOCATED> centroids(0);
             auto centroidsXYXY =
                 centroids.format<float, NUM_CENTROIDS_ALLOCATED / SIMD_SIZE,
@@ -345,8 +346,9 @@ int main(int argc, char *argv[]) {
 
     // compute centroid position
     auto e2 = q.submit([&](cl::sycl::handler &cgh) {
+      nd_range<1> Range1{NUM_CENTROIDS_ACTUAL, 1};
       cgh.parallel_for<class kCompCentroidPos>(
-          GlobalRange1 * LocalRange1, [=](nd_item<1> it) SYCL_ESIMD_KERNEL {
+          Range1, [=](nd_item<1> it) SYCL_ESIMD_KERNEL {
             simd<float, SIMD_SIZE> xsum(0);
             simd<float, SIMD_SIZE> ysum(0);
             simd<int, SIMD_SIZE> npoints(0);
