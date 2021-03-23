@@ -269,7 +269,7 @@ acc_check_substitute = ""
 if 'acc' in config.target_devices.split(','):
     found_at_least_one_device = True
     lit_config.note("Tests accelerator device")
-    acc_run_substitute = " env SYCL_DEVICE_FILTER=acc,host "
+    acc_run_substitute = " env SYCL_DEVICE_FILTER=acc "
     acc_check_substitute = "| FileCheck %s"
     config.available_features.add('accelerator')
 else:
