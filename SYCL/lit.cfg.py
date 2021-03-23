@@ -198,11 +198,11 @@ for target_device in config.target_devices.split(','):
 if 'host' in config.target_devices.split(','):
     found_at_least_one_device = True
     lit_config.note("Test HOST device")
-    host_run_substitute = "env SYCL_DEVICE_FILTER={SYCL_PLUGIN}:host ".format(SYCL_PLUGIN=config.sycl_be)
+    host_run_substitute = "env SYCL_DEVICE_FILTER=host "
     host_check_substitute = "| FileCheck %s"
     config.available_features.add('host')
     if platform.system() == "Linux":
-        host_run_on_linux_substitute = "env SYCL_DEVICE_FILTER={SYCL_PLUGIN}:host ".format(SYCL_PLUGIN=config.sycl_be)
+        host_run_on_linux_substitute = "env SYCL_DEVICE_FILTER=host "
         host_check_on_linux_substitute = "| FileCheck %s"
 else:
     lit_config.warning("HOST device not used")
@@ -220,11 +220,11 @@ cpu_check_on_linux_substitute = ""
 if 'cpu' in config.target_devices.split(','):
     found_at_least_one_device = True
     lit_config.note("Test CPU device")
-    cpu_run_substitute = "env SYCL_DEVICE_FILTER={SYCL_PLUGIN}:cpu ".format(SYCL_PLUGIN=config.sycl_be)
+    cpu_run_substitute = "env SYCL_DEVICE_FILTER=cpu "
     cpu_check_substitute = "| FileCheck %s"
     config.available_features.add('cpu')
     if platform.system() == "Linux":
-        cpu_run_on_linux_substitute = "env SYCL_DEVICE_FILTER={SYCL_PLUGIN}:cpu ".format(SYCL_PLUGIN=config.sycl_be)
+        cpu_run_on_linux_substitute = "env SYCL_DEVICE_FILTER=cpu "
         cpu_check_on_linux_substitute = "| FileCheck %s"
 else:
     lit_config.warning("CPU device not used")
@@ -269,7 +269,7 @@ acc_check_substitute = ""
 if 'acc' in config.target_devices.split(','):
     found_at_least_one_device = True
     lit_config.note("Tests accelerator device")
-    acc_run_substitute = " env SYCL_DEVICE_FILTER={SYCL_PLUGIN}:acc ".format(SYCL_PLUGIN=config.sycl_be)
+    acc_run_substitute = " env SYCL_DEVICE_FILTER=acc ".format(SYCL_PLUGIN=config.sycl_be)
     acc_check_substitute = "| FileCheck %s"
     config.available_features.add('accelerator')
 else:
