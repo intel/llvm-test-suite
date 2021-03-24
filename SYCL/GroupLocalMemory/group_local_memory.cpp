@@ -40,6 +40,10 @@ int main() {
       auto CounterAcc = CounterBuf.get_access<access::mode::read_write>(Cgh);
       Cgh.parallel_for<KernelA>(
           nd_range<1>(range<1>(Size), range<1>(WgSize)), [=](nd_item<1> Item) {
+            // Some alternative (and functionally equivalent) ways to use this
+            // would be:
+            // auto Ptr = group_local_memory<Foo>(Item.get_group(), ...);
+            // Foo &Ref = *group_local_memory<Foo>(Item.get_group(), ...);
             multi_ptr<Foo, access::address_space::local_space> Ptr =
                 group_local_memory<Foo>(Item.get_group(), 1,
                                         CounterAcc[Item.get_group_linear_id()]);
