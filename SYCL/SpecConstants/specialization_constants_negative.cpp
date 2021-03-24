@@ -5,7 +5,7 @@
 // Specialization constants are not supported on FPGA h/w and emulator.
 // UNSUPPORTED: cuda
 //
-//==----------- specialization_constants_negative.cpp ------------------------------------------==//
+//==----------- specialization_constants_negative.cpp ----------------------==//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -15,8 +15,8 @@
 // Checks for negative cases
 
 #include <CL/sycl.hpp>
-#include <cstdint>
 #include <chrono>
+#include <cstdint>
 #include <random>
 
 class SpecializedKernelNegative;
@@ -31,29 +31,28 @@ std::mt19937_64 rnd(seed);
 
 // Fetch a value at runtime.
 uint32_t uint32_ref = rnd() % std::numeric_limits<uint32_t>::max();
-double   double_ref = rnd() % std::numeric_limits<uint64_t>::max();
+double double_ref = rnd() % std::numeric_limits<uint64_t>::max();
 
 template <typename T1, typename T2>
 bool check(const T1 &test, const T2 &ref, string_class type) {
 
   if (test != ref) {
     std::cout << "Test != Reference: " << std::to_string(test)
-              << " != " << std::to_string(ref)
-              << " for type: " << type << "\n";
+              << " != " << std::to_string(ref) << " for type: " << type << "\n";
     return false;
   }
   return true;
 }
 
 int main(int argc, char **argv) {
-  std::cout << "check specialization constants exceptions. (seed ="
-            << seed << "\n";
+  std::cout << "check specialization constants exceptions. (seed =" << seed
+            << "\n";
 
-  auto exception_handler = [&] (sycl::exception_list exceptions) {
-    for (std::exception_ptr const& e : exceptions) {
+  auto exception_handler = [&](sycl::exception_list exceptions) {
+    for (std::exception_ptr const &e : exceptions) {
       try {
         std::rethrow_exception(e);
-      } catch(sycl::exception const& e) {
+      } catch (sycl::exception const &e) {
         std::cout << "an async SYCL exception was caught: "
                   << string_class(e.what());
       }
@@ -95,9 +94,7 @@ int main(int argc, char **argv) {
         auto uint32_acc = uint32_buf.get_access<access::mode::write>(cgh);
         cgh.single_task<SpecializedKernelNegative>(
             prog.get_kernel<SpecializedKernelNegative>(),
-            [=]() {
-              uint32_acc[0] = ui32.get();
-            });
+            [=]() { uint32_acc[0] = ui32.get(); });
       });
     }
     check(uint32_test, uint32_ref, "uint32");
@@ -109,5 +106,3 @@ int main(int argc, char **argv) {
   }
   return 0;
 }
-
-
