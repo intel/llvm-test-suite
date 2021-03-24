@@ -24,3 +24,5 @@
 //
 // RUN: %ACC_RUN_PLACEHOLDER %t_aocx_src.out
 // RUN: %ACC_RUN_PLACEHOLDER %t_aocx_obj.out
+
+// XFAIL: *

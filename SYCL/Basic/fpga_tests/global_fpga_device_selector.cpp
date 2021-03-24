@@ -3,6 +3,8 @@
 // RUN: %clangxx -fsycl -fintelfpga %s -o %t.out
 // RUN: %ACC_RUN_PLACEHOLDER %t.out
 
+// XFAIL: *
+
 #include <CL/sycl.hpp>
 #include <CL/sycl/INTEL/fpga_extensions.hpp>
 

@@ -13,3 +13,5 @@
 
 // RUN: %clangxx -fsycl -fintelfpga %S/std_complex_math_test.cpp -o %t.out
 // RUN: %ACC_RUN_PLACEHOLDER %t.out
+
+// XFAIL: *

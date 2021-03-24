@@ -2,6 +2,7 @@
 
 // RUN: %clangxx -fsycl -fintelfpga -fsycl-unnamed-lambda %s -o %t2.out
 // RUN: env CL_CONFIG_CPU_EMULATE_DEVICES=2 %t2.out
+// XFAIL: *
 
 #include <CL/sycl.hpp>
 
