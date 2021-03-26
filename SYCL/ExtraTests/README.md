@@ -3,7 +3,7 @@
 "ExtraTests" directory contains infrastructure for picking up LIT style tests
 from another external directory passed in SYCL_EXTRA_TESTS_SRC.
 
-# Cmake parameters
+# CMake parameters
 
 All parameters described in [Readme.md](../README.md#cmake-parameters) are
 applicable. Additional parameters for this test category:
@@ -26,4 +26,3 @@ cmake -G Ninja \
 # Build and run full list of SYCL tests
 ninja ninja check-sycl-all
 ```
-
