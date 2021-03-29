@@ -5,21 +5,22 @@ sources of tests are expected to be located outside of llvm-test-suite
 repository. Each subdirectory represents external repository for corresponding
 application/test.
 
-# Directory structure
-Every sub-directory (e.g. RSBench) contains the following content:
+# Adding external test
+
+See [RSBench](RSBench) as example, it contains the following:
  * **CMakeLists.txt** - CMake configuration file which is used to obtain
  application binary and data files.
- * **\*.test** - test configuration files, containing command lines, test
-   status lines and verification patterns following
-   [LLVM tests infrastructure](https://llvm.org/docs/TestingGuide.html).
  * **lit.local.cfg** - application specific LIT infrastructure configuration
-   file. In case of RSBench benchmarks it sets LIT test file suffixes to `.test`
+   file. In case of RSBench benchmark it sets LIT test file suffixes to `.test`
    and mark all tests in directory unsupported if corresponding directory is
-   not added to `SYCL_EXTERNAL_TESTS` list.
+   not added to `SYCL_EXTERNAL_TESTS` list. See more at:
+   [LLVM Testing Guide](https://llvm.org/docs/TestingGuide.html#platform-specific-tests)
+ * **\*.test** - test configuration files, containing command lines, test
+   status lines and verification patterns per each platform.
 
 # CMake parameters
 
-All parameters described in [Readme.md](../README.md#cmake-parameters) are
+All parameters described in [README.md](../README.md#cmake-parameters) are
 applicable.
 
 ***SYCL_EXTERNAL_TESTS*** semicolon-separated names of external SYCL
@@ -64,7 +65,7 @@ With compiler tools available in the PATH:
 cmake \
  -DCMAKE_CXX_COMPILER=clang++ \
  -DTEST_SUITE_SUBDIRS=SYCL \
- -DSYCL_TARGET_DEVICES="level_zero:gpu" \
+ -DCHECK_SYCL_ALL="level_zero:gpu" \
  -DSYCL_EXTERNAL_TESTS="RSBench" \
  ..
 

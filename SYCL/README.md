@@ -16,8 +16,9 @@ on testing scope.
 
  - DPC++ compiler. Can be built following these
    [instructions](https://github.com/intel/llvm/blob/sycl/sycl/doc/GetStartedGuide.md#build-dpc-toolchain)
- - LIT tools (llvm-lit, llvm-size). They can be available as part of compiler
-   build or built separately (e.g. with "ninja check").
+   or taken prebuilt from [releases](https://github.com/intel/llvm/releases).
+ - LIT tools (llvm-lit, llvm-size). They are not available at prebuilts above,
+   but can be built in compiler project (e.g. with "ninja check").
  - Target runtime(s) to execute tests on devices other than host. See
    [installation instructions](https://github.com/intel/llvm/blob/sycl/sycl/doc/GetStartedGuide.md#install-low-level-runtime)
 
@@ -39,7 +40,7 @@ With compiler tools available in the PATH:
 cmake \
  -DCMAKE_CXX_COMPILER=clang++ \
  -DTEST_SUITE_SUBDIRS=SYCL \
- -DSYCL_TARGET_DEVICES="host" \
+ -DCHECK_SYCL_ALL="opencl:host" \
  ..
 
 # Build and Run
@@ -74,6 +75,15 @@ collection
 
 ***TEST_SUITE_LIT*** path to llvm-lit tool
 
+***CHECK_SYCL_ALL*** defines selection of multiple SYCL backends with set of
+target devices per each to be tested iteratively. Value is semicolon-separated
+list of configurations. Each configuration includes backend separated
+from comma-separated list of target devices with colon. Example:
+
+```
+-DCHECK_SYCL_ALL="opencl:cpu,host;level_zero:gpu,host;cuda:gpu"
+```
+
 ***SYCL_BE*** SYCL backend to be used for testing. Supported values are:
  - **opencl** - for OpenCL backend;
  - **cuda** - for CUDA backend;
@@ -85,15 +95,6 @@ Default value is cpu,gpu,acc,host. Supported values are:
  - **gpu**  - GPU device available in OpenCL, Level Zero and CUDA backends;
  - **acc**  - FPGA emulator device available in OpenCL backend only;
  - **host** - SYCL Host device available with all backends.
-
-***CHECK_SYCL_ALL*** defines selection of multiple SYCL backends with set of
-target devices per each to be tested iteratively. Value is semicolon-separated
-list of configurations. Each configuration includes backend separated
-from comma-separated list of target devices with colon. Example:
-
-```
--DCHECK_SYCL_ALL="opencl:cpu,host;level_zero:gpu,host;cuda:gpu"
-```
 
 ***OpenCL_LIBRARY*** path to OpenCL ICD loader library. OpenCL interoperability
 tests require OpenCL ICD loader to be linked with. For such tests OpenCL ICD
