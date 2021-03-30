@@ -2,16 +2,14 @@
 // RUN: %HOST_RUN_PLACEHOLDER %t.out %HOST_CHECK_PLACEHOLDER
 // RUN: %CPU_RUN_PLACEHOLDER %t.out %CPU_CHECK_PLACEHOLDER
 // RUN: %GPU_RUN_PLACEHOLDER %t.out %GPU_CHECK_PLACEHOLDER
-// XFAIL: cuda || (level_zero && windows)
+// Temporary disabled on level_zero && windows (#204)
+// UNSUPPORTED: cuda || (level_zero && windows)
 
 // CUDA works with image_channel_type::fp32, but not with any 8-bit per channel
 // type (such as unorm_int8)
 
 // On Windows, LevelZero returns wrong result for outside right pixel when using
 // unorm_int8 data.
-
-// #204 Disable unstable tests
-// REQUIRES: TEMPORARY_DISABLED
 
 /*
     This file sets up an image, initializes it with data,
