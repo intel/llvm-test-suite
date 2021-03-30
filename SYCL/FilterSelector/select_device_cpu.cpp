@@ -45,11 +45,15 @@ int main() {
     device d = cs.select_device();
     std::cout << "CPU device is found: " << d.is_cpu() << std::endl;
   }
-  // HOST device is always available regardless of SYCL_DEVICE_FILTER
   {
     host_selector hs;
-    device d = hs.select_device();
-    std::cout << "HOST device is found: " << d.is_host() << std::endl;
+    try {
+      device d = hs.select_device();
+      std::cerr << "HOST device is found: " << d.is_host() << std::endl;
+      return -1;
+    } catch (...) {
+      std::cout << "Expectedly, HOST device is not found";
+    }
   }
   {
     accelerator_selector as;
