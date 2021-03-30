@@ -1,5 +1,5 @@
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %s -o %t.out
-// RUN: env SYCL_DEVICE_FILTER=acc,host %t.out
+// RUN: env SYCL_DEVICE_FILTER=acc %t.out
 //
 // Checks if only specified device types can be acquired from select_device
 // when SYCL_DEVICE_FILTER is set
@@ -48,14 +48,23 @@ int main() {
                 << d.is_cpu() << std::endl;
       return -1;
     } catch (...) {
-      std::cout << "Expectedly, CPU device not is found." << std::endl;
+      std::cout << "Expectedly, CPU device is not found." << std::endl;
     }
   }
+  /*
+  // TODO: enable this test after SYCL_DEVICE_FILTER is merged.
   {
     host_selector hs;
-    device d = hs.select_device();
-    std::cout << "HOST device is found: " << d.is_host() << std::endl;
+    try {
+      device d = hs.select_device();
+      std::cerr << "HOST Device is found in error: " << std::boolalpha
+                << d.is_cpu() << std::endl;
+      return -1;
+    } catch (...) {
+      std::cout << "Expectedly, HOST device is not found." << std::endl;
+    }
   }
+  */
   {
     accelerator_selector as;
     device d = as.select_device();
