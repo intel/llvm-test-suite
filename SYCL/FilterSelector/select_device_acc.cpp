@@ -1,5 +1,5 @@
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %s -o %t.out
-// RUN: env SYCL_DEVICE_FILTER=acc %t.out
+// RUN: env SYCL_DEVICE_FILTER=acc,host %t.out
 //
 // Checks if only specified device types can be acquired from select_device
 // when SYCL_DEVICE_FILTER is set
@@ -51,7 +51,6 @@ int main() {
       std::cout << "Expectedly, CPU device not is found." << std::endl;
     }
   }
-  // HOST device is always available regardless of SYCL_DEVICE_FILTER
   {
     host_selector hs;
     device d = hs.select_device();
