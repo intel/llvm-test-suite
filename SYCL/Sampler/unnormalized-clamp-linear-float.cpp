@@ -10,6 +10,9 @@
 // On Windows, LevelZero returns wrong result for outside right pixel when using
 // unorm_int8 data.
 
+// #204 Disable unstable tests
+// REQUIRES: TEMPORARY_DISABLED
+
 /*
     This file sets up an image, initializes it with data,
     and verifies that the data is sampled correctly with a
