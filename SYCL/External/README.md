@@ -1,10 +1,6 @@
----
-**NOTE**
-
-This is experimental extension of test suite. Could be dropped or extended
-further at some later point.
-
----
+> **NOTE**
+> This is experimental extension of test suite. Could be dropped or extended
+> further at some later point.
 
 # Overview
 
