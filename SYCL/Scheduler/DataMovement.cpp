@@ -2,7 +2,7 @@
 // RUN: %HOST_RUN_PLACEHOLDER %t.out
 // RUN: %CPU_RUN_PLACEHOLDER %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
-// RUN: %ACC_RUN_PLACEHOLDER %t.out
+// RUN: env SYCL_DEVICE_FILTER=acc,host %t.out
 //
 //==-------------------------- DataMovement.cpp ----------------------------==//
 //
