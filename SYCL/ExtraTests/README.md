@@ -1,3 +1,10 @@
+---
+
+**NOTE** This is experimental extension of test suite. Could be dropped or
+extended further at some later point.
+
+---
+
 # Overview
 
 "ExtraTests" directory contains infrastructure for picking up LIT style tests
