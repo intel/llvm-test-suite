@@ -7,7 +7,8 @@
 // RUN: %CPU_RUN_PLACEHOLDER %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 
-//==------ oq_event_release.cpp - SYCL ordered queue event release shortcut test --------==//
+//==------ oq_event_release.cpp - SYCL ordered queue event release shortcut test
+//--------==//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
