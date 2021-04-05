@@ -171,9 +171,6 @@ if config.sycl_be not in ['host', 'opencl','cuda', 'level_zero']:
                      config.sycl_be +
                      "' supported values are opencl, cuda, level_zero")
 
-config.substitutions.append( ('%clangxx-esimd',  config.dpcpp_compiler +
-                              ' ' + '-fsycl-explicit-simd' + ' ' +
-                              config.cxx_flags ) )
 config.substitutions.append( ('%clangxx', ' '+ config.dpcpp_compiler + ' ' + config.cxx_flags ) )
 config.substitutions.append( ('%clang', ' ' + config.dpcpp_compiler + ' ' + config.c_flags ) )
 config.substitutions.append( ('%threads_lib', config.sycl_threads_lib) )
@@ -198,11 +195,11 @@ for target_device in config.target_devices.split(','):
 if 'host' in config.target_devices.split(','):
     found_at_least_one_device = True
     lit_config.note("Test HOST device")
-    host_run_substitute = "env SYCL_DEVICE_FILTER={SYCL_PLUGIN}:host ".format(SYCL_PLUGIN=config.sycl_be)
+    host_run_substitute = "env SYCL_DEVICE_FILTER=host "
     host_check_substitute = "| FileCheck %s"
     config.available_features.add('host')
     if platform.system() == "Linux":
-        host_run_on_linux_substitute = "env SYCL_DEVICE_FILTER={SYCL_PLUGIN}:host ".format(SYCL_PLUGIN=config.sycl_be)
+        host_run_on_linux_substitute = "env SYCL_DEVICE_FILTER=host "
         host_check_on_linux_substitute = "| FileCheck %s"
 else:
     lit_config.warning("HOST device not used")
@@ -220,11 +217,11 @@ cpu_check_on_linux_substitute = ""
 if 'cpu' in config.target_devices.split(','):
     found_at_least_one_device = True
     lit_config.note("Test CPU device")
-    cpu_run_substitute = "env SYCL_DEVICE_FILTER={SYCL_PLUGIN}:cpu ".format(SYCL_PLUGIN=config.sycl_be)
+    cpu_run_substitute = "env SYCL_DEVICE_FILTER=cpu,host "
     cpu_check_substitute = "| FileCheck %s"
     config.available_features.add('cpu')
     if platform.system() == "Linux":
-        cpu_run_on_linux_substitute = "env SYCL_DEVICE_FILTER={SYCL_PLUGIN}:cpu ".format(SYCL_PLUGIN=config.sycl_be)
+        cpu_run_on_linux_substitute = "env SYCL_DEVICE_FILTER=cpu,host "
         cpu_check_on_linux_substitute = "| FileCheck %s"
 else:
     lit_config.warning("CPU device not used")
@@ -234,7 +231,6 @@ config.substitutions.append( ('%CPU_RUN_ON_LINUX_PLACEHOLDER',  cpu_run_on_linux
 config.substitutions.append( ('%CPU_CHECK_PLACEHOLDER',  cpu_check_substitute) )
 config.substitutions.append( ('%CPU_CHECK_ON_LINUX_PLACEHOLDER',  cpu_check_on_linux_substitute) )
 
-esimd_run_substitute = "true"
 gpu_run_substitute = "true"
 gpu_run_on_linux_substitute = "true "
 gpu_check_substitute = ""
@@ -244,7 +240,7 @@ gpu_check_on_linux_substitute = ""
 if 'gpu' in config.target_devices.split(','):
     found_at_least_one_device = True
     lit_config.note("Test GPU device")
-    gpu_run_substitute = " env SYCL_DEVICE_FILTER={SYCL_PLUGIN}:gpu ".format(SYCL_PLUGIN=config.sycl_be)
+    gpu_run_substitute = " env SYCL_DEVICE_FILTER={SYCL_PLUGIN}:gpu,host ".format(SYCL_PLUGIN=config.sycl_be)
     gpu_check_substitute = "| FileCheck %s"
     config.available_features.add('gpu')
 
@@ -252,7 +248,7 @@ if 'gpu' in config.target_devices.split(','):
         gpu_l0_check_substitute = "| FileCheck %s"
 
     if platform.system() == "Linux":
-        gpu_run_on_linux_substitute = "env SYCL_DEVICE_FILTER={SYCL_PLUGIN}:gpu ".format(SYCL_PLUGIN=config.sycl_be)
+        gpu_run_on_linux_substitute = "env SYCL_DEVICE_FILTER={SYCL_PLUGIN}:gpu,host ".format(SYCL_PLUGIN=config.sycl_be)
         gpu_check_on_linux_substitute = "| FileCheck %s"
 
 else:
@@ -269,7 +265,7 @@ acc_check_substitute = ""
 if 'acc' in config.target_devices.split(','):
     found_at_least_one_device = True
     lit_config.note("Tests accelerator device")
-    acc_run_substitute = " env SYCL_DEVICE_FILTER={SYCL_PLUGIN}:acc ".format(SYCL_PLUGIN=config.sycl_be)
+    acc_run_substitute = " env SYCL_DEVICE_FILTER=acc "
     acc_check_substitute = "| FileCheck %s"
     config.available_features.add('accelerator')
 else:
@@ -280,7 +276,7 @@ config.substitutions.append( ('%ACC_CHECK_PLACEHOLDER',  acc_check_substitute) )
 if config.sycl_be == 'cuda':
     config.substitutions.append( ('%sycl_triple',  "nvptx64-nvidia-cuda-sycldevice" ) )
 else:
-    config.substitutions.append( ('%sycl_triple',  "spir64-unknown-linux-sycldevice" ) )
+    config.substitutions.append( ('%sycl_triple',  "spir64-unknown-unknown-sycldevice" ) )
 
 if find_executable('sycl-ls'):
     config.available_features.add('sycl-ls')
