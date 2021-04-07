@@ -3,26 +3,10 @@
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // RUN: %ACC_RUN_PLACEHOLDER %t.out
 
-// TODO: this is a temporary solution until the odd performance effect
-// on opencl:cpu is analyzed/fixed. Running 2x more test cases with USM
-// reductions may cause 10x longer execution time right now.
-// RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple -DTEST_SYCL2020_REDUCTIONS %s -o %t2020.out
-// RUN: %CPU_RUN_PLACEHOLDER %t2020.out
-// RUN: %GPU_RUN_PLACEHOLDER %t2020.out
-// RUN: %ACC_RUN_PLACEHOLDER %t2020.out
-
-// RUNx: %HOST_RUN_PLACEHOLDER %t.out
-// TODO: Enable the test for HOST when it supports ONEAPI::reduce() and
-// barrier()
-
 // This test performs basic checks of parallel_for(nd_range, reduction, func)
 // with reductions initialized with USM var. It tests both ONEAPI::reduction
 // and SYCL-2020 reduction (sycl::reduction) assuming only read-write access,
 // i.e. without using SYCL-2020 property::reduction::initialize_to_identity.
-
-// This test fails with exceeded time out on Windows with OpenCL, temporarily
-// disabling
-// UNSUPPORTED: windows && opencl
 
 #include "reduction_utils.hpp"
 #include <CL/sycl.hpp>
@@ -41,9 +25,8 @@ auto createReduction(T *USMPtr, T Identity, BinaryOperation BOp) {
 }
 
 template <typename Name, bool IsSYCL2020, typename T, class BinaryOperation>
-void test(T Identity, T Init, size_t WGSize, size_t NWItems,
+void test(queue &Q, T Identity, T Init, size_t WGSize, size_t NWItems,
           usm::alloc AllocType) {
-  queue Q;
   auto Dev = Q.get_device();
   if (AllocType == usm::alloc::shared &&
       !Dev.get_info<info::device::usm_shared_allocations>())
@@ -112,42 +95,43 @@ void test(T Identity, T Init, size_t WGSize, size_t NWItems,
 }
 
 template <typename Name, typename T, class BinaryOperation>
-void testUSM(T Identity, T Init, size_t WGSize, size_t NWItems) {
-#ifdef TEST_SYCL2020_REDUCTIONS
+void testUSM(queue &Q, T Identity, T Init, size_t WGSize, size_t NWItems) {
+  // Test SYCL-2020 reductions
   test<KernelNameGroup<Name, class Shared2020>, true, T, BinaryOperation>(
-      Identity, Init, WGSize, NWItems, usm::alloc::shared);
+      Q, Identity, Init, WGSize, NWItems, usm::alloc::shared);
   test<KernelNameGroup<Name, class Host2020>, true, T, BinaryOperation>(
-      Identity, Init, WGSize, NWItems, usm::alloc::host);
+      Q, Identity, Init, WGSize, NWItems, usm::alloc::host);
   test<KernelNameGroup<Name, class Device2020>, true, T, BinaryOperation>(
-      Identity, Init, WGSize, NWItems, usm::alloc::device);
-#else
+      Q, Identity, Init, WGSize, NWItems, usm::alloc::device);
+
+  // Test ONEAPI reductions
   test<KernelNameGroup<Name, class Shared>, false, T, BinaryOperation>(
-      Identity, Init, WGSize, NWItems, usm::alloc::shared);
+      Q, Identity, Init, WGSize, NWItems, usm::alloc::shared);
   test<KernelNameGroup<Name, class Host>, false, T, BinaryOperation>(
-      Identity, Init, WGSize, NWItems, usm::alloc::host);
+      Q, Identity, Init, WGSize, NWItems, usm::alloc::host);
   test<KernelNameGroup<Name, class Device>, false, T, BinaryOperation>(
-      Identity, Init, WGSize, NWItems, usm::alloc::device);
-#endif
+      Q, Identity, Init, WGSize, NWItems, usm::alloc::device);
 }
 
 int main() {
+  queue Q;
   // fast atomics and fast reduce
-  testUSM<class AtomicReduce1, int, ONEAPI::plus<int>>(0, 99, 49, 5 * 49);
+  testUSM<class AtomicReduce1, int, ONEAPI::plus<int>>(Q, 0, 99, 49, 5 * 49);
 
   // fast atomics
-  testUSM<class Atomic1, int, ONEAPI::bit_or<int>>(0, 0xff00ff00, 7, 7);
-  testUSM<class Atomic2, int, ONEAPI::bit_or<int>>(0, 0x7f007f00, 4, 32);
+  testUSM<class Atomic1, int, ONEAPI::bit_or<int>>(Q, 0, 0xff00ff00, 7, 7);
+  testUSM<class Atomic2, int, ONEAPI::bit_or<int>>(Q, 0, 0x7f007f00, 4, 32);
 
   // fast reduce
   testUSM<class Reduce1, float, ONEAPI::minimum<float>>(
-      getMaximumFPValue<float>(), -100.0, 17, 17);
+      Q, getMaximumFPValue<float>(), -100.0, 17, 17);
   testUSM<class Reduce2, float, ONEAPI::maximum<float>>(
-      getMinimumFPValue<float>(), 100.0, 4, 32);
+      Q, getMinimumFPValue<float>(), 100.0, 4, 32);
 
   // generic algorithm
-  testUSM<class Generic1, int, std::multiplies<int>>(1, 5, 7, 7);
+  testUSM<class Generic1, int, std::multiplies<int>>(Q, 1, 5, 7, 7);
   testUSM<class Generic2, CustomVec<short>, CustomVecPlus<short>>(
-      CustomVec<short>(0), CustomVec<short>(77), 8, 8 * 3);
+      Q, CustomVec<short>(0), CustomVec<short>(77), 8, 8 * 3);
 
   std::cout << "Test passed\n";
   return 0;

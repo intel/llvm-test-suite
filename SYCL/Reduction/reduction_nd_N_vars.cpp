@@ -50,7 +50,7 @@ template <class Name, bool IsSYCL2020, typename T1, access::mode Mode1,
           typename T4, access::mode Mode4, class BinaryOperation1,
           class BinaryOperation2, class BinaryOperation3,
           class BinaryOperation4>
-int testOne(T1 IdentityVal1, T1 InitVal1, BinaryOperation1 BOp1,
+int testOne(queue &Q, T1 IdentityVal1, T1 InitVal1, BinaryOperation1 BOp1,
             T2 IdentityVal2, T2 InitVal2, BinaryOperation2 BOp2,
             T3 IdentityVal3, T3 InitVal3, BinaryOperation3 BOp3,
             T4 IdentityVal4, T3 InitVal4, BinaryOperation4 BOp4,
@@ -63,7 +63,6 @@ int testOne(T1 IdentityVal1, T1 InitVal1, BinaryOperation1 BOp1,
   buffer<T2, 1> OutBuf2(1);
   buffer<T3, 1> OutBuf3(1);
 
-  queue Q;
   auto Dev = Q.get_device();
   if (AllocType4 == usm::alloc::shared &&
       !Dev.get_info<info::device::usm_shared_allocations>())
@@ -213,32 +212,34 @@ template <class Name, typename T1, access::mode Mode1, typename T2,
           access::mode Mode2, typename T3, access::mode Mode3, typename T4,
           access::mode Mode4, class BinaryOperation1, class BinaryOperation2,
           class BinaryOperation3, class BinaryOperation4>
-int testBoth(T1 IdentityVal1, T1 InitVal1, BinaryOperation1 BOp1,
+int testBoth(queue &Q, T1 IdentityVal1, T1 InitVal1, BinaryOperation1 BOp1,
              T2 IdentityVal2, T2 InitVal2, BinaryOperation2 BOp2,
              T3 IdentityVal3, T3 InitVal3, BinaryOperation3 BOp3,
              T4 IdentityVal4, T3 InitVal4, BinaryOperation4 BOp4,
              usm::alloc AllocType4, size_t NWorkItems, size_t WGSize) {
   int Error =
       testOne<KName<Name, false>, false, T1, Mode1, T2, Mode2, T3, Mode3, T4,
-              Mode4>(IdentityVal1, InitVal1, BOp1, IdentityVal2, InitVal2, BOp2,
-                     IdentityVal3, InitVal3, BOp3, IdentityVal4, InitVal4, BOp4,
-                     AllocType4, NWorkItems, WGSize);
+              Mode4>(Q, IdentityVal1, InitVal1, BOp1, IdentityVal2, InitVal2,
+                     BOp2, IdentityVal3, InitVal3, BOp3, IdentityVal4, InitVal4,
+                     BOp4, AllocType4, NWorkItems, WGSize);
 
-  Error += testOne<KName<Name, true>, true, T1, Mode1, T2, Mode2, T3, Mode3, T4,
-                   Mode4>(IdentityVal1, InitVal1, BOp1, IdentityVal2, InitVal2,
-                          BOp2, IdentityVal3, InitVal3, BOp3, IdentityVal4,
-                          InitVal4, BOp4, AllocType4, NWorkItems, WGSize);
+  Error +=
+      testOne<KName<Name, true>, true, T1, Mode1, T2, Mode2, T3, Mode3, T4,
+              Mode4>(Q, IdentityVal1, InitVal1, BOp1, IdentityVal2, InitVal2,
+                     BOp2, IdentityVal3, InitVal3, BOp3, IdentityVal4, InitVal4,
+                     BOp4, AllocType4, NWorkItems, WGSize);
   return Error;
 }
 
 int main() {
+  queue Q;
   int Error = testBoth<class Case1, float, DW, int, RW, short, RW, int, RW>(
-      0, 1000, std::plus<float>{}, 0, 2000, std::plus<>{}, 0, 4000,
+      Q, 0, 1000, std::plus<float>{}, 0, 2000, std::plus<>{}, 0, 4000,
       std::bit_or<>{}, 0, 8000, std::bit_xor<>{}, usm::alloc::shared, 16, 16);
 
   auto Add = [](auto x, auto y) { return (x + y); };
   Error += testBoth<class Case2, float, RW, int, RW, short, DW, int, DW>(
-      0, 1000, std::plus<float>{}, 0, 2000, std::plus<>{}, 0, 4000, Add, 0,
+      Q, 0, 1000, std::plus<float>{}, 0, 2000, std::plus<>{}, 0, 4000, Add, 0,
       8000, std::plus<>{}, usm::alloc::device, 5 * (256 + 1), 5);
 
   if (!Error)

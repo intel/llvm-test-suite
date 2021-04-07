@@ -14,7 +14,7 @@ constexpr access::mode DW = access::mode::discard_write;
 
 template <typename Name, bool IsSYCL2020Mode, typename T, int Dim,
           access::mode Mode, class BinaryOperation>
-void test(T Identity, T Init, size_t WGSize, size_t NWItems) {
+void test(queue &Q, T Identity, T Init, size_t WGSize, size_t NWItems) {
   buffer<T, 1> InBuf(NWItems);
   buffer<T, 1> OutBuf(1);
 
@@ -28,7 +28,6 @@ void test(T Identity, T Init, size_t WGSize, size_t NWItems) {
   (OutBuf.template get_access<access::mode::write>())[0] = Init;
 
   // Compute.
-  queue Q;
   nd_range<1> NDRange(range<1>{NWItems}, range<1>{WGSize});
   if constexpr (IsSYCL2020Mode) {
     Q.submit([&](handler &CGH) {
@@ -69,38 +68,38 @@ void test(T Identity, T Init, size_t WGSize, size_t NWItems) {
 
 template <typename Name, typename T, int Dim, access::mode Mode,
           class BinaryOperation>
-void testBoth(T Identity, T Init, size_t WGSize, size_t NWItems) {
+void testBoth(queue &Q, T Identity, T Init, size_t WGSize, size_t NWItems) {
   test<KName<Name, false>, false, T, Dim, Mode, BinaryOperation>(
-      Identity, Init, WGSize, NWItems);
+      Q, Identity, Init, WGSize, NWItems);
 
-  test<KName<Name, true>, true, T, Dim, Mode, BinaryOperation>(Identity, Init,
-                                                               WGSize, NWItems);
+  test<KName<Name, true>, true, T, Dim, Mode, BinaryOperation>(
+      Q, Identity, Init, WGSize, NWItems);
 }
 
 template <typename T> int runTests(const string_class &ExtensionName) {
-  device D = default_selector().select_device();
+  queue Q;
+  device D = Q.get_device();
   if (!D.is_host() && !D.has_extension(ExtensionName)) {
     std::cout << "Test skipped\n";
     return 0;
   }
 
-  testBoth<class A, T, 1, RW, std::multiplies<T>>(1, 77, 4, 4);
+  testBoth<class A, T, 1, RW, std::multiplies<T>>(Q, 1, 77, 4, 4);
 
-  testBoth<class B1, T, 0, DW, ONEAPI::plus<T>>(0, 77, 4, 64);
-  testBoth<class B2, T, 1, RW, ONEAPI::plus<>>(0, 33, 3, 3 * 5);
+  testBoth<class B1, T, 0, DW, ONEAPI::plus<T>>(Q, 0, 77, 4, 64);
+  testBoth<class B2, T, 1, RW, ONEAPI::plus<>>(Q, 0, 33, 3, 3 * 5);
 
-  testBoth<class C1, T, 0, RW, ONEAPI::minimum<T>>(getMaximumFPValue<T>(),
+  testBoth<class C1, T, 0, RW, ONEAPI::minimum<T>>(Q, getMaximumFPValue<T>(),
                                                    -10.0, 7, 7);
-  testBoth<class C2, T, 0, RW, ONEAPI::minimum<T>>(getMaximumFPValue<T>(), 99.0,
-                                                   7, 7);
-  testBoth<class C3, T, 1, DW, ONEAPI::minimum<>>(getMaximumFPValue<T>(), -99.0,
-                                                  3, 3);
+  testBoth<class C2, T, 0, RW, ONEAPI::minimum<T>>(Q, getMaximumFPValue<T>(),
+                                                   99.0, 7, 7);
+  testBoth<class C3, T, 1, DW, ONEAPI::minimum<>>(Q, getMaximumFPValue<T>(),
+                                                  -99.0, 3, 3);
 
-  testBoth<class D1, T, 0, DW, ONEAPI::maximum<>>(getMinimumFPValue<T>(), 99.0,
-                                                  3, 3);
-  testBoth<class D2, T, 1, RW, ONEAPI::maximum<T>>(getMinimumFPValue<T>(), 99.0,
-                                                   7, 7 * 5);
-
+  testBoth<class D1, T, 0, DW, ONEAPI::maximum<>>(Q, getMinimumFPValue<T>(),
+                                                  99.0, 3, 3);
+  testBoth<class D2, T, 1, RW, ONEAPI::maximum<T>>(Q, getMinimumFPValue<T>(),
+                                                   99.0, 7, 7 * 5);
   std::cout << "Test passed\n";
   return 0;
 }

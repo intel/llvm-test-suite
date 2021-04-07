@@ -17,9 +17,8 @@ using namespace cl::sycl;
 template <typename T1, typename T2> class KernelNameGroup;
 
 template <typename Name, typename T, class BinaryOperation>
-void test(T Identity, T Init, size_t WGSize, size_t NWItems,
+void test(queue &Q, T Identity, T Init, size_t WGSize, size_t NWItems,
           usm::alloc AllocType) {
-  queue Q;
   auto Dev = Q.get_device();
   if (AllocType == usm::alloc::shared &&
       !Dev.get_info<info::device::usm_shared_allocations>())
@@ -88,33 +87,34 @@ void test(T Identity, T Init, size_t WGSize, size_t NWItems,
 }
 
 template <typename Name, typename T, class BinaryOperation>
-void testUSM(T Identity, T Init, size_t WGSize, size_t NWItems) {
+void testUSM(queue &Q, T Identity, T Init, size_t WGSize, size_t NWItems) {
   test<KernelNameGroup<Name, class Shared2020>, T, BinaryOperation>(
-      Identity, Init, WGSize, NWItems, usm::alloc::shared);
+      Q, Identity, Init, WGSize, NWItems, usm::alloc::shared);
   test<KernelNameGroup<Name, class Host2020>, T, BinaryOperation>(
-      Identity, Init, WGSize, NWItems, usm::alloc::host);
+      Q, Identity, Init, WGSize, NWItems, usm::alloc::host);
   test<KernelNameGroup<Name, class Device2020>, T, BinaryOperation>(
-      Identity, Init, WGSize, NWItems, usm::alloc::device);
+      Q, Identity, Init, WGSize, NWItems, usm::alloc::device);
 }
 
 int main() {
+  queue Q;
   // fast atomics and fast reduce
-  testUSM<class AtomicReduce1, int, ONEAPI::plus<int>>(0, 99, 49, 5 * 49);
+  testUSM<class AtomicReduce1, int, ONEAPI::plus<int>>(Q, 0, 99, 49, 5 * 49);
 
   // fast atomics
-  testUSM<class Atomic1, int, ONEAPI::bit_or<int>>(0, 0xff00ff00, 7, 7);
-  testUSM<class Atomic2, int, ONEAPI::bit_or<int>>(0, 0x7f007f00, 4, 32);
+  testUSM<class Atomic1, int, ONEAPI::bit_or<int>>(Q, 0, 0xff00ff00, 7, 7);
+  testUSM<class Atomic2, int, ONEAPI::bit_or<int>>(Q, 0, 0x7f007f00, 4, 32);
 
   // fast reduce
   testUSM<class Reduce1, float, ONEAPI::minimum<float>>(
-      getMaximumFPValue<float>(), -100.0, 17, 17);
+      Q, getMaximumFPValue<float>(), -100.0, 17, 17);
   testUSM<class Reduce2, float, ONEAPI::maximum<float>>(
-      getMinimumFPValue<float>(), 100.0, 4, 32);
+      Q, getMinimumFPValue<float>(), 100.0, 4, 32);
 
   // generic algorithm
-  testUSM<class Generic1, int, std::multiplies<int>>(1, 5, 7, 7);
+  testUSM<class Generic1, int, std::multiplies<int>>(Q, 1, 5, 7, 7);
   testUSM<class Generic2, CustomVec<short>, CustomVecPlus<short>>(
-      CustomVec<short>(0), CustomVec<short>(77), 8, 8 * 3);
+      Q, CustomVec<short>(0), CustomVec<short>(77), 8, 8 * 3);
 
   std::cout << "Test passed\n";
   return 0;
