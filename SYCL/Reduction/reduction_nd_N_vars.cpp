@@ -3,6 +3,9 @@
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // RUN: %ACC_RUN_PLACEHOLDER %t.out
 
+// TODO: The test irregularly reports incorrect results on CPU.
+// UNSUPPORTED: cpu
+
 // This test checks handling of parallel_for() accepting nd_range and
 // two or more reductions.
 

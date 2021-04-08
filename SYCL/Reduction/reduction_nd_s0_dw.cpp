@@ -71,8 +71,8 @@ void test(queue &Q, T Identity, T Init, size_t WGSize, size_t NWItems) {
 
 template <typename Name, typename T, class BinaryOperation>
 void testBoth(queue &Q, T Identity, T Init, size_t WGSize, size_t NWItems) {
-  test<KName<Name, false>, false, T, BinaryOperation>(Q, Identity, Init,
-                                                      WGSize, NWItems);
+  test<KName<Name, false>, false, T, BinaryOperation>(Q, Identity, Init, WGSize,
+                                                      NWItems);
   test<KName<Name, true>, true, T, BinaryOperation>(Q, Identity, Init, WGSize,
                                                     NWItems);
 }
