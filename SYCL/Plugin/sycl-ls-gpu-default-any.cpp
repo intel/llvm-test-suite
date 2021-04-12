@@ -4,7 +4,9 @@
 // RUN: FileCheck %s --check-prefixes=CHECK-GPU-BUILTIN,CHECK-GPU-CUSTOM --input-file %t.default.out
 
 // CHECK-GPU-BUILTIN: gpu_selector(){{.*}}GPU : {{.*}}{{Level-Zero|CUDA|OpenCL}}
+// clang-format off
 // CHECK-GPU-CUSTOM: custom_selector(gpu){{.*}}GPU : {{.*}}{{Level-Zero|CUDA|OpenCL}}
+// clang-format on
 
 //==--------------------- sycl-ls-gpu-default-any.cpp ----------------------==//
 //
