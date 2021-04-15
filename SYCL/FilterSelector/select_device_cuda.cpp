@@ -51,7 +51,7 @@ int main() {
     host_selector hs;
     try {
       device d = hs.select_device();
-      cerr << "CPU device is found in error: " << d.is_host() << std::endl;
+      cerr << "HOST device is found in error: " << d.is_host() << std::endl;
       return -1;
     } catch (...) {
       cout << "Expectedly, HOST device is not found." << std::endl;
