@@ -22,22 +22,25 @@ int main() {
               << devices[i].get_info<info::device::max_compute_units>()
               << std::endl;
     std::vector<device> subdevices;
-    try {
-      std::cout << "  Subdevices: ";
-      subdevices =
-          devices[i]
-              .create_sub_devices<
-                  info::partition_property::partition_by_affinity_domain>(
-                  info::partition_affinity_domain::numa);
-      std::cout << subdevices.size() << std::endl;
-    } catch (std::exception) {
-      std::cout << "Error -- cannot create subdevices" << std::endl;
-    }
-    for (int j = 0; j < subdevices.size(); ++j) {
-      std::cout << "  Subdevice " << j << std::endl;
-      std::cout << "    EUs: "
-                << subdevices[j].get_info<info::device::max_compute_units>()
-                << std::endl;
+    if( devices[i].get_info<info::device::partition_max_sub_devices>() > 1 &&
+      devices[i].get_info<info::device::max_compute_units>() > 1) {
+      try {
+        std::cout << "  Subdevices: ";
+        subdevices =
+            devices[i]
+                .create_sub_devices<
+                    info::partition_property::partition_by_affinity_domain>(
+                    info::partition_affinity_domain::numa);
+        std::cout << subdevices.size() << std::endl;
+      } catch (std::exception) {
+        std::cout << "Error -- cannot create subdevices" << std::endl;
+      }
+      for (int j = 0; j < subdevices.size(); ++j) {
+        std::cout << "  Subdevice " << j << std::endl;
+        std::cout << "    EUs: "
+                  << subdevices[j].get_info<info::device::max_compute_units>()
+                  << std::endl;
+      }
     }
   }
 }
