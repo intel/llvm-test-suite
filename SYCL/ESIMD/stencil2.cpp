@@ -10,8 +10,6 @@
 // RUN: %clangxx -fsycl %s -o %t.out
 // RUN: %HOST_RUN_PLACEHOLDER %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
-// Temporary disabled on Windows
-// UNSUPPORTED: windows
 
 #include "esimd_test_utils.hpp"
 
@@ -24,7 +22,7 @@
 // test 8x16 block size
 //
 #define DIM_SIZE (1 << 13)
-#define SQUARE_SZ (DIM_SIZE * DIM_SIZE + 16)
+#define SQUARE_SZ (DIM_SIZE * DIM_SIZE)
 
 #define WIDTH 16
 #define HEIGHT 16
@@ -101,15 +99,18 @@ int main(void) {
   auto ctxt = q.get_context();
 
   // create and init matrices
-  float *inputMatrix =
-      static_cast<float *>(malloc_shared(SQUARE_SZ * sizeof(float), dev, ctxt));
-  float *outputMatrix =
-      static_cast<float *>(malloc_shared(SQUARE_SZ * sizeof(float), dev, ctxt));
+  float *inputMatrix = new float[SQUARE_SZ];
+  float *outputMatrix = new float[SQUARE_SZ];
   InitializeSquareMatrix(inputMatrix, DIM_SIZE, false);
   InitializeSquareMatrix(outputMatrix, DIM_SIZE, true);
 
   try {
+    buffer<float, 1> buf_in(inputMatrix, range<1>(SQUARE_SZ));
+    buffer<float, 1> buf_out(outputMatrix, range<1>(SQUARE_SZ));
+
     auto e = q.submit([&](handler &cgh) {
+      auto input = buf_in.get_access<access::mode::read>(cgh);
+      auto output = buf_out.get_access<access::mode::write>(cgh);
       cgh.parallel_for<class Stencil_kernel>(
           GlobalRange * LocalRange, [=](item<2> it) SYCL_ESIMD_KERNEL {
             using namespace sycl::INTEL::gpu;
@@ -125,23 +126,23 @@ int main(void) {
             // the code will interleave data loading and compute
             // first, we load enough data for the first 16 pixels
             //
-            unsigned off = (v_pos * HEIGHT) * DIM_SIZE + h_pos * WIDTH;
+            unsigned off =
+                ((v_pos * HEIGHT) * DIM_SIZE + h_pos * WIDTH) * sizeof(float);
 #pragma unroll
             for (unsigned i = 0; i < 10; i++) {
-              in.row(i) = block_load<float, 32>(inputMatrix + off);
-              off += DIM_SIZE;
+              in.row(i) = block_load<float, 32>(input, off);
+              off += DIM_SIZE * sizeof(float);
             }
 
             unsigned out_off =
-                (((v_pos * HEIGHT + 5) * DIM_SIZE + (h_pos * WIDTH) + 5)) *
-                sizeof(float);
+                ((v_pos * HEIGHT + 5) * DIM_SIZE + (h_pos * WIDTH) + 5);
             simd<unsigned, WIDTH> elm16(0, 1);
 
 #pragma unroll
             for (unsigned i = 0; i < HEIGHT; i++) {
 
-              in.row(10 + i) = block_load<float, 32>(inputMatrix + off);
-              off += DIM_SIZE;
+              in.row(10 + i) = block_load<float, 32>(input, off);
+              off += DIM_SIZE * sizeof(float);
 
               simd<float, WIDTH> sum =
                   vin.select<WIDTH, 1>(GET_IDX(i, 5)) * -0.02f +
@@ -168,9 +169,9 @@ int main(void) {
               // predciate output
               simd<ushort, WIDTH> p = (elm16 + h_pos * WIDTH) < DIM_SIZE - 10;
 
-              simd<unsigned, WIDTH> elm16_off = elm16 * sizeof(float) + out_off;
-              scatter<float, WIDTH>(outputMatrix, sum, elm16_off, p);
-              out_off += DIM_SIZE * sizeof(float);
+              simd<unsigned, WIDTH> elm16_off = elm16 + out_off;
+              scatter<float, WIDTH>(output, sum, elm16_off, 0, p);
+              out_off += DIM_SIZE;
 
               if (v_pos * HEIGHT + 10 + i >= DIM_SIZE - 1)
                 break;
@@ -180,8 +181,8 @@ int main(void) {
     e.wait();
   } catch (cl::sycl::exception const &e) {
     std::cout << "SYCL exception caught: " << e.what() << '\n';
-    free(inputMatrix, ctxt);
-    free(outputMatrix, ctxt);
+    delete[] inputMatrix;
+    delete[] outputMatrix;
     return e.get_cl_code();
   }
 
@@ -192,7 +193,7 @@ int main(void) {
   } else {
     std::cout << "FAILED" << std::endl;
   }
-  free(inputMatrix, ctxt);
-  free(outputMatrix, ctxt);
+  delete[] inputMatrix;
+  delete[] outputMatrix;
   return 0;
 }
