@@ -33,6 +33,7 @@ int main() {
       } catch (exception e) {
         std::cout << "Error -- cannot create subdevices: " << e.what()
                   << std::endl;
+	return 1;
       }
       for (int j = 0; j < subdevices.size(); ++j) {
         std::cout << "  Subdevice " << j << std::endl;
@@ -42,4 +43,5 @@ int main() {
       }
     }
   }
+  return 0;
 }
