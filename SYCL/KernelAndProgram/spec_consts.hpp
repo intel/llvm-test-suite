@@ -71,9 +71,9 @@ int main(int argc, char **argv) {
   cl::sycl::program program3(q.get_context());
   cl::sycl::program program4(q.get_context());
 
-  int goldi = (int)get_value();
+  const int goldi = get_value();
   // TODO make this floating point once supported by the compiler
-  float goldf = (float)get_value();
+  const float goldf = get_value();
 
   cl::sycl::ONEAPI::experimental::spec_constant<int32_t, MyInt32Const> i32 =
       program1.set_spec_constant<MyInt32Const>(goldi);
@@ -147,10 +147,9 @@ int main(int argc, char **argv) {
     std::cout << "*** ERROR: " << vali << " != " << goldi << "(gold)\n";
     passed = false;
   }
-  int valf = vecf[0];
 
-  if (valf != goldf) {
-    std::cout << "*** ERROR: " << valf << " != " << goldf << "(gold)\n";
+  if (std::fabs(vecf[0] - goldf) > std::numeric_limits<float>::epsilon()) {
+    std::cout << "*** ERROR: " << vecf[0] << " != " << goldf << "(gold)\n";
     passed = false;
   }
   int valw = vecw[0];
