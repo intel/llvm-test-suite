@@ -8,8 +8,8 @@
 // REQUIRES: gpu
 // UNSUPPORTED: cuda
 // RUN: %clangxx -fsycl %s -o %t.out
-// RUN: %HOST_RUN_PLACEHOLDER %t.out 1024
-// RUN: %GPU_RUN_PLACEHOLDER %t.out 1024
+// RUN: %HOST_RUN_PLACEHOLDER %t.out
+// RUN: %GPU_RUN_PLACEHOLDER %t.out
 
 #include "esimd_test_utils.hpp"
 
@@ -36,8 +36,7 @@ void InitializeSquareMatrix(float *matrix, size_t const Dim,
   }
 }
 
-bool CheckResults(float *out, float *in, unsigned DIM_SIZE) {
-  unsigned int n = DIM_SIZE;
+bool CheckResults(float *out, float *in, unsigned n) {
   for (unsigned int i = 0; i < n; i++) {
     for (unsigned int j = 0; j < n; j++) {
       if ((5 <= i) && (i < n - 5) && (5 <= j) && (j < n - 5)) {
@@ -75,11 +74,12 @@ bool CheckResults(float *out, float *in, unsigned DIM_SIZE) {
 }
 
 int main(int argc, char *argv[]) {
-  if (argc != 2) {
-    std::cerr << "Usage: stencil.exe <dim_size>" << std::endl;
+  if (argc > 2) {
+    std::cerr << "Usage: stencil.exe [dim_size]" << std::endl;
     exit(1);
   }
-  const unsigned DIM_SIZE = atoi(argv[1]);
+  // Default dimension size is 1024
+  const unsigned DIM_SIZE = (argc == 2) ? atoi(argv[1]) : 1 << 10;
   const unsigned SQUARE_SZ = DIM_SIZE * DIM_SIZE + 16;
   uint range_width =
       (DIM_SIZE - 10) / WIDTH + (((DIM_SIZE - 10) % WIDTH == 0) ? 0 : 1);
