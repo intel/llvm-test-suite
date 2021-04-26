@@ -36,7 +36,7 @@ int main() {
               buffer.get_access<cl::sycl::access::mode::write>(cgh);
           auto image_acc =
               image.get_access<sycl::float4, sycl::access::mode::write>(cgh);
-          cgh.interop_task([&](const cl::sycl::interop_handler &ih) {
+          cgh.interop_task([=](const cl::sycl::interop_handler &ih) {
             cl_mem buffer_mem = ih.get_mem<sycl::backend::opencl>(buffer_acc);
             size_t size = 0;
             clGetMemObjectInfo(buffer_mem, CL_MEM_SIZE, sizeof(size),
