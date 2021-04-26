@@ -1,10 +1,8 @@
-// UNSUPPORTED: cpu
-// #2252 Disable until all variants of built-ins are available in OpenCL CPU
-// runtime for every supported ISA
-//
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %s -o %t.out
 // RUN: %HOST_RUN_PLACEHOLDER %t.out
-// RUN: %CPU_RUN_PLACEHOLDER %t.out
+// #2252 Disable until all variants of built-ins are available in OpenCL CPU
+// runtime for every supported ISA
+// RUNx %CPU_RUN_PLACEHOLDER %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // RUN: %ACC_RUN_PLACEHOLDER %t.out
 //
@@ -47,10 +45,10 @@ template <typename T, int N> void check(queue &Queue) {
       cgh.parallel_for<sycl_subgr<T, N>>(NdRange, [=](nd_item<1> NdItem) {
         ONEAPI::sub_group SG = NdItem.get_sub_group();
         auto SGid = SG.get_group_id().get(0);
+        auto SGsize = SG.get_max_local_range().get(0);
         /* Avoid overlapping data ranges inside and between local groups */
-        if (SGid % N == 0 && (SGid + N) * SG.get_local_range()[0] <= L) {
-          size_t SGOffset =
-              SG.get_group_id().get(0) * SG.get_max_local_range().get(0);
+        if (SGid % N == 0 && (SGid + N) * SGsize <= L) {
+          size_t SGOffset = SGid * SGsize;
           size_t WGSGoffset = NdItem.get_group(0) * L + SGOffset;
           multi_ptr<T, access::address_space::global_space> mp(
               &acc[WGSGoffset]);
@@ -63,7 +61,7 @@ template <typename T, int N> void check(queue &Queue) {
           SG.store<N, T>(mp, t);
         }
         if (NdItem.get_global_id(0) == 0)
-          sgsizeacc[0] = SG.get_local_range()[0];
+          sgsizeacc[0] = SGsize;
       });
     });
     auto acc = syclbuf.template get_access<access::mode::read_write>();
