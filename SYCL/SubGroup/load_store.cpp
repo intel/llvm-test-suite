@@ -2,7 +2,8 @@
 // #2252 Disable until all variants of built-ins are available in OpenCL CPU
 // runtime for every supported ISA
 //
-// RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %s -o %t.out
+// RUN: %clangxx -fsycl -fsycl-device-code-split=per_kernel \
+//               -fsycl-targets=%sycl_triple %s -o %t.out
 // RUN: %HOST_RUN_PLACEHOLDER %t.out
 // RUN: %CPU_RUN_PLACEHOLDER %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
@@ -23,15 +24,10 @@ template <typename T, int N> class sycl_subgr;
 using namespace cl::sycl;
 
 template <typename T, int N> void check(queue &Queue) {
-  const int G = 1024, L = 128;
+  const int G = 1024, L = 1024;
 
-  // Pad arrays based on sub-group size to ensure no out-of-bounds accesses
-  // Workaround for info::device::sub_group_sizes support on some devices
-  size_t max_sg_size = 128;
-#if 0
   auto sg_sizes = Queue.get_device().get_info<info::device::sub_group_sizes>();
   size_t max_sg_size = *std::max_element(sg_sizes.begin(), sg_sizes.end());
-#endif
 
   try {
     nd_range<1> NdRange(G, L);
@@ -181,20 +177,26 @@ int main() {
     check<aligned_int>(Queue);
     check<aligned_int, 1>(Queue);
     check<aligned_int, 2>(Queue);
+    check<aligned_int, 3>(Queue);
     check<aligned_int, 4>(Queue);
     check<aligned_int, 8>(Queue);
+    check<aligned_int, 16>(Queue);
     typedef unsigned int aligned_uint __attribute__((aligned(16)));
     check<aligned_uint>(Queue);
     check<aligned_uint, 1>(Queue);
     check<aligned_uint, 2>(Queue);
+    check<aligned_uint, 3>(Queue);
     check<aligned_uint, 4>(Queue);
     check<aligned_uint, 8>(Queue);
+    check<aligned_uint, 16>(Queue);
     typedef float aligned_float __attribute__((aligned(16)));
     check<aligned_float>(Queue);
     check<aligned_float, 1>(Queue);
     check<aligned_float, 2>(Queue);
+    check<aligned_float, 3>(Queue);
     check<aligned_float, 4>(Queue);
     check<aligned_float, 8>(Queue);
+    check<aligned_float, 16>(Queue);
   }
   if (Queue.get_device().has_extension("cl_intel_subgroups_short") ||
       PlatformName.find("CUDA") != std::string::npos) {
@@ -202,16 +204,20 @@ int main() {
     check<aligned_short>(Queue);
     check<aligned_short, 1>(Queue);
     check<aligned_short, 2>(Queue);
+    check<aligned_short, 3>(Queue);
     check<aligned_short, 4>(Queue);
     check<aligned_short, 8>(Queue);
+    check<aligned_short, 16>(Queue);
     if (Queue.get_device().has_extension("cl_khr_fp16") ||
         PlatformName.find("CUDA") != std::string::npos) {
       typedef half aligned_half __attribute__((aligned(16)));
       check<aligned_half>(Queue);
       check<aligned_half, 1>(Queue);
       check<aligned_half, 2>(Queue);
+      check<aligned_half, 3>(Queue);
       check<aligned_half, 4>(Queue);
       check<aligned_half, 8>(Queue);
+      check<aligned_half, 16>(Queue);
     }
   }
   if (Queue.get_device().has_extension("cl_intel_subgroups_long") ||
@@ -220,20 +226,26 @@ int main() {
     check<aligned_long>(Queue);
     check<aligned_long, 1>(Queue);
     check<aligned_long, 2>(Queue);
+    check<aligned_long, 3>(Queue);
     check<aligned_long, 4>(Queue);
     check<aligned_long, 8>(Queue);
+    check<aligned_long, 16>(Queue);
     typedef unsigned long aligned_ulong __attribute__((aligned(16)));
     check<aligned_ulong>(Queue);
     check<aligned_ulong, 1>(Queue);
     check<aligned_ulong, 2>(Queue);
+    check<aligned_ulong, 3>(Queue);
     check<aligned_ulong, 4>(Queue);
     check<aligned_ulong, 8>(Queue);
+    check<aligned_ulong, 16>(Queue);
     typedef double aligned_double __attribute__((aligned(16)));
     check<aligned_double>(Queue);
     check<aligned_double, 1>(Queue);
     check<aligned_double, 2>(Queue);
+    check<aligned_double, 3>(Queue);
     check<aligned_double, 4>(Queue);
     check<aligned_double, 8>(Queue);
+    check<aligned_double, 16>(Queue);
   }
   std::cout << "Test passed." << std::endl;
   return 0;
