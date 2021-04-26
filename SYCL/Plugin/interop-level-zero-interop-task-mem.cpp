@@ -40,7 +40,7 @@ int main() {
               buffer.get_access<cl::sycl::access::mode::write>(cgh);
           auto image_acc =
               image.get_access<sycl::float4, sycl::access::mode::write>(cgh);
-          cgh.interop_task([&](const cl::sycl::interop_handler &ih) {
+          cgh.interop_task([=](const cl::sycl::interop_handler &ih) {
             void *device_ptr =
                 ih.get_mem<sycl::backend::level_zero>(buffer_acc);
             size_t size = 0;
