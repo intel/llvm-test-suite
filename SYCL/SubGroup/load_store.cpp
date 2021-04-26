@@ -22,11 +22,6 @@ template <typename T, int N> class sycl_subgr;
 
 using namespace cl::sycl;
 
-/* Maximum local group size for the dimention on GPU is 256. At the same time
- * vector load/store operations require max_sg_size * vec_len elements in local
- * group to work. Limit sub-group size to 8 for 16-element vectors to let them
- * work on GPU.
- */
 template <typename T, int N> void check(queue &Queue) {
   const int G = 1024, L = 256;
 
@@ -49,29 +44,27 @@ template <typename T, int N> void check(queue &Queue) {
       auto sgsizeacc = sgsizebuf.get_access<access::mode::read_write>(cgh);
       accessor<T, 1, access::mode::read_write, access::target::local> LocalMem(
           {L + max_sg_size * N}, cgh);
-      cgh.parallel_for<sycl_subgr<T, N>>(
-          NdRange, [=
-      ](nd_item<1> NdItem)[[intel::reqd_sub_group_size(N == 16 ? 8 : 16)]] {
-            ONEAPI::sub_group SG = NdItem.get_sub_group();
-            auto SGid = SG.get_group_id().get(0);
-            /* Avoid overlapping data ranges inside and between local groups */
-            if (SGid % N == 0 && (SGid + N) * SG.get_local_range()[0] < L) {
-              size_t SGOffset =
-                  SG.get_group_id().get(0) * SG.get_max_local_range().get(0);
-              size_t WGSGoffset = NdItem.get_group(0) * L + SGOffset;
-              multi_ptr<T, access::address_space::global_space> mp(
-                  &acc[WGSGoffset]);
-              multi_ptr<T, access::address_space::local_space> MPL(
-                  &LocalMem[SGOffset]);
-              // Add all values in read block
-              vec<T, N> v(utils<T, N>::add_vec(SG.load<N, T>(mp)));
-              SG.store<N, T>(MPL, v);
-              vec<T, N> t(utils<T, N>::add_vec(SG.load<N, T>(MPL)));
-              SG.store<N, T>(mp, t);
-            }
-            if (NdItem.get_global_id(0) == 0)
-              sgsizeacc[0] = SG.get_local_range()[0];
-          });
+      cgh.parallel_for<sycl_subgr<T, N>>(NdRange, [=](nd_item<1> NdItem) {
+        ONEAPI::sub_group SG = NdItem.get_sub_group();
+        auto SGid = SG.get_group_id().get(0);
+        /* Avoid overlapping data ranges inside and between local groups */
+        if (SGid % N == 0 && (SGid + N) * SG.get_local_range()[0] <= L) {
+          size_t SGOffset =
+              SG.get_group_id().get(0) * SG.get_max_local_range().get(0);
+          size_t WGSGoffset = NdItem.get_group(0) * L + SGOffset;
+          multi_ptr<T, access::address_space::global_space> mp(
+              &acc[WGSGoffset]);
+          multi_ptr<T, access::address_space::local_space> MPL(
+              &LocalMem[SGOffset]);
+          // Add all values in read block
+          vec<T, N> v(utils<T, N>::add_vec(SG.load<N, T>(mp)));
+          SG.store<N, T>(MPL, v);
+          vec<T, N> t(utils<T, N>::add_vec(SG.load<N, T>(MPL)));
+          SG.store<N, T>(mp, t);
+        }
+        if (NdItem.get_global_id(0) == 0)
+          sgsizeacc[0] = SG.get_local_range()[0];
+      });
     });
     auto acc = syclbuf.template get_access<access::mode::read_write>();
     auto sgsizeacc = sgsizebuf.get_access<access::mode::read_write>();
@@ -95,7 +88,7 @@ template <typename T, int N> void check(queue &Queue) {
         ref *= N;
       }
       /* There is no defined out-of-range behavior for these functions. */
-      if ((SGid + N) * sg_size < L) {
+      if ((SGid + N) * sg_size <= L) {
         std::string s("Vector<");
         s += std::string(typeid(ref).name()) + std::string(",") +
              std::to_string(N) + std::string(">[") + std::to_string(j) +
