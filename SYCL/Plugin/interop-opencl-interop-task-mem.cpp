@@ -9,41 +9,30 @@
 #include <CL/sycl.hpp>
 #include <CL/sycl/backend/opencl.hpp>
 
-#define SIZE 16
+using namespace sycl;
 
-class my_selector : public cl::sycl::device_selector {
-public:
-  int operator()(const cl::sycl::device &dev) const override {
-    sycl::backend backend = dev.get_platform().get_backend();
-    if (backend == cl::sycl::backend::opencl && dev.is_gpu())
-      return 1;
-    else
-      return 0;
-  }
-};
+constexpr size_t SIZE = 16;
 
 int main() {
-  sycl::queue queue = sycl::queue(my_selector());
+  queue queue{};
 
   try {
-    sycl::buffer<uint8_t, 1> buffer(SIZE);
-    sycl::image<2> image(sycl::image_channel_order::rgba,
-                         sycl::image_channel_type::fp32, {SIZE, SIZE});
+    buffer<uint8_t, 1> buffer(SIZE);
+    image<2> image(image_channel_order::rgba, image_channel_type::fp32,
+                   {SIZE, SIZE});
 
     queue
-        .submit([&](cl::sycl::handler &cgh) {
-          auto buffer_acc =
-              buffer.get_access<cl::sycl::access::mode::write>(cgh);
-          auto image_acc =
-              image.get_access<sycl::float4, sycl::access::mode::write>(cgh);
-          cgh.interop_task([&](const cl::sycl::interop_handler &ih) {
-            cl_mem buffer_mem = ih.get_mem<sycl::backend::opencl>(buffer_acc);
+        .submit([&](handler &cgh) {
+          auto buffer_acc = buffer.get_access<access::mode::write>(cgh);
+          auto image_acc = image.get_access<float4, access::mode::write>(cgh);
+          cgh.interop_task([=](const interop_handler &ih) {
+            cl_mem buffer_mem = ih.get_mem<backend::opencl>(buffer_acc);
             size_t size = 0;
             clGetMemObjectInfo(buffer_mem, CL_MEM_SIZE, sizeof(size),
                                (void *)&size, nullptr);
             assert(size == SIZE);
 
-            cl_mem mem = ih.get_mem<sycl::backend::opencl>(image_acc);
+            cl_mem mem = ih.get_mem<backend::opencl>(image_acc);
             size_t width = 0;
             clGetImageInfo(mem, CL_IMAGE_WIDTH, sizeof(width), (void *)&width,
                            nullptr);
@@ -51,7 +40,7 @@ int main() {
           });
         })
         .wait();
-  } catch (cl::sycl::exception const &e) {
+  } catch (exception const &e) {
     std::cout << "SYCL exception caught: " << e.what() << std::endl;
     return e.get_cl_code();
   } catch (const char *msg) {
