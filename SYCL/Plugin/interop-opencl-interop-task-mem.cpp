@@ -1,4 +1,4 @@
-// REQUIRES: opencl
+// REQUIRES: opencl, opencl_icd
 
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %s -o %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
