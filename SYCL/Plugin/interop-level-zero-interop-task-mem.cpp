@@ -4,11 +4,12 @@
 
 // Test for Level Zero interop_task.
 
-#include <CL/sycl.hpp>
-// clang-format off
+// Level-Zero
 #include <level_zero/ze_api.h>
+
+// SYCL
+#include <CL/sycl.hpp>
 #include <CL/sycl/backend/level_zero.hpp>
-// clang-format on
 
 using namespace sycl;
 
