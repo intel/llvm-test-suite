@@ -5,7 +5,8 @@
 // RUN: %CPU_RUN_PLACEHOLDER %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 
-//==------ InorderQueue.cpp - SYCL ordered queue kernel shortcut test --------==//
+//==------ InorderQueue.cpp - SYCL ordered queue kernel shortcut test
+//--------==//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -75,21 +76,21 @@ int main() {
     });
 
     q.submit([&](handler &cgh) {
-      cgh.parallel_for_work_group<class WkGrp>(range<1>{4}, range<1>{2}, [=](group<1> myGroup) {
-        auto j = myGroup.get_id(0);
-        myGroup.parallel_for_work_item([&] (h_item<1> it) {
-          A[(j * 2) + it.get_local_id(0)]++;
-        });
-      });
+      cgh.parallel_for_work_group<class WkGrp>(
+          range<1>{4}, range<1>{2}, [=](group<1> myGroup) {
+            auto j = myGroup.get_id(0);
+            myGroup.parallel_for_work_item(
+                [&](h_item<1> it) { A[(j * 2) + it.get_local_id(0)]++; });
+          });
     });
 
     q.submit([&](handler &cgh) {
-      cgh.parallel_for_work_group(range<1>{4}, range<1>{2}, [=](group<1> myGroup) {
-        auto j = myGroup.get_id(0);
-        myGroup.parallel_for_work_item([&] (h_item<1> it) {
-          A[(j * 2) + it.get_local_id(0)]++;
-        });
-      });
+      cgh.parallel_for_work_group(
+          range<1>{4}, range<1>{2}, [=](group<1> myGroup) {
+            auto j = myGroup.get_id(0);
+            myGroup.parallel_for_work_item(
+                [&](h_item<1> it) { A[(j * 2) + it.get_local_id(0)]++; });
+          });
     });
 
     q.wait();
