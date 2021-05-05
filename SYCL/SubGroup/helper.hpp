@@ -131,8 +131,8 @@ template <typename T>
 void exit_if_not_equal(std::complex<T> val, std::complex<T> ref,
                        const char *name) {
   std::string Name{name};
-  exit_if_not_equal(val.real(), ref.real(), (Name+".real()").c_str());
-  exit_if_not_equal(val.imag(), ref.imag(), (Name+".imag()").c_str());
+  exit_if_not_equal(val.real(), ref.real(), (Name + ".real()").c_str());
+  exit_if_not_equal(val.imag(), ref.imag(), (Name + ".imag()").c_str());
 }
 
 template <typename T> void exit_if_not_equal(T *val, T *ref, const char *name) {
