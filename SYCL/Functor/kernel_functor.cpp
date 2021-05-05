@@ -108,6 +108,13 @@ int foo(int X) {
 
     Q.submit([&](cl::sycl::handler &cgh) {
       auto Acc = Buf.get_access<sycl_read_write, sycl_global_buffer>(cgh);
+      Functor1 F(X, Acc);
+
+      cgh.single_task(F);
+    });
+
+    Q.submit([&](cl::sycl::handler &cgh) {
+      auto Acc = Buf.get_access<sycl_read_write, sycl_global_buffer>(cgh);
       ns::Functor2 F(X, Acc);
 
       cgh.single_task(F);
