@@ -16,6 +16,9 @@
 
 // This test verifies that things fail in the proper way when they should.
 
+// Regression in GPU RT 21.16.19610
+// XFAIL: level_zero && gpu
+
 #include <CL/sycl.hpp>
 #include <iostream>
 

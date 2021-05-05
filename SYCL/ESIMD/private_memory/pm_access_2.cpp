@@ -10,3 +10,5 @@
 // UNSUPPORTED: cuda
 // RUN: %clangxx -fsycl -I%S/.. %S/Inputs/pm_common.cpp -o %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out 2
+// Regression in GPU RT 21.16.19610
+// XFAIL: level_zero
