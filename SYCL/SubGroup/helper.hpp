@@ -6,6 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 #include <CL/sycl.hpp>
+#include <bitset>
 #include <cmath>
 #include <complex>
 #include <iostream>
@@ -109,9 +110,12 @@ template <typename T2> struct utils<T2, 16> {
 
 template <typename T> void exit_if_not_equal(T val, T ref, const char *name) {
   if (std::is_floating_point<T>::value) {
-    if (std::fabs(val - ref) > 0.02) {
-      std::cout << "Unexpected result for " << name << ": " << (double)val
-                << " expected value: " << (double)ref << std::endl;
+    auto cmp_val = std::bitset<CHAR_BIT * sizeof(T)>(val);
+    auto cmp_ref = std::bitset<CHAR_BIT * sizeof(T)>(ref);
+    if (cmp_val != cmp_ref) {
+      std::cout << "Unexpected result for " << name << ": " << val << "("
+                << cmp_val << ") expected value: " << ref << "(" << cmp_ref
+                << ")" << std::endl;
       exit(1);
     }
   } else {
@@ -126,12 +130,9 @@ template <typename T> void exit_if_not_equal(T val, T ref, const char *name) {
 template <typename T>
 void exit_if_not_equal(std::complex<T> val, std::complex<T> ref,
                        const char *name) {
-  if (std::fabs(val.real() - ref.real()) > 0.02 ||
-      std::fabs(val.imag() - ref.imag()) > 0.02) {
-    std::cout << "Unexpected result for " << name << ": " << val
-              << " expected value: " << ref << std::endl;
-    exit(1);
-  }
+  std::string Name{name};
+  exit_if_not_equal(val.real(), ref.real(), (Name+".real()").c_str());
+  exit_if_not_equal(val.imag(), ref.imag(), (Name+".imag()").c_str());
 }
 
 template <typename T> void exit_if_not_equal(T *val, T *ref, const char *name) {
@@ -145,7 +146,7 @@ template <typename T> void exit_if_not_equal(T *val, T *ref, const char *name) {
 template <> void exit_if_not_equal(half val, half ref, const char *name) {
   int16_t cmp_val = reinterpret_cast<int16_t &>(val);
   int16_t cmp_ref = reinterpret_cast<int16_t &>(ref);
-  if (std::abs(cmp_val - cmp_ref) > 2) {
+  if (std::abs(cmp_val - cmp_ref) > 1) {
     std::cout << "Unexpected result for " << name << ": " << (float)val
               << " expected value: " << (float)ref << std::endl;
     exit(1);

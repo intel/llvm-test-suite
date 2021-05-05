@@ -21,7 +21,7 @@ template <typename T, int N> class sycl_subgr;
 using namespace cl::sycl;
 
 template <typename T, int N> void check(queue &Queue) {
-  const int G = 1024, L = 256;
+  const int G = 512, L = 256;
 
   auto sg_sizes = Queue.get_device().get_info<info::device::sub_group_sizes>();
   size_t max_sg_size = *std::max_element(sg_sizes.begin(), sg_sizes.end());
@@ -34,7 +34,7 @@ template <typename T, int N> void check(queue &Queue) {
       auto acc = syclbuf.template get_access<access::mode::read_write>();
       for (int i = 0; i < G; i++) {
         acc[i] = i;
-        acc[i] += 0.1; // Check that floating point types are not casted to int
+        acc[i] += 0.25; // Check that floating point types are not casted to int
       }
     }
     Queue.submit([&](handler &cgh) {
@@ -55,7 +55,7 @@ template <typename T, int N> void check(queue &Queue) {
           multi_ptr<T, access::address_space::local_space> MPL(
               &LocalMem[SGOffset]);
           // Add all values in read block
-          vec<T, N> v(utils<T, N>::add_vec(SG.load<N, T>(mp)));
+          vec<T, N> v(SG.load<N, T>(mp));
           SG.store<N, T>(MPL, v);
           vec<T, N> t(utils<T, N>::add_vec(SG.load<N, T>(MPL)));
           SG.store<N, T>(mp, t);
@@ -81,9 +81,8 @@ template <typename T, int N> void check(queue &Queue) {
         ref = acc[j - (SGid % N) * sg_size];
       } else {
         for (int i = 0; i < N; i++) {
-          ref += (T)(j + i * sg_size) + 0.1;
+          ref += (T)(j + i * sg_size) + 0.25;
         }
-        ref *= N;
       }
       /* There is no defined out-of-range behavior for these functions. */
       if ((SGid + N) * sg_size <= L) {
