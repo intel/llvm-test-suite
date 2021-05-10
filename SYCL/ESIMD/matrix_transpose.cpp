@@ -128,7 +128,8 @@ ESIMD_INLINE void write(AccessorTy buf, int MZ, int col, int row,
   uint32_t offset = (row * MZ + col) * sizeof(T);
 #pragma unroll
   for (int i = 0; i < N; ++i) {
-    block_store<T, N>(buf, offset, val.template select<N, 1>(i * N));
+    simd<T, N> vals = val.template select<N, 1>(i * N);
+    vals.copy_to(buf, offset);
     offset += MZ * sizeof(T);
   }
 }

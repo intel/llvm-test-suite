@@ -54,7 +54,8 @@ ESIMD_INLINE void cmk_write(AccTy buf, uint32_t offset, simd<ty, size> v) {
   offset *= sizeof(ty);
 #pragma unroll
   for (uint32_t i = 0; i < size; i += 32) {
-    block_store<ty, 32, AccTy>(buf, offset, v.template select<32, 1>(i));
+    simd<ty, 32> vals = v.template select<32, 1>(i);
+    vals.copy_to(buf, offset);
     offset += 32 * sizeof(ty);
   }
 }

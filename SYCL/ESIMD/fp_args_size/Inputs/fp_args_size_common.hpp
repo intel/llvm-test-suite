@@ -73,8 +73,10 @@ int main(void) {
                             simd<c_data_t, SIZE>>;
             auto vc = foo(va, vb);
 
-            for (int j = 0; j < ROWS; j++)
-              block_store<c_data_t, VL>(C + j * VL, vc.select<VL, 1>(j * VL));
+            for (int j = 0; j < ROWS; j++) {
+              simd<c_data_t, VL> vals = vc.select<VL, 1>(j * VL);
+              vals.copy_to(C + j * VL);
+            }
           });
     });
 

@@ -56,8 +56,9 @@ int main() {
               simd<Ty, 16> var;
               var.copy_from(acc0, offset);
               var += VAL;
-              block_store(acc0, offset, var);
-              block_store(acc1, offset, var + 1);
+              var.copy_to(acc0, offset);
+              var += 1;
+              var.copy_to(acc1, offset);
               offset += 64;
             }
           });

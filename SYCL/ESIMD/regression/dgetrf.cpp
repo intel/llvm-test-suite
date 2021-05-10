@@ -208,8 +208,10 @@ ESIMD_INLINE void dgetrfnp_left_step(double *a, int64_t lda, int64_t *info) {
 
   // store P1
   for (j = 0, a1 = a + K * lda; j < N; j++, a1 += lda)
-    for (i = 0; i < M; i += 8)
-      block_store<double, 8>(a1 + i, V8(p1, j * M + i));
+    for (i = 0; i < M; i += 8) {
+      simd<double, 8> vals = V8(p1, j * M + i);
+      vals.copy_to(a1 + i);
+    }
 }
 
 ESIMD_INLINE void dgetrfnp_esimd(int64_t m, int64_t n, double *a, int64_t lda,

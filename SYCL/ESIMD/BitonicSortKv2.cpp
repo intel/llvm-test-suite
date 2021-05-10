@@ -52,7 +52,8 @@ template <typename ty, uint32_t size>
 ESIMD_INLINE void cmk_write(ty *buf, uint32_t offset, simd<ty, size> v) {
 #pragma unroll
   for (uint32_t i = 0; i < size; i += 32) {
-    block_store<ty, 32>(buf + offset + i, v.template select<32, 1>(i));
+    simd<ty, 32> vals = v.template select<32, 1>(i);
+    vals.copy_to(buf + offset + i);
   }
 }
 
