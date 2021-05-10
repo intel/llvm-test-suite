@@ -53,7 +53,8 @@ int main() {
             using namespace sycl::ext::intel::experimental::esimd;
             unsigned int offset = 0;
             for (int k = 0; k < VL / 16; k++) {
-              simd<Ty, 16> var = block_load<Ty, 16>(acc0, offset);
+              simd<Ty, 16> var;
+              var.copy_from(acc0, offset);
               var += VAL;
               block_store(acc0, offset, var);
               block_store(acc1, offset, var + 1);

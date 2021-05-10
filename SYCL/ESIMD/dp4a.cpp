@@ -70,7 +70,7 @@ int main(void) {
 
             auto res =
                 esimd_dp4a<DTYPE, DTYPE, DTYPE, DTYPE, SIZE>(src0, src1, src2);
-            block_store<DTYPE, SIZE>(RES, res);
+            res.copy_to(RES);
           });
     });
     e.wait();

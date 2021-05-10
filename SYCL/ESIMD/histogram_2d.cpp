@@ -197,7 +197,7 @@ int main(int argc, char *argv[]) {
 #else
               auto vals = block_load<unsigned int, 8>(bins + i);
               vals = vals + src;
-              block_store<unsigned int, 8>(bins + i, vals);
+              vals.copy_to(bins + i);
 #endif
             }
           });

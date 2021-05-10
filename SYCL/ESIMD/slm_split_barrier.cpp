@@ -128,7 +128,7 @@ int main(void) {
 
             v_slmData = slm_load<uint, VL>(v_Off);
 
-            block_store<uint, VL>(B + globalID * VL, v_slmData);
+            v_slmData.copy_to(B + globalID * VL);
           });
     });
     e.wait();

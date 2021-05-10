@@ -309,7 +309,7 @@ int main(int argc, char *argv[]) {
                 min_dist.merge(dist, (dist < min_dist));
               }
 
-              block_store<int, SIMD_SIZE>(kpoints4[index + i].cluster, cluster);
+              cluster.copy_to(kpoints4[index + i].cluster);
 
 #pragma unroll
               for (int k = 0; k < SIMD_SIZE; k++) {
@@ -352,14 +352,14 @@ int main(int argc, char *argv[]) {
             unsigned int offset = 0;
             for (int i = 0; i < (NUM_POINTS / POINTS_PER_THREAD) / SIMD_SIZE;
                  i++) {
-              simd<float, SIMD_SIZE> t = block_load<float, SIMD_SIZE>(
-                  kaccum4[it.get_global_id(0)].x_sum + offset);
+              simd<float, SIMD_SIZE> t;
+              t.copy_from(kaccum4[it.get_global_id(0)].x_sum + offset);
               xsum += t;
               t = block_load<float, SIMD_SIZE>(
                   kaccum4[it.get_global_id(0)].y_sum + offset);
               ysum += t;
-              simd<int, SIMD_SIZE> n = block_load<int, SIMD_SIZE>(
-                  kaccum4[it.get_global_id(0)].num_points + offset);
+              simd<int, SIMD_SIZE> n;
+              n.copy_from(kaccum4[it.get_global_id(0)].num_points + offset);
               npoints += n;
               offset += SIMD_SIZE;
             }
