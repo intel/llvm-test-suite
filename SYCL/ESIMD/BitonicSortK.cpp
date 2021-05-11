@@ -43,7 +43,9 @@ ESIMD_INLINE simd<ty, size> cmk_read(AccTy buf, uint32_t offset) {
   offset *= sizeof(ty);
 #pragma unroll
   for (uint32_t i = 0; i < size; i += 32) {
-    v.template select<32, 1>(i) = block_load<ty, 32, AccTy>(buf, offset);
+    simd<ty, 32> data;
+    data.copy_from(buf, offset);
+    v.template select<32, 1>(i) = data;
     offset += 32 * sizeof(ty);
   }
   return v;

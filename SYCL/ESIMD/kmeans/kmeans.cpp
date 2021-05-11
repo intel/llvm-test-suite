@@ -243,8 +243,9 @@ int main(int argc, char *argv[]) {
 
 #pragma unroll
             for (int i = 0; i < NUM_CENTROIDS_ALLOCATED / SIMD_SIZE; i++) {
-              centroidsXYXY.row(i) =
-                  block_load<float, 2 * SIMD_SIZE>(kcentroids4[i].xyn);
+              simd<float, 2 * SIMD_SIZE> data;
+              data.copy_from(kcentroids4[i].xyn);
+              centroidsXYXY.row(i) = data;
             }
 
             simd<float, NUM_CENTROIDS_ALLOCATED> accumxsum(0);
@@ -269,8 +270,7 @@ int main(int argc, char *argv[]) {
               auto pointsXY = points.format<float, 2, SIMD_SIZE>();
               simd<int, SIMD_SIZE> cluster(0);
 
-              points =
-                  block_load<float, 2 * SIMD_SIZE>(kpoints4[index + i].xyn);
+              points.copy_from(kpoints4[index + i].xyn);
 
               simd<float, SIMD_SIZE> dx =
                   pointsXY.row(0) - centroidsXY.row(0)[0];
@@ -355,8 +355,7 @@ int main(int argc, char *argv[]) {
               simd<float, SIMD_SIZE> t;
               t.copy_from(kaccum4[it.get_global_id(0)].x_sum + offset);
               xsum += t;
-              t = block_load<float, SIMD_SIZE>(
-                  kaccum4[it.get_global_id(0)].y_sum + offset);
+              t.copy_from(kaccum4[it.get_global_id(0)].y_sum + offset);
               ysum += t;
               simd<int, SIMD_SIZE> n;
               n.copy_from(kaccum4[it.get_global_id(0)].num_points + offset);

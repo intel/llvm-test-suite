@@ -117,7 +117,9 @@ ESIMD_NOINLINE void read(int *buf, int MZ, int col, int row, int GrfIdx) {
   buf += row * MZ + col;
 #pragma unroll
   for (int i = 0; i < N; ++i) {
-    res.template select<N, 1>(i * N) = block_load<int, N>(buf);
+    simd<int, N> data;
+    data.copy_from(buf);
+    res.template select<N, 1>(i * N) = data;
     buf += MZ;
   }
 }

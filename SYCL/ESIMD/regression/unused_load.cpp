@@ -11,7 +11,7 @@
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 
 // This test checks that ESIMD JIT compilation does not crash on unused
-// block_load invocation.
+// copy_from invocation.
 
 #include <CL/sycl.hpp>
 #include <CL/sycl/INTEL/esimd.hpp>
