@@ -15,7 +15,6 @@ struct custom_type_nested {
 
   char c = default_c_value;
   float f = default_f_value;
-
 };
 
 inline bool operator==(const custom_type_nested &lhs,
@@ -30,8 +29,8 @@ inline bool operator!=(const custom_type_nested &lhs,
 
 inline std::ostream &operator<<(std::ostream &out,
                                 const custom_type_nested &v) {
-  return out << "custom_type_nested { .c = " << v.c << ", .f = " << v.f
-             << "}" << std::endl;
+  return out << "custom_type_nested { .c = " << v.c << ", .f = " << v.f << "}"
+             << std::endl;
 }
 
 struct custom_type {
@@ -53,13 +52,12 @@ inline bool operator!=(const custom_type &lhs, const custom_type &rhs) {
   return !(lhs == rhs);
 }
 
-inline std::ostream &operator<<(std::ostream &out,
-                                const custom_type &v) {
+inline std::ostream &operator<<(std::ostream &out, const custom_type &v) {
   return out << "custom_type { .n = \n\t" << v.n << ",\n .ull = " << v.ull
              << "}" << std::endl;
 }
 
-template<typename T>
+template <typename T>
 bool check_value(const T &got, const T &ref, const std::string &variable_name) {
   if (got != ref) {
     std::cout << "Unexpected value of " << variable_name << ": " << got

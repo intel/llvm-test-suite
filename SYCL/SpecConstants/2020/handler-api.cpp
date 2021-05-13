@@ -15,9 +15,9 @@
 // FIXME: CUDA uses emulation path, which is not yet supported
 // UNSUPPORTED: cuda
 
-#include <sycl/sycl.hpp>
-#include <iostream>
 #include <cstdlib>
+#include <iostream>
+#include <sycl/sycl.hpp>
 
 #include "common.hpp"
 
@@ -55,14 +55,12 @@ int main() {
   }
 
   if (!test_set_and_get_on_host(q)) {
-    std::cout << "Test for set and get API on host failed!"
-              << std::endl;
+    std::cout << "Test for set and get API on host failed!" << std::endl;
     return 1;
   }
 
   if (!test_set_and_get_on_device(q)) {
-    std::cout << "Test for set and get API on device failed!"
-              << std::endl;
+    std::cout << "Test for set and get API on device failed!" << std::endl;
     return 1;
   }
 
@@ -87,8 +85,9 @@ bool test_default_values(sycl::queue q) {
   });
 
   auto int_acc = int_buffer.get_access<sycl::access::mode::read>();
-  if (!check_value(0, int_acc[0],
-             "integer specialization constant (defined without default value)"))
+  if (!check_value(
+          0, int_acc[0],
+          "integer specialization constant (defined without default value)"))
     return false;
 
   auto double_acc = double_buffer.get_access<sycl::access::mode::read>();
@@ -113,9 +112,8 @@ bool test_set_and_get_on_host(sycl::queue q) {
             "integer specializaiton constant before setting any value"))
       ++errors;
 
-    if (!check_value(
-            3.14, cgh.get_specialization_constant<double_id>(),
-            "double specializaiton constant before setting any value"))
+    if (!check_value(3.14, cgh.get_specialization_constant<double_id>(),
+                     "double specializaiton constant before setting any value"))
       ++errors;
 
     custom_type custom_type_ref;
