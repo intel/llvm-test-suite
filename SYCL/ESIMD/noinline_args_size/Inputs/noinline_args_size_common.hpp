@@ -75,9 +75,10 @@ int main(void) {
             auto vc = add<simd<a_data_t, SIZE>, simd<b_data_t, SIZE>,
                           simd<c_data_t, SIZE>>(va, vb);
 
-            for (int j = 0; j < ROWS; j++)
-              simd<c_data_t, VL> vals =
-                  vc.select<VL, 1>(j * VL) vals.copy_to(C + j * VL);
+            for (int j = 0; j < ROWS; j++) {
+              simd<c_data_t, VL> vals = vc.select<VL, 1>(j * VL);
+              vals.copy_to(C + j * VL);
+            }
           });
     });
 
