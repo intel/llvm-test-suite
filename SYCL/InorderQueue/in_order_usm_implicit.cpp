@@ -7,7 +7,9 @@
 // RUN: %ACC_RUN_PLACEHOLDER %t.out
 // RUN: %CPU_RUN_PLACEHOLDER %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
-// SYCL in ordered queues implicit USM test
+// SYCL in ordered queues implicit USM test.
+// Simple test checking implicit USM functionality using a Queue with the
+// in_order property.
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
