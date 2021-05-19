@@ -1,8 +1,13 @@
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %s -o %t.out
+// RUN: %clangxx -fsycl -DSG2020BARRIER -fsycl-targets=%sycl_triple %s -o %t2.out
 // RUN: %HOST_RUN_PLACEHOLDER %t.out
 // RUN: %CPU_RUN_PLACEHOLDER %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // RUN: %ACC_RUN_PLACEHOLDER %t.out
+// RUN: %HOST_RUN_PLACEHOLDER %t2.out
+// RUN: %CPU_RUN_PLACEHOLDER %t2.out
+// RUN: %GPU_RUN_PLACEHOLDER %t2.out
+// RUN: %ACC_RUN_PLACEHOLDER %t2.out
 
 //==---------- barrier.cpp - SYCL sub_group barrier test -------*- C++ -*---==//
 //
@@ -16,6 +21,13 @@
 #include <CL/sycl.hpp>
 #include <limits>
 #include <numeric>
+
+#ifdef SG2020BARRIER
+#define SG_BARRIER(SG, Fence) group_barrier(SG)
+#else
+#define SG_BARRIER(SG, Fence) SG.barrier(Fence)
+#endif
+
 template <typename T> class sycl_subgr;
 using namespace cl::sycl;
 template <typename T> void check(queue &Queue, size_t G = 240, size_t L = 60) {
@@ -39,7 +51,8 @@ template <typename T> void check(queue &Queue, size_t G = 240, size_t L = 60) {
         for (size_t i = 0; i <= lid; i++) {
           res += addacc[SGoff + i];
         }
-        SG.barrier(access::fence_space::global_space);
+        // SG.barrier(access::fence_space::global_space);
+        SG_BARRIER(SG, access::fence_space::global_space);
         addacc[gid] = res;
         if (NdItem.get_global_id(0) == 0)
           sgsizeacc[0] = SG.get_max_local_range()[0];
