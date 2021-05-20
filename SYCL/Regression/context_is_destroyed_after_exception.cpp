@@ -9,7 +9,7 @@ int main() {
   const auto GlobalRange = 1;
   const auto LocalRange = 2;
 
-  sycl::queue myQueue{sycl::cpu_selector{}, [](sycl::exception_list elist) {
+  sycl::queue myQueue{sycl::gpu_selector{}, [](sycl::exception_list elist) {
                         for (auto e : elist)
                           std::rethrow_exception(e);
                       }};
@@ -27,4 +27,4 @@ int main() {
   return 0;
 }
 
-// CHECK:---> piContextRelease
+// CHECK:---> piContextRelease(
