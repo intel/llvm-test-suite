@@ -34,17 +34,17 @@ int main() {
   sycl::kernel_id TestKernelID = sycl::get_kernel_id<TestKernel>();
   sycl::kernel Kernel = KernelBundle.get_kernel(TestKernelID);
 
-  const size_t MaxNumSubgroups =
-      Kernel.get_info<sycl::info::kernel_device_specific::max_num_sub_groups>(
-          Q.get_device());
-  const size_t SubgroupSize = 32 / MaxNumSubgroups;
+  const size_t SubgroupSize =
+      Kernel.get_info<sycl::info::kernel_device_specific::max_sub_group_size>(
+          Q.get_device(), sycl::range{32, 1, 1});
+  const size_t MaxNumSubgroups = 32 / SubgroupSize;
 
   for (size_t SGNo = 0; SGNo < MaxNumSubgroups; SGNo++) {
     for (size_t WINo = 0; WINo < SubgroupSize; WINo++) {
       const int Leader = WINo == 0 ? 1 : 0;
       assert(Acc[0][SGNo][WINo] == Leader);
-      assert(Acc[1][SGNo][WINo] == SGNo);
-      assert(Acc[1][SGNo][WINo] == WINo);
+      assert(Acc[1][SGNo][WINo] == MaxNumSubgroups);
+      assert(Acc[2][SGNo][WINo] == SubgroupSize);
     }
   }
 

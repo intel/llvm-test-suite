@@ -51,7 +51,6 @@ template <typename T> void check(queue &Queue, size_t G = 240, size_t L = 60) {
         for (size_t i = 0; i <= lid; i++) {
           res += addacc[SGoff + i];
         }
-        // SG.barrier(access::fence_space::global_space);
         SG_BARRIER(SG, access::fence_space::global_space);
         addacc[gid] = res;
         if (NdItem.get_global_id(0) == 0)
