@@ -15,7 +15,9 @@ int main() {
                       }};
 
   try {
-    myQueue.parallel_for<class myclass>(
+    // Generating an exception caused by the fact that LocalRange size (== 2)
+    // can't be greater than GlobalRange size (== 1)
+    myQueue.parallel_for<class TestKernel>(
         sycl::nd_range<1>{sycl::range<1>(GlobalRange),
                           sycl::range<1>(LocalRange)},
         [=](sycl::nd_item<1> idx) {});
