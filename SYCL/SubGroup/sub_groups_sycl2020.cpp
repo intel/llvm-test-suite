@@ -10,8 +10,11 @@ int main() {
   sycl::queue Q;
   sycl::buffer<int, 3> Buf{sycl::range{3, 32, 32}};
 
+  sycl::kernel_id TestKernelID = sycl::get_kernel_id<TestKernel>();
+
   sycl::kernel_bundle KernelBundle =
-      sycl::get_kernel_bundle<sycl::bundle_state::executable>(Q.get_context());
+      sycl::get_kernel_bundle<sycl::bundle_state::executable>(Q.get_context(),
+                                                              {TestKernelID});
 
   Q.submit([&](sycl::handler &CGH) {
     CGH.use_kernel_bundle(KernelBundle);
@@ -31,7 +34,6 @@ int main() {
 
   sycl::host_accessor Acc{Buf, sycl::read_only};
 
-  sycl::kernel_id TestKernelID = sycl::get_kernel_id<TestKernel>();
   sycl::kernel Kernel = KernelBundle.get_kernel(TestKernelID);
 
   const size_t SubgroupSize =
