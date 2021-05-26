@@ -61,6 +61,7 @@ bool check_value(const T &ref, const T &got, const std::string &variable_name) {
   if (got != ref) {
     std::cout << "Unexpected value of " << variable_name << ": " << got
               << " (got) vs " << ref << " (expected)" << std::endl;
+    return false;
   }
 
   return true;
