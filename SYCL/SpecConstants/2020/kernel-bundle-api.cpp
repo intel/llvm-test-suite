@@ -2,10 +2,10 @@
 // constants using sycl::kernel_bundle and sycl::kernel_handler APIs:
 // - test that specialization constants can be accessed in kernel and they
 //   have their default values if `set_specialization_constants` wasn't called
-// - test that specialization constant values can be set and retrieved within
-//   command group scope
-// - test that specialization constant values can be set within command group
-//   scope and correctly retrieved within a kernel
+// - test that specialization constant values can be set and retrieved through
+//   kernel_bundle APIs on host
+// - test that specialization constant values can be set through kernel_bundle
+//   API and correctly retrieved within a kernel
 //
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %s -o %t.out
 // FIXME: SYCL 2020 specialization constants are not supported on host device
