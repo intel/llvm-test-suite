@@ -1,6 +1,9 @@
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %s -o %t.out
 // RUN: %CPU_RUN_PLACEHOLDER %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
+//
+// TODO enable test on CUDA once kernel_bundle is supported
+// UNSUPPORTED: cuda
 
 #include <sycl/sycl.hpp>
 
