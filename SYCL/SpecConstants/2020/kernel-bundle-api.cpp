@@ -126,80 +126,83 @@ bool test_set_and_get_on_host(sycl::queue q) {
     return true;
   }
 
-  auto input_bundle =
-      sycl::get_kernel_bundle<sycl::bundle_state::input>(q.get_context());
-
-  if (!input_bundle.contains_specialization_constants()) {
-    std::cout << "Obtained kernel_bundle is expected to contain specialization "
-                 "constants, but it doesn't!"
-              << std::endl;
-    return false;
-  }
-
   unsigned errors = 0;
 
-  // Check default values
-  if (!check_value(0, input_bundle.get_specialization_constant<int_id>(),
-                   "integer specializaiton constant before setting any value"))
-    ++errors;
+  try {
+    auto input_bundle =
+        sycl::get_kernel_bundle<sycl::bundle_state::input>(q.get_context());
 
-  if (!check_value(3.14, input_bundle.get_specialization_constant<double_id>(),
-                   "double specializaiton constant before setting any value"))
-    ++errors;
+    if (!input_bundle.contains_specialization_constants()) {
+      std::cout << "Obtained kernel_bundle is expected to contain specialization "
+                   "constants, but it doesn't!"
+                << std::endl;
+      return false;
+    }
 
-  custom_type custom_type_ref;
-  if (!check_value(
-          custom_type_ref,
-          input_bundle.get_specialization_constant<custom_type_id>(),
-          "custom_type specializaiton constant before setting any value"))
-    ++errors;
+    // Check default values
+    if (!check_value(0, input_bundle.get_specialization_constant<int_id>(),
+                     "integer specializaiton constant before setting any value"))
+      ++errors;
 
-  // Update values
-  int new_int_value = 42;
-  double new_double_value = 3.0;
-  custom_type new_custom_type_value('b', 1.0, 12);
+    if (!check_value(3.14, input_bundle.get_specialization_constant<double_id>(),
+                     "double specializaiton constant before setting any value"))
+      ++errors;
 
-  input_bundle.set_specialization_constant<int_id>(new_int_value);
-  input_bundle.set_specialization_constant<double_id>(new_double_value);
-  input_bundle.set_specialization_constant<custom_type_id>(
-      new_custom_type_value);
+    custom_type custom_type_ref;
+    if (!check_value(
+            custom_type_ref,
+            input_bundle.get_specialization_constant<custom_type_id>(),
+            "custom_type specializaiton constant before setting any value"))
+      ++errors;
 
-  // And re-check them again
-  if (!check_value(new_int_value,
-                   input_bundle.get_specialization_constant<int_id>(),
-                   "integer specializaiton constant after setting a new value"))
-    ++errors;
+    // Update values
+    int new_int_value = 42;
+    double new_double_value = 3.0;
+    custom_type new_custom_type_value('b', 1.0, 12);
 
-  if (!check_value(new_double_value,
-                   input_bundle.get_specialization_constant<double_id>(),
-                   "double specializaiton constant after setting a value"))
-    ++errors;
+    input_bundle.set_specialization_constant<int_id>(new_int_value);
+    input_bundle.set_specialization_constant<double_id>(new_double_value);
+    input_bundle.set_specialization_constant<custom_type_id>(
+        new_custom_type_value);
 
-  if (!check_value(
-          new_custom_type_value,
-          input_bundle.get_specialization_constant<custom_type_id>(),
-          "custom_type specializaiton constant after setting a new value"))
-    ++errors;
+    // And re-check them again
+    if (!check_value(new_int_value,
+                     input_bundle.get_specialization_constant<int_id>(),
+                     "integer specializaiton constant after setting a new value"))
+      ++errors;
 
-  // Let's try to build the bundle
-  auto exec_bundle = sycl::build(input_bundle);
+    if (!check_value(new_double_value,
+                     input_bundle.get_specialization_constant<double_id>(),
+                     "double specializaiton constant after setting a value"))
+      ++errors;
 
-  // And ensure that updated spec constant values are still there
-  if (!check_value(new_int_value,
-                   exec_bundle.get_specialization_constant<int_id>(),
-                   "integer specializaiton constant after build"))
-    ++errors;
+    if (!check_value(
+            new_custom_type_value,
+            input_bundle.get_specialization_constant<custom_type_id>(),
+            "custom_type specializaiton constant after setting a new value"))
+      ++errors;
 
-  if (!check_value(new_double_value,
-                   exec_bundle.get_specialization_constant<double_id>(),
-                   "double specializaiton constant after build"))
-    ++errors;
+    // Let's try to build the bundle
+    auto exec_bundle = sycl::build(input_bundle);
 
-  if (!check_value(
-          new_custom_type_value,
-          exec_bundle.get_specialization_constant<custom_type_id>(),
-          "custom_type specializaiton constant after build"))
-    ++errors;
+    // And ensure that updated spec constant values are still there
+    if (!check_value(new_int_value,
+                     exec_bundle.get_specialization_constant<int_id>(),
+                     "integer specializaiton constant after build"))
+      ++errors;
+
+    if (!check_value(new_double_value,
+                     exec_bundle.get_specialization_constant<double_id>(),
+                     "double specializaiton constant after build"))
+      ++errors;
+
+    if (!check_value(
+            new_custom_type_value,
+            exec_bundle.get_specialization_constant<custom_type_id>(),
+            "custom_type specializaiton constant after build"))
+      ++errors;
+  } catch (sycl::exception &e) {
+  }
 
   return 0 == errors;
 }
