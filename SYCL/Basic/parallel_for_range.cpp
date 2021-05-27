@@ -13,10 +13,6 @@
 
 using namespace cl::sycl;
 
-[[cl::reqd_work_group_size(4, 4, 4)]] void reqd_wg_size_helper() {
-  // do nothing
-}
-
 int main() {
   auto AsyncHandler = [](exception_list ES) {
     for (auto &E : ES) {
@@ -49,7 +45,7 @@ int main() {
         Q.submit([&](handler &CGH) {
           CGH.parallel_for<class ReqdWGSizeNegativeA>(
               nd_range<3>(range<3>(16, 16, 16), range<3>(8, 8, 8)),
-              [=](nd_item<3>) { reqd_wg_size_helper(); });
+              [=](nd_item<3>) [[cl::reqd_work_group_size(4, 4, 4)]]{});
         });
         Q.wait_and_throw();
         std::cerr
@@ -84,7 +80,7 @@ int main() {
       try {
         Q.submit([&](handler &CGH) {
           CGH.parallel_for<class ReqdWGSizeNegativeB>(
-              range<3>(16, 16, 16), [=](item<3>) { reqd_wg_size_helper(); });
+              range<3>(16, 16, 16), [=](item<3>) [[cl::reqd_work_group_size(4, 4, 4)]]{});
         });
         Q.wait_and_throw();
         std::cerr
@@ -124,7 +120,7 @@ int main() {
       Q.submit([&](handler &CGH) {
         CGH.parallel_for<class ReqdWGSizePositiveA>(
             nd_range<3>(range<3>(8, 8, 8), range<3>(4, 4, 4)),
-            [=](nd_item<3>) { reqd_wg_size_helper(); });
+            [=](nd_item<3>) [[cl::reqd_work_group_size(4, 4, 4)]]{});
       });
       Q.wait_and_throw();
     } catch (nd_range_error &E) {
