@@ -2,21 +2,22 @@
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %level_zero_options %s -o %t.out
 // RUN: env SYCL_PROGRAM_COMPILE_OPTIONS=-ze-intel-greater-than-4GB-buffer-required %GPU_RUN_PLACEHOLDER %t.out
 
-#include <iostream>
 #include <CL/sycl.hpp>
+#include <iostream>
 
 using namespace cl::sycl;
 
-const double Gb = 1024*1024*1024;
+const double Gb = 1024 * 1024 * 1024;
 
 int main() {
   auto D = device(gpu_selector());
 
-  std::cout << "name = " << D.get_info<info::device::name>()  << std::endl;
+  std::cout << "name = " << D.get_info<info::device::name>() << std::endl;
 
   auto global_mem_size = D.get_info<info::device::global_mem_size>() / Gb;
-  std::cout << "global_mem_size = " << global_mem_size  << std::endl;
-  std::cout << "max_mem_alloc_size = " << D.get_info<info::device::max_mem_alloc_size>()/Gb  << std::endl;
+  std::cout << "global_mem_size = " << global_mem_size << std::endl;
+  std::cout << "max_mem_alloc_size = "
+            << D.get_info<info::device::max_mem_alloc_size>() / Gb << std::endl;
 
   auto Q = queue(D);
   for (int I = 1; I < global_mem_size; I++) {
