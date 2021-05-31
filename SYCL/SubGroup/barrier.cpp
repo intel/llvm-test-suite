@@ -1,13 +1,8 @@
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %s -o %t.out
-// RUN: %clangxx -fsycl -DSG2020BARRIER -fsycl-targets=%sycl_triple %s -o %t2.out
 // RUN: %HOST_RUN_PLACEHOLDER %t.out
 // RUN: %CPU_RUN_PLACEHOLDER %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // RUN: %ACC_RUN_PLACEHOLDER %t.out
-// RUN: %HOST_RUN_PLACEHOLDER %t2.out
-// RUN: %CPU_RUN_PLACEHOLDER %t2.out
-// RUN: %GPU_RUN_PLACEHOLDER %t2.out
-// RUN: %ACC_RUN_PLACEHOLDER %t2.out
 
 //==---------- barrier.cpp - SYCL sub_group barrier test -------*- C++ -*---==//
 //
@@ -22,15 +17,10 @@
 #include <limits>
 #include <numeric>
 
-#ifdef SG2020BARRIER
-#define SG_BARRIER(SG, Fence) group_barrier(SG)
-#else
-#define SG_BARRIER(SG, Fence) SG.barrier(Fence)
-#endif
-
-template <typename T> class sycl_subgr;
+template <typename T, bool UseNewSyntax> class sycl_subgr;
 using namespace cl::sycl;
-template <typename T> void check(queue &Queue, size_t G = 240, size_t L = 60) {
+template <typename T, bool UseNewSyntax = false>
+void check(queue &Queue, size_t G = 240, size_t L = 60) {
   try {
     nd_range<1> NdRange(G, L);
     std::vector<T> data(G);
@@ -41,21 +31,26 @@ template <typename T> void check(queue &Queue, size_t G = 240, size_t L = 60) {
       auto addacc = addbuf.template get_access<access::mode::read_write>(cgh);
       auto sgsizeacc = sgsizebuf.get_access<access::mode::read_write>(cgh);
 
-      cgh.parallel_for<sycl_subgr<T>>(NdRange, [=](nd_item<1> NdItem) {
-        ONEAPI::sub_group SG = NdItem.get_sub_group();
-        size_t lid = SG.get_local_id().get(0);
-        size_t gid = NdItem.get_global_id(0);
-        size_t SGoff = gid - lid;
+      cgh.parallel_for<sycl_subgr<T, UseNewSyntax>>(
+          NdRange, [=](nd_item<1> NdItem) {
+            ONEAPI::sub_group SG = NdItem.get_sub_group();
+            size_t lid = SG.get_local_id().get(0);
+            size_t gid = NdItem.get_global_id(0);
+            size_t SGoff = gid - lid;
 
-        T res = 0;
-        for (size_t i = 0; i <= lid; i++) {
-          res += addacc[SGoff + i];
-        }
-        SG_BARRIER(SG, access::fence_space::global_space);
-        addacc[gid] = res;
-        if (NdItem.get_global_id(0) == 0)
-          sgsizeacc[0] = SG.get_max_local_range()[0];
-      });
+            T res = 0;
+            for (size_t i = 0; i <= lid; i++) {
+              res += addacc[SGoff + i];
+            }
+            if constexpr (UseNewSyntax) {
+              group_barrier(SG);
+            } else {
+              SG.barrier(access::fence_space::global_space);
+            }
+            addacc[gid] = res;
+            if (NdItem.get_global_id(0) == 0)
+              sgsizeacc[0] = SG.get_max_local_range()[0];
+          });
     });
     auto addacc = addbuf.template get_access<access::mode::read_write>();
     auto sgsizeacc = sgsizebuf.get_access<access::mode::read_write>();
@@ -91,8 +86,14 @@ int main() {
   check<long>(Queue);
   check<unsigned long>(Queue);
   check<float>(Queue);
+  check<int, true>(Queue);
+  check<unsigned int, true>(Queue);
+  check<long, true>(Queue);
+  check<unsigned long, true>(Queue);
+  check<float, true>(Queue);
   if (Queue.get_device().has_extension("cl_khr_fp64")) {
     check<double>(Queue);
+    check<double, true>(Queue);
   }
   std::cout << "Test passed." << std::endl;
   return 0;
