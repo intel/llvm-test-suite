@@ -101,7 +101,7 @@ int main() {
           "Unrecognized key in device allowlist",
           "Unrecognized key in SYCL_DEVICE_ALLOWLIST"};
       const std::string GotMessage(E.what());
-      const bool CorrectMsg = false;
+      bool CorrectMsg = false;
       for (const auto &ExpectedMsg : ExpectedMsgs) {
         if (GotMessage.find(ExpectedMsg) != std::string::npos) {
           CorrectMsg = true;
