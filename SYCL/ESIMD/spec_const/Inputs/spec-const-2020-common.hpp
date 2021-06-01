@@ -78,4 +78,3 @@ int main(int argc, char **argv) {
   std::cout << "FAILED" << std::endl;
   return 1;
 }
-

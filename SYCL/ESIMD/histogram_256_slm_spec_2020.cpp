@@ -169,7 +169,7 @@ int main(int argc, char **argv) {
             histogram_atomic(input_ptr, output_surface, ndi.get_group(0),
                              ndi.get_local_id(0), 16,
                              kh.get_specialization_constant<NumBlocksSpecId>());
-      });
+          });
     });
     e.wait();
   } catch (cl::sycl::exception const &e) {
