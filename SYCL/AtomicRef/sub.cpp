@@ -1,12 +1,8 @@
-// RUN: %clangxx -fsycl -fsycl-unnamed-lambda -DSYCL_USE_NATIVE_FP_ATOMICS \
-// RUN: -fsycl-targets=%sycl_triple %s -o %t.out \
+// RUN: %clangxx -fsycl -fsycl-unnamed-lambda -fsycl-targets=%sycl_triple %s -o %t.out \
 // RUN: -Xsycl-target-backend=nvptx64-nvidia-cuda-sycldevice --cuda-gpu-arch=sm_60
 // RUN: %HOST_RUN_PLACEHOLDER %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // RUN: %CPU_RUN_PLACEHOLDER %t.out
-// TODO: Remove items from UNSUPPORTED once corresponding backends support
-// "native" implementation
-// UNSUPPORTED: cpu
 
 #include <CL/sycl.hpp>
 #include <algorithm>
