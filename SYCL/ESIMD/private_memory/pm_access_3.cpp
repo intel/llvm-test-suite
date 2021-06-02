@@ -8,5 +8,5 @@
 
 // REQUIRES: gpu
 // UNSUPPORTED: cuda
-// RUN: %clangxx -fsycl -Xs "-stateless-stack-mem-size=32768" -I%S/.. %S/Inputs/pm_common.cpp -o %t.out
+// RUN: %clangxx -fsycl -Xs "-stateless-stack-mem-size=131072" -I%S/.. %S/Inputs/pm_common.cpp -o %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out 3
