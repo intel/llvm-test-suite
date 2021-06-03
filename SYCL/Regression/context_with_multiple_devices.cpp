@@ -1,7 +1,7 @@
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %s -o %t.out
 // RUN: env NEOReadDebugKeys=1 CreateMultipleRootDevices=2 %GPU_RUN_PLACEHOLDER %t.out
 // REQUIRES: level_zero && gpu
-
+// UNSUPPORTED: gpu-intel-dg1
 // Test the Level Zero backend with context having multiple root devices
 
 #include <CL/sycl.hpp>
