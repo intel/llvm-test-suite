@@ -1,5 +1,5 @@
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %s -o %t.out
-// RUN: %GPU_RUN_PLACEHOLDER %t.out
+// RUN: env NEOReadDebugKeys=1 CreateMultipleRootDevices=2 %GPU_RUN_PLACEHOLDER %t.out
 // REQUIRES: level_zero && gpu
 
 // Test the Level Zero backend with context having multiple root devices
@@ -13,10 +13,7 @@ int main() {
   auto Devs = Plt.get_devices();
   auto Ctx = context(Devs);
 
-  // Test the patform with 2 or more devices
-  if (Devs.size() < 2) {
-    return 0;
-  }
+  assert(Devs.size() == 2);
 
   queue Queue1{Ctx, Devs[0]};
   queue Queue2{Ctx, Devs[1]};
