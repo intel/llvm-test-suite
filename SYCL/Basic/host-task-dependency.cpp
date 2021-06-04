@@ -6,15 +6,20 @@
 // TODO: Behaviour is unstable for level zero on Windows. Enable when fixed.
 // UNSUPPORTED: windows && level_zero
 
+#define SYCL2020_DISABLE_DEPRECATION_WARNINGS
+
+#include <CL/sycl.hpp>
+
 #include <atomic>
 #include <condition_variable>
 #include <future>
 #include <mutex>
 #include <thread>
 
-#include <CL/sycl.hpp>
-
 namespace S = cl::sycl;
+
+template <typename T, bool B>
+class NameGen;
 
 struct Context {
   std::atomic_bool Flag;
@@ -93,7 +98,7 @@ template <bool UseSYCL2020HostTask> void Thread1Fn(Context *Ctx) {
         GeneratorAcc[Idx] = Idx;
     };
 
-    CGH.single_task<class GeneratorTask>(GeneratorKernel);
+    CGH.single_task<NameGen<class Gen, UseSYCL2020HostTask>>(GeneratorKernel);
   });
 
   // 2. submit host task writing from buf 1 to buf 2
@@ -114,7 +119,7 @@ template <bool UseSYCL2020HostTask> void Thread1Fn(Context *Ctx) {
         DstAcc[Idx] = SrcAcc[Idx];
     };
 
-    CGH.single_task<class CopierTask>(CopierKernel);
+    CGH.single_task<NameGen<class Copier, UseSYCL2020HostTask>>(CopierKernel);
   });
 
   // 4. check data in buffer #3
@@ -155,7 +160,8 @@ template <bool UseSYCL2020HostTask> void test() {
   Context Ctx{{false}, Queue, {10}, {10}, {10}, {}, {}};
 
   // 0. setup: thread 1 T1: exec smth; thread 2 T2: waits; init flag F = false
-  auto A1 = std::async(std::launch::async, Thread1Fn<true>, &Ctx);
+  auto A1 =
+      std::async(std::launch::async, Thread1Fn<UseSYCL2020HostTask>, &Ctx);
   auto A2 = std::async(std::launch::async, Thread2Fn, &Ctx);
 
   A1.get();
