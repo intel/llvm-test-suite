@@ -4,7 +4,7 @@
 // RUN: %ACC_RUN_PLACEHOLDER %t.out
 // TODO test disabled due to Jenkins testing failure on unrelated commit
 // failed on Linux level_zero only
-// UNSUPPORTED: *
+// UNSUPPORTED: linux && level_zero
 
 // This test performs basic checks of parallel_for(nd_range, reduction, func)
 // with reductions initialized with USM var. It tests only SYCL-2020 reduction
