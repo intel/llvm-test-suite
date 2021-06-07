@@ -18,8 +18,7 @@
 
 namespace S = cl::sycl;
 
-template <typename T, bool B>
-class NameGen;
+template <typename T, bool B> class NameGen;
 
 struct Context {
   std::atomic_bool Flag;
@@ -192,25 +191,25 @@ int main() {
   return 0;
 }
 
-// launch of GeneratorTask kernel
+// launch of Gen kernel
 // CHECK:---> piKernelCreate(
-// CHECK: GeneratorTask
+// CHECK: NameGen
 // CHECK:---> piEnqueueKernelLaunch(
 // prepare for host task
 // CHECK:---> piEnqueueMemBuffer{{Map|Read}}(
-// launch of CopierTask kernel
+// launch of Copier kernel
 // CHECK:---> piKernelCreate(
-// CHECK: CopierTask
+// CHECK: Copier
 // CHECK:---> piEnqueueKernelLaunch(
 
 // CHECK:---> piKernelCreate(
-// CHECK: GeneratorTask
+// CHECK: NameGen
 // CHECK:---> piEnqueueKernelLaunch(
 // prepare for host task
 // CHECK:---> piEnqueueMemBuffer{{Map|Read}}(
-// launch of CopierTask kernel
+// launch of Copier kernel
 // CHECK:---> piKernelCreate(
-// CHECK: CopierTask
+// CHECK: Copier
 // CHECK:---> piEnqueueKernelLaunch(
 
 // TODO need to check for piEventsWait as "wait on dependencies of host task".
