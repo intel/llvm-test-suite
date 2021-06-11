@@ -9,7 +9,7 @@
 // Test currently timeouts on Windows Level Zero and OpenCL
 // UNSUPPORTED: windows
 // Temporarily disabled due to flaky behavior
-// REQUIRES: TEMPORARY_DISBLED
+// REQUIRES: TEMPORARY_DISABLED
 // RUN: %clangxx -fsycl %s -o %t.out
 // RUN: env IGC_FunctionControl=3 IGC_ForceInlineStackCallWithImplArg=1 %GPU_RUN_PLACEHOLDER %t.out
 // UNSUPPORTED: cuda
