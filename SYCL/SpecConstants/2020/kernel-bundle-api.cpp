@@ -133,18 +133,21 @@ bool test_set_and_get_on_host(sycl::queue q) {
         sycl::get_kernel_bundle<sycl::bundle_state::input>(q.get_context());
 
     if (!input_bundle.contains_specialization_constants()) {
-      std::cout << "Obtained kernel_bundle is expected to contain specialization "
-                   "constants, but it doesn't!"
-                << std::endl;
+      std::cout
+          << "Obtained kernel_bundle is expected to contain specialization "
+             "constants, but it doesn't!"
+          << std::endl;
       return false;
     }
 
     // Check default values
-    if (!check_value(0, input_bundle.get_specialization_constant<int_id>(),
-                     "integer specializaiton constant before setting any value"))
+    if (!check_value(
+            0, input_bundle.get_specialization_constant<int_id>(),
+            "integer specializaiton constant before setting any value"))
       ++errors;
 
-    if (!check_value(3.14, input_bundle.get_specialization_constant<double_id>(),
+    if (!check_value(3.14,
+                     input_bundle.get_specialization_constant<double_id>(),
                      "double specializaiton constant before setting any value"))
       ++errors;
 
@@ -166,9 +169,9 @@ bool test_set_and_get_on_host(sycl::queue q) {
         new_custom_type_value);
 
     // And re-check them again
-    if (!check_value(new_int_value,
-                     input_bundle.get_specialization_constant<int_id>(),
-                     "integer specializaiton constant after setting a new value"))
+    if (!check_value(
+            new_int_value, input_bundle.get_specialization_constant<int_id>(),
+            "integer specializaiton constant after setting a new value"))
       ++errors;
 
     if (!check_value(new_double_value,
@@ -196,10 +199,9 @@ bool test_set_and_get_on_host(sycl::queue q) {
                      "double specializaiton constant after build"))
       ++errors;
 
-    if (!check_value(
-            new_custom_type_value,
-            exec_bundle.get_specialization_constant<custom_type_id>(),
-            "custom_type specializaiton constant after build"))
+    if (!check_value(new_custom_type_value,
+                     exec_bundle.get_specialization_constant<custom_type_id>(),
+                     "custom_type specializaiton constant after build"))
       ++errors;
   } catch (sycl::exception &e) {
   }
