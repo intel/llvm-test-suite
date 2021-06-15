@@ -258,4 +258,3 @@ bool test_set_and_get_on_device(sycl::queue q) {
 
   return true;
 }
-
