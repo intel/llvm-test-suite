@@ -4,8 +4,8 @@
 // RUN: %ACC_RUN_PLACEHOLDER %t.out | %ACC_RUN_PLACEHOLDER FileCheck %s
 //
 // CHECK-NOT:  One shouldn't see this message
-// CHECK:      {{.*}}assert_in_kernels.cpp:37: void kernelFunc2(int *, int): global id: [{{[0,2]}},0,0],
-// CHECK-SAME: local id: [0,0,0] Assertion `Buf[wiID] == 0 && \"from assert statement\"` failed.
+// CHECK:      {{.*}}assert_in_kernels.cpp:37: void kernelFunc2(int *, int): global id: [{{[0,2]}},0,0], local id: [0,0,0]
+// CHECK-SAME: Assertion `Buf[wiID] == 0 && \"from assert statement\"` failed.
 // CHECK-NOT:  test aborts earlier, one shouldn't see this message
 // CHECK-NOT:  The test ended.
 

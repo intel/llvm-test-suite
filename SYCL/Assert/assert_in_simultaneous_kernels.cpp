@@ -3,8 +3,8 @@
 // RUN: %GPU_RUN_PLACEHOLDER %t.out | %GPU_RUN_PLACEHOLDER FileCheck %s
 // RUN: %ACC_RUN_PLACEHOLDER %t.out | %ACC_RUN_PLACEHOLDER FileCheck %s
 //
-// CHECK:      {{.*}}assert_in_simultaneous_kernels.cpp:21: void assertFunc(): global id: [9,7,0],
-// CHECK-SAME: local id: [0,0,0] Assertion `false && \"this message from assert statement\"` failed.
+// CHECK:      {{.*}}assert_in_simultaneous_kernels.cpp:21: void assertFunc(): global id: [9,7,0], local id: [0,0,0]
+// CHECK-SAME: Assertion `false && \"from assert statement\"` failed.
 // CHECK-NOT:  The test ended.
 
 #include <CL/sycl.hpp>
@@ -18,7 +18,7 @@ using namespace cl::sycl::access;
 static constexpr size_t NUM_THREADS = 4;
 static constexpr size_t RANGE_SIZE = 1024;
 
-void assertFunc() { assert(false && "this message from assert statement"); }
+void assertFunc() { assert(false && "from assert statement"); }
 
 template <class kernel_name> void assertTest(queue *Q) {
   Q->submit([&](handler &CGH) {
