@@ -1,7 +1,7 @@
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %s -o %t.out %threads_lib
-// RUN: %CPU_RUN_PLACEHOLDER %t.out | FileCheck %s
-// RUN: %GPU_RUN_PLACEHOLDER %t.out | FileCheck %s
-// RUN: %ACC_RUN_PLACEHOLDER %t.out | FileCheck %s
+// RUN: %CPU_RUN_PLACEHOLDER %t.out | %CPU_RUN_PLACEHOLDER FileCheck %s
+// RUN: %GPU_RUN_PLACEHOLDER %t.out | %GPU_RUN_PLACEHOLDER FileCheck %s
+// RUN: %ACC_RUN_PLACEHOLDER %t.out | %ACC_RUN_PLACEHOLDER FileCheck %s
 //
 // CHECK:      {{.*}}assert_in_simultaneous_kernels.cpp:21: void assertFunc(): global id: [9,7,0],
 // CHECK-SAME: local id: [0,0,0] Assertion `false && \"this message from assert statement\"` failed.
