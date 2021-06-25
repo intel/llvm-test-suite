@@ -62,7 +62,7 @@ template <MathOp Op> float HostMathFunc(float X);
 
 // --- Specializations per each extended math operation
 
-#define DEFINE_ESIMD_OP(Op, HostOp)                                                  \
+#define DEFINE_ESIMD_OP(Op, HostOp)                                            \
   template <> float HostMathFunc<MathOp::Op>(float X) { return HostOp(X); }    \
   template <int VL> struct DeviceMathFunc<VL, MathOp::Op> {                    \
     simd<float, VL>                                                            \
@@ -71,7 +71,7 @@ template <MathOp Op> float HostMathFunc(float X);
     }                                                                          \
   }
 
-#define DEFINE_SIMD_OVERLOADED_STD_SYCL_OP(Op, HostOp)                                     \
+#define DEFINE_SIMD_OVERLOADED_STD_SYCL_OP(Op, HostOp)                         \
   template <> float HostMathFunc<MathOp::Op>(float X) { return HostOp(X); }    \
   template <int VL> struct DeviceMathFunc<VL, MathOp::Op> {                    \
     simd<float, VL>                                                            \
