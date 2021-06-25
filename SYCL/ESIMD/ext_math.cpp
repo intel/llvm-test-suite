@@ -62,7 +62,7 @@ template <MathOp Op> float HostMathFunc(float X);
 
 // --- Specializations per each extended math operation
 
-#define DEFINE_OP(Op, HostOp)                                                  \
+#define DEFINE_ESIMD_OP(Op, HostOp)                                                  \
   template <> float HostMathFunc<MathOp::Op>(float X) { return HostOp(X); }    \
   template <int VL> struct DeviceMathFunc<VL, MathOp::Op> {                    \
     simd<float, VL>                                                            \
@@ -71,7 +71,7 @@ template <MathOp Op> float HostMathFunc(float X);
     }                                                                          \
   }
 
-#define DEFINE_OP_REUSE_SCALAR(Op, HostOp)                                     \
+#define DEFINE_SIMD_OVERLOADED_STD_SYCL_OP(Op, HostOp)                                     \
   template <> float HostMathFunc<MathOp::Op>(float X) { return HostOp(X); }    \
   template <int VL> struct DeviceMathFunc<VL, MathOp::Op> {                    \
     simd<float, VL>                                                            \
@@ -80,13 +80,13 @@ template <MathOp Op> float HostMathFunc(float X);
     }                                                                          \
   }
 
-DEFINE_OP_REUSE_SCALAR(sin, sin);
-DEFINE_OP_REUSE_SCALAR(cos, cos);
-DEFINE_OP_REUSE_SCALAR(exp, exp);
-DEFINE_OP_REUSE_SCALAR(log, log);
-DEFINE_OP(inv, 1.0f /);
-DEFINE_OP(sqrt, sqrt);
-DEFINE_OP(rsqrt, 1.0f / sqrt);
+DEFINE_SIMD_OVERLOADED_STD_SYCL_OP(sin, sin);
+DEFINE_SIMD_OVERLOADED_STD_SYCL_OP(cos, cos);
+DEFINE_SIMD_OVERLOADED_STD_SYCL_OP(exp, exp);
+DEFINE_SIMD_OVERLOADED_STD_SYCL_OP(log, log);
+DEFINE_ESIMD_OP(inv, 1.0f /);
+DEFINE_ESIMD_OP(sqrt, sqrt);
+DEFINE_ESIMD_OP(rsqrt, 1.0f / sqrt);
 
 // --- Generic kernel calculating an extended math operation on array elements
 
