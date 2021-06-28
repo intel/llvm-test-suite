@@ -4,8 +4,8 @@
 //
 // CHECK-NOT: ---> LEAK
 
-// The test is to check that there are no leaks reported with the embedded ZE_DEBUG=4
-// testing capability. Example of a leak reported is this:
+// The test is to check that there are no leaks reported with the embedded
+// ZE_DEBUG=4 testing capability. Example of a leak reported is this:
 //
 // clang-format off
 // ZE_DEBUG=4: check balance of create/destroy calls
@@ -26,7 +26,7 @@
 //              zeMemAllocShared = 0     \--->                     zeMemFree = 0
 //
 // clang-format on
-// 
+//
 // NOTE: The 129 value below is to be larger thatn the "128" heuristic in
 // queue_impl::addSharedEvent.
 
