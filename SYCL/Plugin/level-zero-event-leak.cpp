@@ -27,14 +27,14 @@
 //
 // clang-format on
 //
-// NOTE: The 129 value below is to be larger than the "128" heuristic in
+// NOTE: The 1000 value below is to be larger than the "128" heuristic in
 // queue_impl::addSharedEvent.
 
 #include <CL/sycl.hpp>
 using namespace cl;
 int main(int argc, char **argv) {
   sycl::queue Q;
-  const unsigned n_chunk = 129;
+  const unsigned n_chunk = 1000;
   for (int i = 0; i < n_chunk; i++)
     Q.single_task([=]() {});
   Q.wait();
