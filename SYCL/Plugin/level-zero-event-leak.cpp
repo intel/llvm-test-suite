@@ -27,7 +27,7 @@
 //
 // clang-format on
 //
-// NOTE: The 129 value below is to be larger thatn the "128" heuristic in
+// NOTE: The 129 value below is to be larger than the "128" heuristic in
 // queue_impl::addSharedEvent.
 
 #include <CL/sycl.hpp>
