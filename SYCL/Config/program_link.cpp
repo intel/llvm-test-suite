@@ -44,9 +44,7 @@ int main(void) {
 
   // enforce SYCL toolchain to emit device image but no enqueue in run-time
   if (false) {
-    Q.submit([&](handler &CGH) {
-      CGH.parallel_for(range<1>{2}, DUMMY{});
-    });
+    Q.submit([&](handler &CGH) { CGH.parallel_for(range<1>{2}, DUMMY{}); });
   }
 
   return 0;
