@@ -15,8 +15,8 @@
 #include <CL/sycl.hpp>
 
 using namespace cl::sycl;
-// change to 'using namespace cl::sycl::oneapi' after PR intel/llvm:4014 is
-// merged
+// TODO: change to 'using namespace cl::sycl::oneapi' after PR intel/llvm:4014
+// is merged
 using namespace cl::sycl::ONEAPI;
 
 int main() {
@@ -27,7 +27,7 @@ int main() {
   std::cout << "# Devices found: " << Devs.size() << std::endl;
 
   if (Devs.size() > 1) {
-    // change all occurrences of filter_selector to 'filter_selector' or
+    // TODO: change all occurrences of filter_selector to 'filter_selector' or
     // 'oneapi::filter_selector' after PR intel/llvm:4014 is merged
     ONEAPI::filter_selector filter("1");
 
