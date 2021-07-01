@@ -31,7 +31,7 @@
 // RUN: %LLVM_SPIRV -r %t.spv -o=%t.bc
 // RUN: %LLVM_LINK %t.bc %T/fallback-cassert.bc -o=%t2.bc
 // RUN: %LLVM_SPIRV %t2.bc -o=%t.spv
-// RUN: opencl-aot %sycl_libs_dir/libsycl-fallback-cassert.spv %t.spv -o=%t_cpu.ir --device=cpu
+// RUN: opencl-aot %t.spv -o=%t_cpu.ir --device=cpu
 // RUN: ocloc -file %t.spv -spirv_input -output %t_gen.out -output_no_suffix -device cfl
 // RUN: aoc %t.spv -o %t_fpga.aocx -sycl -dep-files=%t.d
 
