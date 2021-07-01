@@ -19,6 +19,7 @@
 // RUN: env SYCL_DEVICE_FILTER=cpu,host %t.out | FileCheck %s --check-prefixes=CHECK-CPU-HOST
 // RUN: env SYCL_DEVICE_FILTER=acc,cpu %t.out | FileCheck %s --check-prefixes=CHECK-ACC-CPU
 // RUN: env SYCL_DEVICE_FILTER=gpu,host %t.out | FileCheck %s --check-prefixes=CHECK-GPU-HOST
+//
 // RUN: env SYCL_DEVICE_FILTER=cpu,acc,host %t.out | FileCheck %s --check-prefixes=CHECK-ACC-CPU-HOST
 // RUN: env SYCL_DEVICE_FILTER=cpu,acc,gpu %t.out | FileCheck %s --check-prefixes=CHECK-ACC-GPU-CPU
 // RUN: env CL_CONFIG_CPU_EMULATE_DEVICES=2 SYCL_DEVICE_FILTER=cpu,acc,host %t.out | FileCheck %s --check-prefixes=CHECK-ACC-CPU-HOST
@@ -73,4 +74,3 @@
 // CHECK-ACC-GPU-CPU: Device: gpu
 // CHECK-ACC-GPU-CPU: Device: cpu
 // CHECK-ACC-GPU-CPU-NOT: Device: host
-
