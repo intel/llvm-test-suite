@@ -26,7 +26,8 @@
 // RUN: %clangxx -fsycl -fsycl-link-targets=spir64-unknown-unknown-sycldevice %t.o -o %t.spv
 // AOT-compile device binary images
 // RUN: opencl-aot %sycl_libs_dir/libsycl-fallback-cassert.spv %t.spv -o=%t_cpu.ir --device=cpu
-// neither ocloc nor aoc can compile several files, hence, here is this workaround
+// neither ocloc nor aoc can compile several files, hence, here is this
+// workaround
 // RUN: %LLVM_SPIRV -r %sycl_libs_dir/libsycl-fallback-cassert.spv -o=%T/fallback-cassert.bc
 // RUN: %LLVM_SPIRV -r %t.spv -o=%t.bc
 // RUN: %LLVM_LINK %t.bc %T/fallback-cassert.bc -o=%t2.bc
