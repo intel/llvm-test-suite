@@ -14,8 +14,8 @@ int main() {
 }
 
 //CHECK: ---> piEnqueueKernelLaunch(
-//CHECK: ---> piQueueRelease(
 //CHECK: ---> piEventRelease(
+//CHECK: ---> piQueueRelease(
 //CHECK: ---> piContextRelease(
 //CHECK: ---> piKernelRelease(
 //CHECK: ---> piProgramRelease(
