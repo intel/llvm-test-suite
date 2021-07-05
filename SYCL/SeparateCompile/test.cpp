@@ -35,7 +35,7 @@
 // RUN: clang-offload-wrapper -o wrapper.bc -host=x86_64 -kind=sycl -target=spir64 app.spv
 //
 // >> compile .bc to .o
-// RUN: %clangxx -c wrapper.bc -o wrapper.o
+// RUN: %clangxx SYCL_DISABLE_FALLBACK_ASSERT -c wrapper.bc -o wrapper.o
 //
 // >> ---- link the full hetero app
 // RUN: %clangxx wrapper.o a.o b.o -o app.exe %sycl_options
