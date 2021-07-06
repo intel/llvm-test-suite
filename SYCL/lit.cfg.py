@@ -286,7 +286,7 @@ if llvm_spirv_path:
   lit_config.note("Found llvm-spirv")
   config.substitutions.append( ('%LLVM_SPIRV', os.path.realpath(llvm_spirv_path)) )
 else:
-  lit_config.warning("Can't find llvm_spirv")
+  lit_config.warning("Can't find llvm-spirv")
 
 llvm_link_path = find_executable("llvm-link")
 if llvm_link_path:
