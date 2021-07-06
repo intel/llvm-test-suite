@@ -319,15 +319,15 @@ int main() {
 //CHECK: image_desc w/h/d : 16 / 1 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4340
 //CHECK: ---> piEnqueueMemImageRead(
 //CHECK: pi_image_region width/height/depth : 16/1/1
-//CHECK: ---> piEnqueueMemImageWrite(
-//CHECK: pi_image_region width/height/depth : 16/1/1
 //CHECK: ---> piMemImageCreate(
 //CHECK: image_desc w/h/d : 16 / 1 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4340
 //CHECK: ---> piEnqueueMemImageRead(
 //CHECK: pi_image_region width/height/depth : 16/1/1
+//CHECK: about to destruct 1D
 //CHECK: ---> piEnqueueMemImageWrite(
 //CHECK: pi_image_region width/height/depth : 16/1/1
-//CHECK: about to destruct 1D
+//CHECK: ---> piEnqueueMemImageWrite(
+//CHECK: pi_image_region width/height/depth : 16/1/1
 //CHECK: ---> piEnqueueMemImageRead(
 //CHECK: pi_image_region width/height/depth : 16/1/1
 //CHECK: -- 2D
@@ -339,17 +339,17 @@ int main() {
 //CHECK: image_desc w/h/d : 16 / 5 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4337
 //CHECK: ---> piEnqueueMemImageRead(
 //CHECK: pi_image_region width/height/depth : 16/5/1
-//CHECK: ---> piEnqueueMemImageWrite(
-//CHECK: pi_image_region width/height/depth : 16/5/1
-// CHECK-NEXT: <unknown> : 256
 //CHECK: ---> piMemImageCreate(
 //CHECK: image_desc w/h/d : 16 / 5 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4337
 //CHECK: ---> piEnqueueMemImageRead(
 //CHECK: pi_image_region width/height/depth : 16/5/1
+//CHECK: about to destruct 2D
 //CHECK: ---> piEnqueueMemImageWrite(
 //CHECK: pi_image_region width/height/depth : 16/5/1
 // CHECK-NEXT: <unknown> : 256
-//CHECK: about to destruct 2D
+//CHECK: ---> piEnqueueMemImageWrite(
+//CHECK: pi_image_region width/height/depth : 16/5/1
+// CHECK-NEXT: <unknown> : 256
 //CHECK: ---> piEnqueueMemImageRead(
 //CHECK: pi_image_region width/height/depth : 16/5/1
 //CHECK: -- 3D
@@ -361,19 +361,19 @@ int main() {
 //CHECK: image_desc w/h/d : 16 / 5 / 3  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4338
 //CHECK: ---> piEnqueueMemImageRead(
 //CHECK: pi_image_region width/height/depth : 16/5/3
-//CHECK: ---> piEnqueueMemImageWrite(
-//CHECK: pi_image_region width/height/depth : 16/5/3
-// CHECK-NEXT: <unknown> : 256
-// CHECK-NEXT: <unknown> : 1280
 //CHECK: ---> piMemImageCreate(
 //CHECK: image_desc w/h/d : 16 / 5 / 3  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4338
 //CHECK: ---> piEnqueueMemImageRead(
 //CHECK: pi_image_region width/height/depth : 16/5/3
+//CHECK: about to destruct 3D
 //CHECK: ---> piEnqueueMemImageWrite(
 //CHECK: pi_image_region width/height/depth : 16/5/3
 // CHECK-NEXT: <unknown> : 256
 // CHECK-NEXT: <unknown> : 1280
-//CHECK: about to destruct 3D
+//CHECK: ---> piEnqueueMemImageWrite(
+//CHECK: pi_image_region width/height/depth : 16/5/3
+// CHECK-NEXT: <unknown> : 256
+// CHECK-NEXT: <unknown> : 1280
 //CHECK: ---> piEnqueueMemImageRead(
 //CHECK: pi_image_region width/height/depth : 16/5/3
 // CHECK-NEXT: <unknown> : 256
