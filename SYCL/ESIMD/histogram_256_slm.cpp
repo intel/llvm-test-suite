@@ -61,10 +61,10 @@ ESIMD_INLINE void histogram_atomic(const uint32_t *input_ptr, uint32_t *output,
   // Update global sum by atomically adding each local histogram
   simd<uint, 16> local_histogram;
   local_histogram = slm_load<uint32_t, 16>(slm_offset);
-  flat_atomic<atomic_op::add, uint32_t, 8>(
-      output, slm_offset.select<8, 1>(0), local_histogram.select<8, 1>(0), 1);
-  flat_atomic<atomic_op::add, uint32_t, 8>(
-      output, slm_offset.select<8, 1>(8), local_histogram.select<8, 1>(8), 1);
+  flat_atomic<atomic_op::add, uint32_t, 8>(output, slm_offset.select<8, 1>(0),
+                                           local_histogram.select<8, 1>(0), 1);
+  flat_atomic<atomic_op::add, uint32_t, 8>(output, slm_offset.select<8, 1>(8),
+                                           local_histogram.select<8, 1>(8), 1);
 }
 
 // This function calculates histogram of the image with the CPU.

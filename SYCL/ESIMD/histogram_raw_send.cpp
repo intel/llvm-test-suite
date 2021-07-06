@@ -216,8 +216,8 @@ int main(int argc, char *argv[]) {
 #ifdef __SYCL_DEVICE_ONLY__
               // flat_atomic<atomic_op::add, unsigned int,
               // 8>(bins, offset, src, 1);
-              atomic_write<atomic_op::add, unsigned int, 8>(
-                  bins, offset, src, 1);
+              atomic_write<atomic_op::add, unsigned int, 8>(bins, offset, src,
+                                                            1);
               offset += 8 * sizeof(unsigned int);
 #else
               simd<unsigned int, 8> vals;

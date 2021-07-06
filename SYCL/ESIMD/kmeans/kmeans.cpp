@@ -233,12 +233,10 @@ int main(int argc, char *argv[]) {
       cgh.parallel_for<class kMeans>(
           Range, [=](nd_item<1> it) SYCL_ESIMD_KERNEL {
             simd<float, 2 * NUM_CENTROIDS_ALLOCATED> centroids(0);
-            auto centroidsXYXY =
-                centroids.bit_cast_view<float, NUM_CENTROIDS_ALLOCATED / SIMD_SIZE,
-                                 SIMD_SIZE * 2>();
-            auto centroidsXY =
-                centroids.bit_cast_view<float, 2 * NUM_CENTROIDS_ALLOCATED / SIMD_SIZE,
-                                 SIMD_SIZE>();
+            auto centroidsXYXY = centroids.bit_cast_view<
+                float, NUM_CENTROIDS_ALLOCATED / SIMD_SIZE, SIMD_SIZE * 2>();
+            auto centroidsXY = centroids.bit_cast_view<
+                float, 2 * NUM_CENTROIDS_ALLOCATED / SIMD_SIZE, SIMD_SIZE>();
 
 #pragma unroll
             for (int i = 0; i < NUM_CENTROIDS_ALLOCATED / SIMD_SIZE; i++) {
@@ -251,15 +249,12 @@ int main(int argc, char *argv[]) {
             simd<float, NUM_CENTROIDS_ALLOCATED> accumysum(0);
             simd<int, NUM_CENTROIDS_ALLOCATED> accumnpoints(0);
 
-            auto xsum =
-                accumxsum.bit_cast_view<float, NUM_CENTROIDS_ALLOCATED / SIMD_SIZE,
-                                 SIMD_SIZE>();
-            auto ysum =
-                accumysum.bit_cast_view<float, NUM_CENTROIDS_ALLOCATED / SIMD_SIZE,
-                                 SIMD_SIZE>();
-            auto npoints =
-                accumnpoints.bit_cast_view<int, NUM_CENTROIDS_ALLOCATED / SIMD_SIZE,
-                                    SIMD_SIZE>();
+            auto xsum = accumxsum.bit_cast_view<
+                float, NUM_CENTROIDS_ALLOCATED / SIMD_SIZE, SIMD_SIZE>();
+            auto ysum = accumysum.bit_cast_view<
+                float, NUM_CENTROIDS_ALLOCATED / SIMD_SIZE, SIMD_SIZE>();
+            auto npoints = accumnpoints.bit_cast_view<
+                int, NUM_CENTROIDS_ALLOCATED / SIMD_SIZE, SIMD_SIZE>();
 
             // each thread handles POINTS_PER_THREAD points
             int index = it.get_global_id(0) * POINTS_PER_THREAD / SIMD_SIZE;
