@@ -15,14 +15,14 @@
 // FIXME Disabled use of devicelib by assert feature until the 2-step build gets
 // fixed.
 // RUN: rm %t_image.a || true
-// RUN: %clangx -DSYCL_DISABLE_FALLBACK_ASSERT=1x -fsycl -fintelfpga -fsycl-link=image %S/Inputs/fpga_device.cpp -o %t_image.lib
+// RUN: %clangxx -DSYCL_DISABLE_FALLBACK_ASSERT=1 -fsycl -fintelfpga -fsycl-link=image %S/Inputs/fpga_device.cpp -o %t_image.lib
 // Produce a host object
-// RUN: %clangx -DSYCL_DISABLE_FALLBACK_ASSERT=1x -fsycl -fintelfpga -DHOST_PART %S/Inputs/fpga_host.cpp -c -o %t.obj
+// RUN: %clangxx -DSYCL_DISABLE_FALLBACK_ASSERT=1 -fsycl -fintelfpga -DHOST_PART %S/Inputs/fpga_host.cpp -c -o %t.obj
 
 // AOCX with source
-// RUN: %clangx -DSYCL_DISABLE_FALLBACK_ASSERT=1x -fsycl -fintelfpga -DHOST_PART %S/Inputs/fpga_host.cpp %t_image.lib -o %t_aocx_src.out
+// RUN: %clangxx -DSYCL_DISABLE_FALLBACK_ASSERT=1 -fsycl -fintelfpga -DHOST_PART %S/Inputs/fpga_host.cpp %t_image.lib -o %t_aocx_src.out
 // AOCX with object
-// RUN: %clangx -DSYCL_DISABLE_FALLBACK_ASSERT=1x -fsycl -fintelfpga %t.obj %t_image.lib -o %t_aocx_obj.out
+// RUN: %clangxx -DSYCL_DISABLE_FALLBACK_ASSERT=1 -fsycl -fintelfpga %t.obj %t_image.lib -o %t_aocx_obj.out
 //
 // RUN: %ACC_RUN_PLACEHOLDER %t_aocx_src.out
 // RUN: %ACC_RUN_PLACEHOLDER %t_aocx_obj.out
