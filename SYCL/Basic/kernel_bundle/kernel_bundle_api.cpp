@@ -30,18 +30,25 @@ void checkException(TryBodyT TryBody, const std::string &ExpectedErrMsg) {
 }
 
 int main() {
-  sycl::queue Q;
-  sycl::queue Q2;
+  const std::vector<sycl::platform> Platforms = sycl::platform::get_platforms();
 
-  // No support for host device so far.
-  if (Q.is_host() || Q2.is_host())
-    return 0;
+  std::vector<sycl::queue> Queues;
 
+  for (const sycl::platform &Platform : Platforms) {
+    const std::vector<sycl::device> Devices = Platform.get_devices();
+    assert(!Devices.empty() && "No devices in the platform?");
+
+    // Assuming that if a device is the host device then it is the only device
+    // in the list
+    if (Devices[0].is_host())
+      continue;
+
+    Queues.emplace_back(Devices[0]);
+  }
+
+  sycl::queue &Q = Queues[0];
   const sycl::context Ctx = Q.get_context();
   const sycl::device Dev = Q.get_device();
-
-  const sycl::context Ctx2 = Q2.get_context();
-  const sycl::device Dev2 = Q2.get_device();
 
   // The code is needed to just have device images in the executable
   if (0) {
@@ -301,69 +308,83 @@ int main() {
         "Not all devices are in the set of associated "
         "devices for input bundle or vector of devices is empty");
 
-    std::cerr << "Mismatched contexts for link" << std::endl;
-    checkException(
-        [&]() {
-          sycl::kernel_bundle KernelBundleObject1 =
-              sycl::get_kernel_bundle<sycl::bundle_state::object>(Ctx, {Dev});
+    // Check if we have second queue which is bound to a different context
+    if (Queues.size() > 1) {
+      sycl::queue &Q2 = Queues[0];
 
-          sycl::kernel_bundle KernelBundleObject2 =
-              sycl::get_kernel_bundle<sycl::bundle_state::object>(Ctx2, {Dev2});
+      const sycl::context Ctx2 = Q2.get_context();
+      const sycl::device Dev2 = Q2.get_device();
 
-          sycl::link({KernelBundleObject1, KernelBundleObject2}, {Dev2});
-        },
-        "Not all input bundles have the same associated context");
+      std::cerr << "Mismatched contexts for link" << std::endl;
+      checkException(
+          [&]() {
+            sycl::kernel_bundle KernelBundleObject1 =
+                sycl::get_kernel_bundle<sycl::bundle_state::object>(Ctx, {Dev});
 
-    std::cerr << "Empty device list for link" << std::endl;
-    checkException(
-        [&]() {
-          sycl::kernel_bundle KernelBundleObject1 =
-              sycl::get_kernel_bundle<sycl::bundle_state::object>(Ctx, {Dev});
+            sycl::kernel_bundle KernelBundleObject2 =
+                sycl::get_kernel_bundle<sycl::bundle_state::object>(Ctx2,
+                                                                    {Dev2});
 
-          sycl::kernel_bundle KernelBundleObject2 =
-              sycl::get_kernel_bundle<sycl::bundle_state::object>(Ctx, {Dev});
+            sycl::link({KernelBundleObject1, KernelBundleObject2}, {Dev2});
+          },
+          "Not all input bundles have the same associated context");
 
-          sycl::link({KernelBundleObject1, KernelBundleObject2},
-                     std::vector<sycl::device>{});
-        },
-        "Not all devices are in the set of associated devices for input "
-        "bundles or vector of devices is empty");
+      std::cerr << "Empty device list for link" << std::endl;
+      checkException(
+          [&]() {
+            sycl::kernel_bundle KernelBundleObject1 =
+                sycl::get_kernel_bundle<sycl::bundle_state::object>(Ctx, {Dev});
 
-    std::cerr << "Mismatched contexts for join" << std::endl;
-    checkException(
-        [&]() {
-          sycl::kernel_bundle KernelBundleObject1 =
-              sycl::get_kernel_bundle<sycl::bundle_state::object>(Ctx);
+            sycl::kernel_bundle KernelBundleObject2 =
+                sycl::get_kernel_bundle<sycl::bundle_state::object>(Ctx, {Dev});
 
-          sycl::kernel_bundle KernelBundleObject2 =
-              sycl::get_kernel_bundle<sycl::bundle_state::object>(Ctx2);
+            sycl::link({KernelBundleObject1, KernelBundleObject2},
+                       std::vector<sycl::device>{});
+          },
+          "Not all devices are in the set of associated devices for input "
+          "bundles or vector of devices is empty");
 
-          sycl::join(
-              std::vector<sycl::kernel_bundle<sycl::bundle_state::object>>{
-                  KernelBundleObject1, KernelBundleObject2});
-        },
-        "Not all input bundles have the same associated context");
+      std::cerr << "Mismatched contexts for join" << std::endl;
+      checkException(
+          [&]() {
+            sycl::kernel_bundle KernelBundleObject1 =
+                sycl::get_kernel_bundle<sycl::bundle_state::object>(Ctx);
 
-    std::cerr << "Not found kernel" << std::endl;
-    checkException(
-        [&]() {
-          sycl::kernel_id Kernel3ID = sycl::get_kernel_id<Kernel3Name>();
-          sycl::kernel_bundle KernelBundleExecutable =
-              sycl::get_kernel_bundle<sycl::bundle_state::executable>(
-                  Ctx, {Dev}, {Kernel3ID});
+            sycl::kernel_bundle KernelBundleObject2 =
+                sycl::get_kernel_bundle<sycl::bundle_state::object>(Ctx2);
 
-          KernelBundleExecutable.get_kernel(Kernel1ID);
-        },
-        "The kernel bundle does not contain the kernel identified by kernelId");
+            sycl::join(
+                std::vector<sycl::kernel_bundle<sycl::bundle_state::object>>{
+                    KernelBundleObject1, KernelBundleObject2});
+          },
+          "Not all input bundles have the same associated context");
 
-    std::cerr << "Empty devices for has_kernel_bundle" << std::endl;
-    checkException(
-        [&]() {
-          sycl::has_kernel_bundle<sycl::bundle_state::input>(
-              Ctx, std::vector<sycl::device>{});
-        },
-        "Not all devices are associated with the context or vector of devices "
-        "is empty");
+      std::cerr << "Not found kernel" << std::endl;
+      checkException(
+          [&]() {
+            sycl::kernel_id Kernel3ID = sycl::get_kernel_id<Kernel3Name>();
+            sycl::kernel_bundle KernelBundleExecutable =
+                sycl::get_kernel_bundle<sycl::bundle_state::executable>(
+                    Ctx, {Dev}, {Kernel3ID});
+
+            KernelBundleExecutable.get_kernel(Kernel1ID);
+          },
+          "The kernel bundle does not contain the kernel identified by "
+          "kernelId");
+
+      std::cerr << "Empty devices for has_kernel_bundle" << std::endl;
+      checkException(
+          [&]() {
+            sycl::has_kernel_bundle<sycl::bundle_state::input>(
+                Ctx, std::vector<sycl::device>{});
+          },
+          "Not all devices are associated with the context or vector of "
+          "devices "
+          "is empty");
+    } else {
+      std::cout << "Skipping part of the checks since only one context is "
+                   "available.\n";
+    }
   }
 
   return 0;

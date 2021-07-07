@@ -385,7 +385,10 @@ int main() {
   testGetLinearIndex();
 
   testcopyD2HBuffer();
-  testcopyH2DBuffer();
+  // Disabling this part of the test because there is no reliable way to create
+  // two separate context in all cases which is required to trigger PI calls
+  // the test checks. TODO: Move the test to unittests.
+  // testcopyH2DBuffer();
   testcopyD2DBuffer();
   testFill_Buffer();
 }
@@ -404,21 +407,21 @@ int main() {
 // CHECK-NEXT: <unknown> : 320
 // CHECK: end copyD2H-buffer
 
-// CHECK-LABEL: start copyH2D-buffer
-// CHECK: ---> piEnqueueMemBufferWrite(
-// CHECK: <unknown> : 64
-// CHECK:  ---> piEnqueueMemBufferWriteRect(
-// CHECK: pi_buff_rect_region width_bytes/height/depth : 64/5/1
-// CHECK-NEXT: <unknown> : 64
-// CHECK-NEXT: <unknown> : 0
-// CHECK-NEXT: <unknown> : 64
-// CHECK:  ---> piEnqueueMemBufferWriteRect(
-// CHECK: pi_buff_rect_region width_bytes/height/depth : 64/5/3
-// CHECK-NEXT: <unknown> : 64
-// CHECK-NEXT: <unknown> : 320
-// CHECK-NEXT: <unknown> : 64
-// CHECK-NEXT: <unknown> : 320
-// CHECK: end copyH2D-buffer
+// CHECK-LABEL-DISABLED: start copyH2D-buffer
+// CHECK-DISABLED: ---> piEnqueueMemBufferWrite(
+// CHECK-DISABLED: <unknown> : 64
+// CHECK-DISABLED:  ---> piEnqueueMemBufferWriteRect(
+// CHECK-DISABLED: pi_buff_rect_region width_bytes/height/depth : 64/5/1
+// CHECK-NEXT-DISABLED: <unknown> : 64
+// CHECK-NEXT-DISABLED: <unknown> : 0
+// CHECK-NEXT-DISABLED: <unknown> : 64
+// CHECK-DISABLED:  ---> piEnqueueMemBufferWriteRect(
+// CHECK-DISABLED: pi_buff_rect_region width_bytes/height/depth : 64/5/3
+// CHECK-NEXT-DISABLED: <unknown> : 64
+// CHECK-NEXT-DISABLED: <unknown> : 320
+// CHECK-NEXT-DISABLED: <unknown> : 64
+// CHECK-NEXT-DISABLED: <unknown> : 320
+// CHECK-DISABLED: end copyH2D-buffer
 
 // CHECK-LABEL: start copyD2D-buffer
 // CHECK: ---> piEnqueueMemBufferCopy(

@@ -272,7 +272,10 @@ int main() {
 
   remind();
   testcopyD2HImage();
-  testcopyH2DImage();
+  // Disabling this part of the test because there is no reliable way to create
+  // two separate context in all cases which is required to trigger PI calls
+  // the test checks. TODO: Move the test to unittests.
+  //testcopyH2DImage();
   // TODO  .copy() and .fill() not yet supported for images
   // add tests once they are.
 }
@@ -309,73 +312,73 @@ int main() {
 // CHECK-NEXT: <unknown> : 1280
 //CHECK: end copyD2H-Image
 
-//CHECK: start copyH2D-image
-//CHECK: -- 1D
-//CHECK: ---> piMemImageCreate(
-//CHECK: image_desc w/h/d : 16 / 1 / 1  --  arrSz/row/slice : 0 / 256 / 256  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4340
-//CHECK: ---> piMemImageCreate(
-//CHECK: image_desc w/h/d : 16 / 1 / 1  --  arrSz/row/slice : 0 / 256 / 256  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4340
-//CHECK: ---> piMemImageCreate(
-//CHECK: image_desc w/h/d : 16 / 1 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4340
-//CHECK: ---> piEnqueueMemImageRead(
-//CHECK: pi_image_region width/height/depth : 16/1/1
-//CHECK: ---> piEnqueueMemImageWrite(
-//CHECK: pi_image_region width/height/depth : 16/1/1
-//CHECK: ---> piMemImageCreate(
-//CHECK: image_desc w/h/d : 16 / 1 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4340
-//CHECK: ---> piEnqueueMemImageRead(
-//CHECK: pi_image_region width/height/depth : 16/1/1
-//CHECK: ---> piEnqueueMemImageWrite(
-//CHECK: pi_image_region width/height/depth : 16/1/1
-//CHECK: about to destruct 1D
-//CHECK: ---> piEnqueueMemImageRead(
-//CHECK: pi_image_region width/height/depth : 16/1/1
-//CHECK: -- 2D
-//CHECK: ---> piMemImageCreate(
-//CHECK: image_desc w/h/d : 16 / 5 / 1  --  arrSz/row/slice : 0 / 256 / 1280  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4337
-//CHECK: ---> piMemImageCreate(
-//CHECK: image_desc w/h/d : 16 / 5 / 1  --  arrSz/row/slice : 0 / 256 / 1280  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4337
-//CHECK: ---> piMemImageCreate(
-//CHECK: image_desc w/h/d : 16 / 5 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4337
-//CHECK: ---> piEnqueueMemImageRead(
-//CHECK: pi_image_region width/height/depth : 16/5/1
-//CHECK: ---> piEnqueueMemImageWrite(
-//CHECK: pi_image_region width/height/depth : 16/5/1
-// CHECK-NEXT: <unknown> : 256
-//CHECK: ---> piMemImageCreate(
-//CHECK: image_desc w/h/d : 16 / 5 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4337
-//CHECK: ---> piEnqueueMemImageRead(
-//CHECK: pi_image_region width/height/depth : 16/5/1
-//CHECK: ---> piEnqueueMemImageWrite(
-//CHECK: pi_image_region width/height/depth : 16/5/1
-// CHECK-NEXT: <unknown> : 256
-//CHECK: about to destruct 2D
-//CHECK: ---> piEnqueueMemImageRead(
-//CHECK: pi_image_region width/height/depth : 16/5/1
-//CHECK: -- 3D
-//CHECK: ---> piMemImageCreate(
-//CHECK: image_desc w/h/d : 16 / 5 / 3  --  arrSz/row/slice : 0 / 256 / 1280  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4338
-//CHECK: ---> piMemImageCreate(
-//CHECK: image_desc w/h/d : 16 / 5 / 3  --  arrSz/row/slice : 0 / 256 / 1280  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4338
-//CHECK: ---> piMemImageCreate(
-//CHECK: image_desc w/h/d : 16 / 5 / 3  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4338
-//CHECK: ---> piEnqueueMemImageRead(
-//CHECK: pi_image_region width/height/depth : 16/5/3
-//CHECK: ---> piEnqueueMemImageWrite(
-//CHECK: pi_image_region width/height/depth : 16/5/3
-// CHECK-NEXT: <unknown> : 256
-// CHECK-NEXT: <unknown> : 1280
-//CHECK: ---> piMemImageCreate(
-//CHECK: image_desc w/h/d : 16 / 5 / 3  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4338
-//CHECK: ---> piEnqueueMemImageRead(
-//CHECK: pi_image_region width/height/depth : 16/5/3
-//CHECK: ---> piEnqueueMemImageWrite(
-//CHECK: pi_image_region width/height/depth : 16/5/3
-// CHECK-NEXT: <unknown> : 256
-// CHECK-NEXT: <unknown> : 1280
-//CHECK: about to destruct 3D
-//CHECK: ---> piEnqueueMemImageRead(
-//CHECK: pi_image_region width/height/depth : 16/5/3
-// CHECK-NEXT: <unknown> : 256
-// CHECK-NEXT: <unknown> : 1280
-//CHECK: end copyH2D-image
+//CHECK-DISABLED: start copyH2D-image
+//CHECK-DISABLED: -- 1D
+//CHECK-DISABLED: ---> piMemImageCreate(
+//CHECK-DISABLED: image_desc w/h/d : 16 / 1 / 1  --  arrSz/row/slice : 0 / 256 / 256  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4340
+//CHECK-DISABLED: ---> piMemImageCreate(
+//CHECK-DISABLED: image_desc w/h/d : 16 / 1 / 1  --  arrSz/row/slice : 0 / 256 / 256  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4340
+//CHECK-DISABLED: ---> piMemImageCreate(
+//CHECK-DISABLED: image_desc w/h/d : 16 / 1 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4340
+//CHECK-DISABLED: ---> piEnqueueMemImageRead(
+//CHECK-DISABLED: pi_image_region width/height/depth : 16/1/1
+//CHECK-DISABLED: ---> piEnqueueMemImageWrite(
+//CHECK-DISABLED: pi_image_region width/height/depth : 16/1/1
+//CHECK-DISABLED: ---> piMemImageCreate(
+//CHECK-DISABLED: image_desc w/h/d : 16 / 1 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4340
+//CHECK-DISABLED: ---> piEnqueueMemImageRead(
+//CHECK-DISABLED: pi_image_region width/height/depth : 16/1/1
+//CHECK-DISABLED: ---> piEnqueueMemImageWrite(
+//CHECK-DISABLED: pi_image_region width/height/depth : 16/1/1
+//CHECK-DISABLED: about to destruct 1D
+//CHECK-DISABLED: ---> piEnqueueMemImageRead(
+//CHECK-DISABLED: pi_image_region width/height/depth : 16/1/1
+//CHECK-DISABLED: -- 2D
+//CHECK-DISABLED: ---> piMemImageCreate(
+//CHECK-DISABLED: image_desc w/h/d : 16 / 5 / 1  --  arrSz/row/slice : 0 / 256 / 1280  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4337
+//CHECK-DISABLED: ---> piMemImageCreate(
+//CHECK-DISABLED: image_desc w/h/d : 16 / 5 / 1  --  arrSz/row/slice : 0 / 256 / 1280  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4337
+//CHECK-DISABLED: ---> piMemImageCreate(
+//CHECK-DISABLED: image_desc w/h/d : 16 / 5 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4337
+//CHECK-DISABLED: ---> piEnqueueMemImageRead(
+//CHECK-DISABLED: pi_image_region width/height/depth : 16/5/1
+//CHECK-DISABLED: ---> piEnqueueMemImageWrite(
+//CHECK-DISABLED: pi_image_region width/height/depth : 16/5/1
+// CHECK-NEXT-DISABLED: <unknown> : 256
+//CHECK-DISABLED: ---> piMemImageCreate(
+//CHECK-DISABLED: image_desc w/h/d : 16 / 5 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4337
+//CHECK-DISABLED: ---> piEnqueueMemImageRead(
+//CHECK-DISABLED: pi_image_region width/height/depth : 16/5/1
+//CHECK-DISABLED: ---> piEnqueueMemImageWrite(
+//CHECK-DISABLED: pi_image_region width/height/depth : 16/5/1
+// CHECK-NEXT-DISABLED: <unknown> : 256
+//CHECK-DISABLED: about to destruct 2D
+//CHECK-DISABLED: ---> piEnqueueMemImageRead(
+//CHECK-DISABLED: pi_image_region width/height/depth : 16/5/1
+//CHECK-DISABLED: -- 3D
+//CHECK-DISABLED: ---> piMemImageCreate(
+//CHECK-DISABLED: image_desc w/h/d : 16 / 5 / 3  --  arrSz/row/slice : 0 / 256 / 1280  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4338
+//CHECK-DISABLED: ---> piMemImageCreate(
+//CHECK-DISABLED: image_desc w/h/d : 16 / 5 / 3  --  arrSz/row/slice : 0 / 256 / 1280  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4338
+//CHECK-DISABLED: ---> piMemImageCreate(
+//CHECK-DISABLED: image_desc w/h/d : 16 / 5 / 3  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4338
+//CHECK-DISABLED: ---> piEnqueueMemImageRead(
+//CHECK-DISABLED: pi_image_region width/height/depth : 16/5/3
+//CHECK-DISABLED: ---> piEnqueueMemImageWrite(
+//CHECK-DISABLED: pi_image_region width/height/depth : 16/5/3
+// CHECK-NEXT-DISABLED: <unknown> : 256
+// CHECK-NEXT-DISABLED: <unknown> : 1280
+//CHECK-DISABLED: ---> piMemImageCreate(
+//CHECK-DISABLED: image_desc w/h/d : 16 / 5 / 3  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4338
+//CHECK-DISABLED: ---> piEnqueueMemImageRead(
+//CHECK-DISABLED: pi_image_region width/height/depth : 16/5/3
+//CHECK-DISABLED: ---> piEnqueueMemImageWrite(
+//CHECK-DISABLED: pi_image_region width/height/depth : 16/5/3
+// CHECK-NEXT-DISABLED: <unknown> : 256
+// CHECK-NEXT-DISABLED: <unknown> : 1280
+//CHECK-DISABLED: about to destruct 3D
+//CHECK-DISABLED: ---> piEnqueueMemImageRead(
+//CHECK-DISABLED: pi_image_region width/height/depth : 16/5/3
+// CHECK-NEXT-DISABLED: <unknown> : 256
+// CHECK-NEXT-DISABLED: <unknown> : 1280
+//CHECK-DISABLED: end copyH2D-image

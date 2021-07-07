@@ -21,21 +21,34 @@ using namespace cl::sycl;
 int main() {
   int Data[10] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
   {
+
+    const std::vector<platform> Platforms = platform::get_platforms();
+
+    if (Platforms.size() < 2) {
+      std::cout << "Need at least two platforms to create two separate "
+                   "contexts. Skipping...\n";
+      return 0;
+    }
+
+    std::vector<queue> Queues;
+
+    for (const platform &Platform : Platforms) {
+      const std::vector<device> Devices = Platform.get_devices();
+      assert(!Devices.empty() && "No devices in the platform?");
+
+      Queues.emplace_back(Devices[0]);
+    }
+
     buffer<int, 1> Buffer(Data, range<1>(10),
                           {property::buffer::use_host_ptr()});
 
-    default_selector Selector;
-
-    queue FirstQueue(Selector);
-    queue SecondQueue(Selector);
-
-    assert(FirstQueue.get_context() != SecondQueue.get_context());
-    FirstQueue.submit([&](handler &Cgh) {
+    assert(Queues[0].get_context() != Queues[1].get_context());
+    Queues[0].submit([&](handler &Cgh) {
       auto Accessor = Buffer.get_access<access::mode::read_write>(Cgh);
       Cgh.parallel_for<class init_b>(range<1>{10},
                                      [=](id<1> Index) { Accessor[Index] = 0; });
     });
-    SecondQueue.submit([&](handler &Cgh) {
+    Queues[1].submit([&](handler &Cgh) {
       auto Accessor = Buffer.get_access<access::mode::read_write>(Cgh);
       Cgh.parallel_for<class increment_b>(
           range<1>{10}, [=](id<1> Index) { Accessor[Index] += 1; });
