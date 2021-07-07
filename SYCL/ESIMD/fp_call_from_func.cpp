@@ -6,11 +6,14 @@
 //
 //===----------------------------------------------------------------------===//
 // REQUIRES: gpu
-// Issue #162 Test timeouts on Windows
-// UNSUPPORTED: windows
+// Issue #162 Test timeouts on Windows and Linux
+// UNSUPPORTED: TEMPORARY_DISABLED
 // RUN: %clangxx -Xclang -fsycl-allow-func-ptr -fsycl %s -o %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
 // UNSUPPORTED: cuda
+//
+// The test hangs after driver update to 21.23.20043
+// REQUIRES: TEMPORARY_DISABLE
 //
 // The test checks that ESIMD kernels support use of function pointers from
 // within other functions.
@@ -27,7 +30,7 @@ class KernelID;
 ESIMD_NOINLINE int add(int A, int B) { return A + B; }
 
 template <typename AccTy> ESIMD_NOINLINE void test(AccTy acc, int A, int B) {
-  using namespace sycl::INTEL::gpu;
+  using namespace sycl::ext::intel::experimental::esimd;
 
   auto foo = &add;
   auto res = foo(A, B);

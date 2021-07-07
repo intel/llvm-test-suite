@@ -53,12 +53,14 @@ int main(void) {
       auto PC = bufc.get_access<access::mode::write>(cgh);
       cgh.parallel_for<class Test>(
           GlobalRange * LocalRange, [=](id<1> i) SYCL_ESIMD_KERNEL {
-            using namespace sycl::INTEL::gpu;
+            using namespace sycl::ext::intel::experimental::esimd;
             unsigned int offset = i * VL * sizeof(float);
-            simd<float, VL> va = block_load<float, VL>(PA, offset);
-            simd<float, VL> vb = block_load<float, VL>(PB, offset);
+            simd<float, VL> va;
+            va.copy_from(PA, offset);
+            simd<float, VL> vb;
+            vb.copy_from(PB, offset);
             simd<float, VL> vc = va + vb;
-            block_store(PC, offset, vc);
+            vc.copy_to(PC, offset);
           });
     });
     e.wait();
@@ -97,5 +99,5 @@ int main(void) {
 }
 
 // CHECK: ---> piProgramBuild(
-// CHECK: <const char *>: -vc-codegen
+// CHECK: <const char *>: {{.*}}-vc-codegen
 // CHECK: ) ---> pi_result : PI_SUCCESS

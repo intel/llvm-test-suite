@@ -18,7 +18,7 @@
 #include <iostream>
 
 using namespace cl::sycl;
-using namespace sycl::INTEL::gpu;
+using namespace sycl::ext::intel::experimental::esimd;
 using namespace std;
 
 #define LOG2_ELEMENTS 16 // 24
@@ -43,7 +43,9 @@ ESIMD_INLINE simd<ty, size> cmk_read(AccTy buf, uint32_t offset) {
   offset *= sizeof(ty);
 #pragma unroll
   for (uint32_t i = 0; i < size; i += 32) {
-    v.template select<32, 1>(i) = block_load<ty, 32, AccTy>(buf, offset);
+    simd<ty, 32> data;
+    data.copy_from(buf, offset);
+    v.template select<32, 1>(i) = data;
     offset += 32 * sizeof(ty);
   }
   return v;
@@ -54,7 +56,8 @@ ESIMD_INLINE void cmk_write(AccTy buf, uint32_t offset, simd<ty, size> v) {
   offset *= sizeof(ty);
 #pragma unroll
   for (uint32_t i = 0; i < size; i += 32) {
-    block_store<ty, 32, AccTy>(buf, offset, v.template select<32, 1>(i));
+    simd<ty, 32> vals = v.template select<32, 1>(i);
+    vals.copy_to(buf, offset);
     offset += 32 * sizeof(ty);
   }
 }
@@ -598,11 +601,11 @@ int BitonicSort::Solve(uint32_t *pInputs, uint32_t *pOutputs, uint32_t size) {
     auto e = pQueue_->submit([&](handler &cgh) {
       auto acci = bufi.get_access<access::mode::read>(cgh);
       auto acco = bufo.get_access<access::mode::write>(cgh);
-      cgh.parallel_for<class Sort256>(SortGlobalRange * SortLocalRange,
-                                      [=](id<1> i) SYCL_ESIMD_KERNEL {
-                                        using namespace sycl::INTEL::gpu;
-                                        cmk_bitonic_sort_256(acci, acco, i);
-                                      });
+      cgh.parallel_for<class Sort256>(
+          SortGlobalRange * SortLocalRange, [=](id<1> i) SYCL_ESIMD_KERNEL {
+            using namespace sycl::ext::intel::experimental::esimd;
+            cmk_bitonic_sort_256(acci, acco, i);
+          });
     });
     e.wait();
     total_time += esimd_test::report_time("kernel time", e, e);
@@ -638,11 +641,12 @@ int BitonicSort::Solve(uint32_t *pInputs, uint32_t *pOutputs, uint32_t size) {
         buffer<uint32_t, 1> buf(pOutputs, range<1>(size));
         mergeEvent[k] = pQueue_->submit([&](handler &cgh) {
           auto acc = buf.get_access<access::mode::read_write>(cgh);
-          cgh.parallel_for<class Merge>(MergeGlobalRange * MergeLocalRange,
-                                        [=](id<1> tid) SYCL_ESIMD_KERNEL {
-                                          using namespace sycl::INTEL::gpu;
-                                          cmk_bitonic_merge(acc, j, i, tid);
-                                        });
+          cgh.parallel_for<class Merge>(
+              MergeGlobalRange * MergeLocalRange,
+              [=](id<1> tid) SYCL_ESIMD_KERNEL {
+                using namespace sycl::ext::intel::experimental::esimd;
+                cmk_bitonic_merge(acc, j, i, tid);
+              });
         });
         k++;
       }

@@ -1,6 +1,6 @@
 // REQUIRES: level_zero, level_zero_dev_kit
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %level_zero_options %s -o %t.out
-// RUN: %GPU_RUN_PLACEHOLDER %t.out
+// RUN: env SYCL_BE=PI_LEVEL_ZERO %GPU_RUN_PLACEHOLDER %t.out
 
 // Test for Level Zero interop_task.
 
@@ -30,7 +30,7 @@ int main() {
         .submit([&](handler &cgh) {
           auto buffer_acc = buffer.get_access<access::mode::write>(cgh);
           auto image_acc = image.get_access<float4, access::mode::write>(cgh);
-          cgh.interop_task([&](const interop_handler &ih) {
+          cgh.interop_task([=](const interop_handler &ih) {
             void *device_ptr = ih.get_mem<backend::level_zero>(buffer_acc);
             size_t size = 0;
             zeMemGetAddressRange(ze_context, device_ptr, NULL, &size);

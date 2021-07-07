@@ -23,7 +23,7 @@ static constexpr int BLOCK_WIDTH = 32;
 static constexpr int NUM_BLOCKS = 32;
 
 using namespace cl::sycl;
-using namespace sycl::INTEL::gpu;
+using namespace sycl::ext::intel::experimental::esimd;
 
 // Histogram kernel: computes the distribution of pixel intensities
 ESIMD_INLINE void histogram_atomic(const uint32_t *input_ptr, uint32_t *output,
@@ -44,7 +44,8 @@ ESIMD_INLINE void histogram_atomic(const uint32_t *input_ptr, uint32_t *output,
   auto start_off = (linear_id * BLOCK_WIDTH * num_blocks);
   for (int y = 0; y < num_blocks; y++) {
     auto start_addr = ((unsigned int *)input_ptr) + start_off;
-    auto data = block_load<uint, 32>(start_addr);
+    simd<uint, 32> data;
+    data.copy_from(start_addr);
     auto in = data.format<uchar>();
 
 #pragma unroll

@@ -52,13 +52,15 @@ int main(void) {
     auto e = q.submit([&](handler &cgh) {
       cgh.parallel_for<class Test>(
           Range, [=](nd_item<1> ndi) SYCL_ESIMD_KERNEL {
-            using namespace sycl::INTEL::gpu;
+            using namespace sycl::ext::intel::experimental::esimd;
 
             int i = ndi.get_global_id(0);
-            simd<float, VL> va = block_load<float, VL>(A + i * VL);
-            simd<float, VL> vb = block_load<float, VL>(B + i * VL);
+            simd<float, VL> va;
+            va.copy_from(A + i * VL);
+            simd<float, VL> vb;
+            vb.copy_from(B + i * VL);
             simd<float, VL> vc = va + vb;
-            block_store<float, VL>(C + i * VL, vc);
+            vc.copy_to(C + i * VL);
           });
     });
     e.wait();

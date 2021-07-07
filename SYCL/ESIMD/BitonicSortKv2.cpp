@@ -19,7 +19,7 @@
 #include <iostream>
 
 using namespace cl::sycl;
-using namespace sycl::INTEL::gpu;
+using namespace sycl::ext::intel::experimental::esimd;
 using namespace std;
 
 #define LOG2_ELEMENTS 16 // 24
@@ -43,7 +43,9 @@ ESIMD_INLINE simd<ty, size> cmk_read(ty *buf, uint32_t offset) {
   simd<ty, size> v;
 #pragma unroll
   for (uint32_t i = 0; i < size; i += 32) {
-    v.template select<32, 1>(i) = block_load<ty, 32>(buf + offset + i);
+    simd<ty, 32> data;
+    data.copy_from(buf + offset + i);
+    v.template select<32, 1>(i) = data;
   }
   return v;
 }
@@ -52,7 +54,8 @@ template <typename ty, uint32_t size>
 ESIMD_INLINE void cmk_write(ty *buf, uint32_t offset, simd<ty, size> v) {
 #pragma unroll
   for (uint32_t i = 0; i < size; i += 32) {
-    block_store<ty, 32>(buf + offset + i, v.template select<32, 1>(i));
+    simd<ty, 32> vals = v.template select<32, 1>(i);
+    vals.copy_to(buf + offset + i);
   }
 }
 
@@ -517,7 +520,7 @@ int BitonicSort::Solve(uint32_t *pInputs, uint32_t *pOutputs, uint32_t size) {
     auto e = pQueue_->submit([&](handler &cgh) {
       cgh.parallel_for<class Sort256>(
           SortGlobalRange * SortLocalRange, [=](id<1> i) SYCL_ESIMD_KERNEL {
-            using namespace sycl::INTEL::gpu;
+            using namespace sycl::ext::intel::experimental::esimd;
             cmk_bitonic_sort_256(pInputs, pOutputs, i);
           });
     });
@@ -553,12 +556,12 @@ int BitonicSort::Solve(uint32_t *pInputs, uint32_t *pOutputs, uint32_t size) {
       // locally.
       for (int j = i; j >= 8; j--) {
         mergeEvent[k] = pQueue_->submit([&](handler &cgh) {
-          cgh.parallel_for<class Merge>(MergeGlobalRange * MergeLocalRange,
-                                        [=](id<1> tid) SYCL_ESIMD_KERNEL {
-                                          using namespace sycl::INTEL::gpu;
-                                          cmk_bitonic_merge(pOutputs, j, i,
-                                                            tid);
-                                        });
+          cgh.parallel_for<class Merge>(
+              MergeGlobalRange * MergeLocalRange,
+              [=](id<1> tid) SYCL_ESIMD_KERNEL {
+                using namespace sycl::ext::intel::experimental::esimd;
+                cmk_bitonic_merge(pOutputs, j, i, tid);
+              });
         });
         // mergeEvent[k].wait();
         k++;

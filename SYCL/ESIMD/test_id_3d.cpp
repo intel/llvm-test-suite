@@ -44,14 +44,14 @@ int main(void) {
     auto e = q.submit([&](handler &cgh) {
       cgh.parallel_for<class Test>(
           GlobalRange, [=](item<3> it) SYCL_ESIMD_KERNEL {
-            using namespace sycl::INTEL::gpu;
+            using namespace sycl::ext::intel::experimental::esimd;
             auto id = it.get_id();
             // calculate linear ID:
             size_t lin_id = id[0] * Y * X + id[1] * X + id[2];
             simd<int, VL> inc(0, 1);
             int off = (int)(lin_id * VL);
             simd<int, VL> val = inc + off;
-            block_store<int, VL>(C + off, val);
+            val.copy_to(C + off);
           });
     });
     e.wait();

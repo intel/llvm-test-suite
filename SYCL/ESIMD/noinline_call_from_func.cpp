@@ -8,6 +8,8 @@
 // REQUIRES: gpu
 // Test currently timeouts on Windows Level Zero and OpenCL
 // UNSUPPORTED: windows
+// Temporarily disabled due to flaky behavior
+// REQUIRES: TEMPORARY_DISABLED
 // RUN: %clangxx -fsycl %s -o %t.out
 // RUN: env IGC_FunctionControl=3 IGC_ForceInlineStackCallWithImplArg=1 %GPU_RUN_PLACEHOLDER %t.out
 // UNSUPPORTED: cuda
@@ -27,7 +29,7 @@ class KernelID;
 ESIMD_NOINLINE int add(int A, int B) { return A + B; }
 
 template <typename AccTy> ESIMD_NOINLINE void test(AccTy acc, int A, int B) {
-  using namespace sycl::INTEL::gpu;
+  using namespace sycl::ext::intel::experimental::esimd;
 
   auto res = add(A, B);
 
