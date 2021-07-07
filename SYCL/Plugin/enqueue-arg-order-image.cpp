@@ -282,6 +282,7 @@ int main() {
 
 // ----------- IMAGES
 
+// clang-format off
 //CHECK: start copyD2H-Image
 //CHECK: -- 1D
 //CHECK: ---> piMemImageCreate(
@@ -322,7 +323,8 @@ int main() {
 //CHECK: image_desc w/h/d : 16 / 1 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4340
 //CHECK: ---> piEnqueueMemImageRead(
 //CHECK: pi_image_region width/height/depth : 16/1/1
-// The order of the following calls may vary since some of them are made by a host task (in a separate thread).
+// The order of the following calls may vary since some of them are made by a
+// host task (in a separate thread).
 //CHECK-DAG: ---> piMemImageCreate(
 //CHECK-DAG: image_desc w/h/d : 16 / 1 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4340
 //CHECK-DAG: ---> piEnqueueMemImageRead(
@@ -343,7 +345,8 @@ int main() {
 //CHECK: image_desc w/h/d : 16 / 5 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4337
 //CHECK: ---> piEnqueueMemImageRead(
 //CHECK: pi_image_region width/height/depth : 16/5/1
-// The order of the following calls may vary since some of them are made by a host task (in a separate thread).
+// The order of the following calls may vary since some of them are made by a
+// host task (in a separate thread).
 //CHECK-DAG: ---> piMemImageCreate(
 //CHECK-DAG: image_desc w/h/d : 16 / 5 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4337
 //CHECK-DAG: ---> piEnqueueMemImageRead(
@@ -366,7 +369,8 @@ int main() {
 //CHECK: image_desc w/h/d : 16 / 5 / 3  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4338
 //CHECK: ---> piEnqueueMemImageRead(
 //CHECK: pi_image_region width/height/depth : 16/5/3
-// The order of the following calls may vary since some of them are made by a host task (in a separate thread).
+// The order of the following calls may vary since some of them are made by a
+// host task (in a separate thread).
 //CHECK-DAG: ---> piMemImageCreate(
 //CHECK-DAG: image_desc w/h/d : 16 / 5 / 3  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4338
 //CHECK-DAG: ---> piEnqueueMemImageRead(
@@ -385,3 +389,4 @@ int main() {
 // CHECK-NEXT: <unknown> : 256
 // CHECK-NEXT: <unknown> : 1280
 //CHECK: end copyH2D-image
+// clang-format on
