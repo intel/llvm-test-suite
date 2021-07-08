@@ -1,4 +1,4 @@
-//==---------------- matrix_transpose.cpp  - DPC++ ESIMD on-device test ----==//
+//==--------------- matrix_transpose2.cpp  - DPC++ ESIMD on-device test ----==//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -9,6 +9,8 @@
 // UNSUPPORTED: cuda
 // RUN: %clangxx -fsycl %s -o %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
+
+// This test checks matrix transpose implementation with media block read/write
 
 #include "esimd_test_utils.hpp"
 
