@@ -292,11 +292,6 @@ elif config.sycl_be == 'rocm' and config.rocm_platform == 'AMD':
 else:
     config.substitutions.append( ('%sycl_triple',  "spir64-unknown-unknown-sycldevice" ) )
 
-if config.sycl_be == 'rocm' and config.rocm_platform == 'AMD':
-    config.substitutions.append( ('%mcpu',  "-mcpu=gfx906" ) )
-else:
-    config.substitutions.append( ('%mcpu', "") )
-
 if find_executable('sycl-ls'):
     config.available_features.add('sycl-ls')
 
