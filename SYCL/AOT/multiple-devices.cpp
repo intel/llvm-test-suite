@@ -18,7 +18,7 @@
 // RUN: %GPU_RUN_PLACEHOLDER %t_all.out
 // RUN: %ACC_RUN_PLACEHOLDER %t_all.out
 
-// FIXME: Change the behavior when proper automaton for assert support is
+// FIXME: Change the behavior when proper automation for assert support is
 // introduced
 // Produce object file, spirv, device images to combine these differently
 // at link-time, thus testing various AOT-compiled images configurations
