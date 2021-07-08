@@ -11,6 +11,9 @@
 // RUN: %CPU_RUN_PLACEHOLDER %t1.out
 // RUN: %GPU_RUN_PLACEHOLDER %t1.out
 // RUN: %ACC_RUN_PLACEHOLDER %t1.out
+//
+// XFAIL: cuda
+// TODO enable the test when cuda_piextUSMEnqueuePrefetch starts handling flags
 
 #include <CL/sycl.hpp>
 
@@ -27,14 +30,9 @@ int main() {
   event eMemset2 = q.memset(y, 0, sizeof(int), std::vector<event>{}); // y = 0
   event eFill = q.fill(x, 1, 1, {eMemset1, eMemset2});                // x = 1
   event eMemcpy = q.memcpy(y, x, sizeof(int), eFill);                 // y = 1
-  event Event = q.copy(y, z, 1, eMemcpy);                             // z = 1
-
-  // TODO cuda_piextUSMEnqueuePrefetch does not yet handle flags
-  if (q.get_backend() != backend::cuda) {
-    Event = q.prefetch(z, sizeof(int), Event);
-  }
-
-  q.single_task<class kernel>(Event, [=] { *z *= 2; }).wait(); // z = 2
+  event eCopy = q.copy(y, z, 1, eMemcpy);                             // z = 1
+  event ePrefetch = q.prefetch(z, sizeof(int), eCopy);                //
+  q.single_task<class kernel>(ePrefetch, [=] { *z *= 2; }).wait();    // z = 2
 
   int error = (*z != 2) ? 1 : 0;
   std::cout << (error ? "failed\n" : "passed\n");
