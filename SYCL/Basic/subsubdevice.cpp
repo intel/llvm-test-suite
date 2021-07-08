@@ -1,7 +1,7 @@
 // RUN: %clangxx -fsycl -fsycl-targets=%sycl_triple %s -o %t.out
-// RUN: %CPU_RUN_PLACEHOLDER SYCL_PI_TRACE=2 %t.out separate equally %CPU_CHECK_PLACEHOLDER --check-prefix CHECK-SEPARATE
-// RUN: %CPU_RUN_PLACEHOLDER SYCL_PI_TRACE=2 %t.out shared equally %CPU_CHECK_PLACEHOLDER --check-prefix CHECK-SHARED --implicit-check-not piContextCreate --implicit-check-not piMemBufferCreate
-// RUN: %CPU_RUN_PLACEHOLDER SYCL_PI_TRACE=2 %t.out fused  equally %CPU_CHECK_PLACEHOLDER --check-prefix CHECK-FUSED --implicit-check-not piContextCreate --implicit-check-not piMemBufferCreate
+// RUN: %GPU_RUN_PLACEHOLDER SYCL_PI_TRACE=2 %t.out separate affinity %GPU_CHECK_PLACEHOLDER --check-prefix CHECK-SEPARATE
+// RUN: %GPU_RUN_PLACEHOLDER SYCL_PI_TRACE=2 %t.out shared affinity %GPU_CHECK_PLACEHOLDER --check-prefix CHECK-SHARED --implicit-check-not piContextCreate --implicit-check-not piMemBufferCreate
+// RUN: %GPU_RUN_PLACEHOLDER SYCL_PI_TRACE=2 %t.out fused affinity %GPU_CHECK_PLACEHOLDER --check-prefix CHECK-FUSED --implicit-check-not piContextCreate --implicit-check-not piMemBufferCreate
 //
 // Intel OpenCL CPU Runtime supports device partition on all (multi-core)
 // platforms. Other devices may not support this.
@@ -26,6 +26,15 @@ static void use_mem(buffer<int, 1> buf, queue q) {
 
 typedef std::vector<device> (*partition_fn)(device dev);
 
+static std::vector<device> partition_affinity(device dev) {
+  std::vector<device> subdevices = dev.create_sub_devices<
+      info::partition_property::partition_by_affinity_domain>(
+      info::partition_affinity_domain::next_partitionable);
+
+  return subdevices;
+}
+
+// This is currently not tested
 static std::vector<device> partition_equally(device dev) {
   std::vector<device> subdevices =
       dev.create_sub_devices<info::partition_property::partition_equally>(1);
@@ -46,7 +55,7 @@ static bool check_separate(device dev, buffer<int, 1> buf,
   assert(subsubdevices.size() > 1);
   // CHECK-SEPARATE: Create sub sub devices of sub device 0
   // CHECK-SEPARATE: ---> piDevicePartition
-  
+
   log_pi("Test sub sub device 0");
   {
     queue q0(subsubdevices[0]);
@@ -187,7 +196,7 @@ static bool check_fused_context(device dev, buffer<int, 1> buf,
     queue q1(fused_context, subsubdevices[1]);
     use_mem(buf, q1);
   }
-  // CHECK-FUSED: Test sub device 1
+  // CHECK-FUSED: Test sub sub device 1
   // CHECK-FUSED: ---> piQueueCreate
   // CHECK-FUSED: ---> piEnqueueKernelLaunch
   // CHECK-FUSED: ---> piEventsWait
@@ -210,6 +219,8 @@ int main(int argc, const char **argv) {
   partition_fn partition;
   if (partition_type == "equally") {
     partition = partition_equally;
+  } else if (partition_type == "affinity") {
+    partition = partition_affinity;
   } else {
     assert(0 && "Unsupported partition type");
   }
