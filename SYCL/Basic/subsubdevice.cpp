@@ -41,12 +41,11 @@ static bool check_separate(device dev, buffer<int, 1> buf,
   // CHECK-SEPARATE: Create sub devices
   // CHECK-SEPARATE: ---> piDevicePartition
 
-  log_pi("Create sub sub devices of sub-device 0");
+  log_pi("Create sub sub devices of sub device 0");
   std::vector<device> subsubdevices = partition(subdevices[0]);
   assert(subsubdevices.size() > 1);
-  // CHECK-SEPARATE: Create sub sub devices of sub-device 0
+  // CHECK-SEPARATE: Create sub sub devices of sub device 0
   // CHECK-SEPARATE: ---> piDevicePartition
-
   
   log_pi("Test sub sub device 0");
   {
@@ -220,7 +219,9 @@ int main(int argc, const char **argv) {
     result = check_separate(dev, buf, partition);
   } else if (test == "shared") {
     result = check_shared_context(dev, buf, partition);
-  }else {
+  } else if (test == "fused") {
+    result = check_fused_context(dev, buf, partition);
+  } else {
     assert(0 && "Unknown test");
   }
 
