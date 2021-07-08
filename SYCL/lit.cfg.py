@@ -284,14 +284,16 @@ if find_executable('sycl-ls'):
 llvm_spirv_path = find_executable("llvm-spirv")
 if llvm_spirv_path:
   lit_config.note("Found llvm-spirv")
-  config.substitutions.append( ('%LLVM_SPIRV', os.path.realpath(llvm_spirv_path)) )
+  config.available_features.add('llvm-spirv')
+  config.substitutions.append( ('%llvm_spirv', os.path.realpath(llvm_spirv_path)) )
 else:
   lit_config.warning("Can't find llvm-spirv")
 
 llvm_link_path = find_executable("llvm-link")
 if llvm_link_path:
   lit_config.note("Found llvm-link")
-  config.substitutions.append( ('%LLVM_LINK', os.path.realpath(llvm_link_path)) )
+  config.available_features.add('llvm-link')
+  config.substitutions.append( ('%llvm_link', os.path.realpath(llvm_link_path)) )
 else:
   lit_config.warning("Can't find llvm-link")
 
