@@ -1,3 +1,5 @@
+// Temporarily disable flaky test
+// UNSUPPORTED: *
 // No JITing for host devices.
 // REQUIRES: opencl || level_zero
 // RUN: rm -rf %t/cache_dir
