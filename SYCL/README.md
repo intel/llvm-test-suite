@@ -87,7 +87,7 @@ from comma-separated list of target devices with colon. Example:
 ***SYCL_BE*** SYCL backend to be used for testing. Supported values are:
  - **opencl** - for OpenCL backend;
  - **cuda** - for CUDA backend;
- - **ROCm** - for ROCm backend;
+ - **rocm** - for ROCm backend;
  - **level_zero** - Level Zero backend.
 
 ***SYCL_TARGET_DEVICES*** comma separated list of target devices for testing.
@@ -111,7 +111,7 @@ Defaults to AMD if no value is given. Supported values are:
  - **AMD**    - for ROCm to target AMD GPUs
  - **NVIDIA** - for ROCm to target NVIDIA GPUs
  
- ***MCPU*** Please not, flag must be set for when using ROCm triple. 
+ ***MCPU*** Flag must be set for when using ROCm triple. 
  For example it may be set to "gfx906".
 
 

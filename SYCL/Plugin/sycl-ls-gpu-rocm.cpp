@@ -1,4 +1,4 @@
-// REQUIRES: gpu, rocm
+// REQUIRES: gpu, rocm, sycl-ls
 
 // RUN: env SYCL_DEVICE_FILTER=rocm sycl-ls --verbose >%t.rocm.out
 // RUN: FileCheck %s --check-prefixes=CHECK-BUILTIN-GPU-ROCM,CHECK-CUSTOM-GPU-ROCM --input-file %t.rocm.out
@@ -13,7 +13,3 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-
-
-
-

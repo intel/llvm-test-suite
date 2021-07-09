@@ -206,7 +206,7 @@ int main() {
     std::cout << "Test 'rocm'";
     device d19(ONEAPI::filter_selector("rocm"));
     assert(d19.get_platform().get_backend() == backend::rocm);
-    std:: cout << "...PASS" << std::endl;
+    std::cout << "...PASS" << std::endl;
 
     std::cout << "test 'rocm:gpu'";
     device d20(ONEAPI::filter_selector("rocm:gpu"));
