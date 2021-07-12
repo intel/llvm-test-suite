@@ -136,13 +136,13 @@ config.substitutions.append( ('%opencl_include_dir',  config.opencl_include_dir)
 if cl_options:
     config.substitutions.append( ('%sycl_options',  ' sycl.lib /I' +
                                 config.sycl_include + ' /I' + os.path.join(config.sycl_include, 'sycl')) )
-    config.substitutions.append( ('%include_option',  '/FI') )
+    config.substitutions.append( ('%include_option',  '/FI' ) )
     config.substitutions.append( ('%debug_option',  '/DEBUG' ) )
     config.substitutions.append( ('%cxx_std_option',  '/std:' ) )
 else:
     config.substitutions.append( ('%sycl_options', ' -lsycl -I' +
                                 config.sycl_include + ' -I' + os.path.join(config.sycl_include, 'sycl')) )
-    config.substitutions.append( ('%include_option',  '-include') )
+    config.substitutions.append( ('%include_option',  '-include' ) )
     config.substitutions.append( ('%debug_option',  '-g' ) )
     config.substitutions.append( ('%cxx_std_option',  '-std=' ) )
 
