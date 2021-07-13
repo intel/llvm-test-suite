@@ -1,4 +1,4 @@
-//==--------------- matrix_transpose_glb.cpp  - DPC++ ESIMD on-device test -==//
+//==--------------- matrix_transpose2.cpp  - DPC++ ESIMD on-device test ----==//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -9,6 +9,8 @@
 // UNSUPPORTED: cuda
 // RUN: %clangxx -fsycl %s -o %t.out
 // RUN: %GPU_RUN_PLACEHOLDER %t.out
+
+// This test checks matrix transpose implementation with media block read/write
 
 #include "esimd_test_utils.hpp"
 
@@ -56,10 +58,6 @@ bool checkResult(const int *M, unsigned N) {
   return true;
 }
 
-// This represents the register file that kernels operate on.
-// The max size we need is for 3 16x16 matrices
-ESIMD_PRIVATE ESIMD_REGISTER(192) simd<int, 3 * 32 * 8> GRF;
-
 // The basic idea of vecotrizing transposition can be illustrated by
 // transposing a 2 x 2 matrix as follows:
 //
@@ -71,15 +69,14 @@ ESIMD_PRIVATE ESIMD_REGISTER(192) simd<int, 3 * 32 * 8> GRF;
 // A C
 // B D
 //
-// This function does 8x8 transposition
-ESIMD_NOINLINE void transpose_matrix(int InR, int OuR) {
+template <typename T>
+ESIMD_INLINE simd<T, 64> transpose_matrix(simd<T, 64> v1) {
+  simd<T, 64> v2;
   // mask to control how to merge two vectors.
   simd<uint16_t, 16> mask = 0;
   mask.select<8, 2>(0) = 1;
-  auto t1 = GRF.template bit_cast_view<int, 48, 16>().select<4, 1, 16, 1>(
-      InR >> 1, 0);
-  auto t2 = GRF.template bit_cast_view<int, 48, 16>().select<4, 1, 16, 1>(
-      OuR >> 1, 0);
+  auto t1 = v1.template bit_cast_view<T, 4, 16>();
+  auto t2 = v2.template bit_cast_view<T, 4, 16>();
 
   // j = 1
   t2.row(0).merge(t1.template replicate<8, 1, 2, 0>(0, 0),
@@ -110,58 +107,60 @@ ESIMD_NOINLINE void transpose_matrix(int InR, int OuR) {
                   t1.template replicate<8, 1, 2, 0>(3, 0), mask);
   t2.row(3).merge(t1.template replicate<8, 1, 2, 0>(1, 8),
                   t1.template replicate<8, 1, 2, 0>(3, 8), mask);
+  return v2;
 }
 
 // read a N-by-N sub-matrix
-template <int N>
-ESIMD_NOINLINE void read(int *buf, int MZ, int col, int row, int GrfIdx) {
-  auto res = GRF.select<N * N, 1>(GrfIdx * 8);
-  buf += row * MZ + col;
-#pragma unroll
-  for (int i = 0; i < N; ++i) {
-    simd<int, N> data;
-    data.copy_from(buf);
-    res.template select<N, 1>(i * N) = data;
-    buf += MZ;
-  }
+template <typename T, int N, typename AccessorTy>
+ESIMD_INLINE simd<T, N * N> read(AccessorTy img, int MZ, int col, int row) {
+  static_assert(N == 8, "only 8x8 sub-matrix is supported");
+
+  simd<T, N * N> res;
+  auto in = res.template bit_cast_view<unsigned char, 8, 32>();
+  in = media_block_load<unsigned char, 8, 32>(img, col * sizeof(T), row);
+
+  return res;
 }
 
 // write a N-by-N sub-matrix
-template <int N>
-ESIMD_NOINLINE void write(int *buf, int MZ, int col, int row, int GrfIdx) {
-  auto val = GRF.select<N * N, 1>(GrfIdx * 8);
-  buf += row * MZ + col;
-#pragma unroll
-  for (int i = 0; i < N; ++i) {
-    simd<int, N> val2 = val.template select<N, 1>(i * N);
-    val2.copy_to(buf);
-    buf += MZ;
-  }
+template <typename T, int N, typename AccessorTy>
+ESIMD_INLINE void write(AccessorTy img, int MZ, int col, int row,
+                        simd<T, N * N> val) {
+  static_assert(N == 8, "only 8x8 sub-matrix is supported");
+
+  auto out = val.template bit_cast_view<uchar, 8, 32>();
+  media_block_store<unsigned char, 8, 32>(img, col * sizeof(T), row, out);
 }
 
 // Square matrix transposition on block of size 8x8
-// input and output are in the same buffer
-ESIMD_INLINE void transpose8(int *buf, int MZ, int block_col, int block_row) {
+// input and output are in the same image
+template <typename AccessorInTy, typename AccessorOutTy>
+ESIMD_INLINE void transpose8(AccessorInTy in, AccessorOutTy out, int MZ,
+                             int block_col, int block_row) {
   static const int N = 8;
 
   if (block_row == block_col) {
-    read<N>(buf, MZ, N * block_col, N * block_row, 0); // to grf line#0
+    auto m1 = read<int, N, AccessorInTy>(in, MZ, N * block_col, N * block_row);
 
-    transpose_matrix(0, 8); // to grf line#8
+    // cerr << m1 << std::endl;
 
-    write<N>(buf, MZ, N * block_row, N * block_col, 8); // from grf line#8
+    auto t1 = transpose_matrix(m1);
+
+    // cerr << t1 << std::endl;
+
+    write<int, N, AccessorOutTy>(out, MZ, N * block_row, N * block_col, t1);
   } else if (block_row < block_col) {
-    // Read two blocks to be swapped. line #0 and line #8
-    read<N>(buf, MZ, N * block_col, N * block_row, 0);
-    read<N>(buf, MZ, N * block_row, N * block_col, 8);
+    // Read two blocks to be swapped.
+    auto m1 = read<int, N, AccessorInTy>(in, MZ, N * block_col, N * block_row);
+    auto m2 = read<int, N, AccessorInTy>(in, MZ, N * block_row, N * block_col);
 
     // Tranpose them.
-    transpose_matrix(0, 16);
-    transpose_matrix(8, 24);
+    auto t1 = transpose_matrix(m1);
+    auto t2 = transpose_matrix(m2);
 
     // Write them back to the transposed location.
-    write<N>(buf, MZ, N * block_row, N * block_col, 16);
-    write<N>(buf, MZ, N * block_col, N * block_row, 24);
+    write<int, N, AccessorOutTy>(out, MZ, N * block_row, N * block_col, t1);
+    write<int, N, AccessorOutTy>(out, MZ, N * block_col, N * block_row, t2);
   }
 }
 
@@ -169,79 +168,107 @@ ESIMD_INLINE void transpose8(int *buf, int MZ, int block_col, int block_row) {
 // In this version, a thread handle a block of size 16x16 which allows
 // to better latency hidding and subsentantially improve overall performance.
 //
-ESIMD_INLINE void transpose16(int *buf, int MZ, int block_col, int block_row) {
+template <typename AccessorInTy, typename AccessorOutTy>
+ESIMD_INLINE void transpose16(AccessorInTy in, AccessorOutTy out, int MZ,
+                              int block_col, int block_row) {
   static const int N = 16;
 
   if (block_row == block_col) {
-    // Read a tile of 4 8x8 sub-blocks to
+    // Read a tile of 4 8x8 sub-blocks:
     //
-    //  [ line00-07 line08-15 ]
-    //  [ line16-23 line24-32 ]
+    //  [ m00 m01 ]
+    //  [ m10 m11 ]
     //
-    read<8>(buf, MZ, (N * block_col + 0), N * block_row + 0, 0);
-    read<8>(buf, MZ, (N * block_col + 8), N * block_row + 0, 8);
-    read<8>(buf, MZ, (N * block_col + 0), N * block_row + 8, 16);
-    read<8>(buf, MZ, (N * block_col + 8), N * block_row + 8, 24);
+    // matrix<int, 8, 8> m00, m01, m10, m11, t00, t01, t10, t11;
+    auto m00 = read<int, 8, AccessorInTy>(in, MZ, (N * block_col + 0),
+                                          N * block_row + 0);
+    auto m01 = read<int, 8, AccessorInTy>(in, MZ, (N * block_col + 8),
+                                          N * block_row + 0);
+    auto m10 = read<int, 8, AccessorInTy>(in, MZ, (N * block_col + 0),
+                                          N * block_row + 8);
+    auto m11 = read<int, 8, AccessorInTy>(in, MZ, (N * block_col + 8),
+                                          N * block_row + 8);
 
     // Tranpose sub-blocks.
-    transpose_matrix(0, 32);  // to line#32
-    transpose_matrix(8, 40);  // to line#40
-    transpose_matrix(16, 48); // to line#48
-    transpose_matrix(24, 56); // to line#56
+    auto t00 = transpose_matrix(m00);
+    auto t01 = transpose_matrix(m01);
+    auto t10 = transpose_matrix(m10);
+    auto t11 = transpose_matrix(m11);
 
     // write out as
     //
-    // [line32-39 line48-55]
-    // [line40-47 line56-63]
+    // [t00 t10]
+    // [t01 t11]
     //
-    write<8>(buf, MZ, (N * block_col + 0), N * block_row + 0, 32);
-    write<8>(buf, MZ, (N * block_col + 8), N * block_row + 0, 48);
-    write<8>(buf, MZ, (N * block_col + 0), N * block_row + 8, 40);
-    write<8>(buf, MZ, (N * block_col + 8), N * block_row + 8, 56);
+    write<int, 8, AccessorOutTy>(out, MZ, (N * block_col + 0),
+                                 N * block_row + 0, t00);
+    write<int, 8, AccessorOutTy>(out, MZ, (N * block_col + 8),
+                                 N * block_row + 0, t10);
+    write<int, 8, AccessorOutTy>(out, MZ, (N * block_col + 0),
+                                 N * block_row + 8, t01);
+    write<int, 8, AccessorOutTy>(out, MZ, (N * block_col + 8),
+                                 N * block_row + 8, t11);
   } else if (block_row < block_col) {
     // Read two tiles of 4 8x8 sub-blocks to be swapped.
-    read<8>(buf, MZ, (N * block_col + 0), N * block_row + 0, 0);
-    read<8>(buf, MZ, (N * block_col + 8), N * block_row + 0, 8);
-    read<8>(buf, MZ, (N * block_col + 0), N * block_row + 8, 16);
-    read<8>(buf, MZ, (N * block_col + 8), N * block_row + 8, 24);
+    //
+    // matrix<int, 8, 8> a00, a01, a10, a11, t00, t01, t10, t11;
+    auto a00 = read<int, 8, AccessorInTy>(in, MZ, (N * block_col + 0),
+                                          N * block_row + 0);
+    auto a01 = read<int, 8, AccessorInTy>(in, MZ, (N * block_col + 8),
+                                          N * block_row + 0);
+    auto a10 = read<int, 8, AccessorInTy>(in, MZ, (N * block_col + 0),
+                                          N * block_row + 8);
+    auto a11 = read<int, 8, AccessorInTy>(in, MZ, (N * block_col + 8),
+                                          N * block_row + 8);
 
-    read<8>(buf, MZ, (N * block_row + 0), N * block_col + 0, 32);
-    read<8>(buf, MZ, (N * block_row + 8), N * block_col + 0, 40);
-    read<8>(buf, MZ, (N * block_row + 0), N * block_col + 8, 48);
-    read<8>(buf, MZ, (N * block_row + 8), N * block_col + 8, 56);
+    // matrix<int, 8, 8> b00, b01, b10, b11, r00, r01, r10, r11;
+    auto b00 = read<int, 8, AccessorInTy>(in, MZ, (N * block_row + 0),
+                                          N * block_col + 0);
+    auto b01 = read<int, 8, AccessorInTy>(in, MZ, (N * block_row + 8),
+                                          N * block_col + 0);
+    auto b10 = read<int, 8, AccessorInTy>(in, MZ, (N * block_row + 0),
+                                          N * block_col + 8);
+    auto b11 = read<int, 8, AccessorInTy>(in, MZ, (N * block_row + 8),
+                                          N * block_col + 8);
 
     // Tranpose the first tile.
-    transpose_matrix(0, 64);  //(a00);
-    transpose_matrix(8, 72);  //(a01);
-    transpose_matrix(16, 80); //(a10);
-    transpose_matrix(24, 88); //(a11);
+    auto t00 = transpose_matrix(a00);
+    auto t01 = transpose_matrix(a01);
+    auto t10 = transpose_matrix(a10);
+    auto t11 = transpose_matrix(a11);
 
     // Tranpose the second tile.
-    transpose_matrix(32, 0);  //(b00);
-    transpose_matrix(40, 8);  //(b01);
-    transpose_matrix(48, 16); //(b10);
-    transpose_matrix(56, 24); //(b11);
+    auto r00 = transpose_matrix(b00);
+    auto r01 = transpose_matrix(b01);
+    auto r10 = transpose_matrix(b10);
+    auto r11 = transpose_matrix(b11);
 
     // Write the first tile to the transposed location.
-    write<8>(buf, MZ, (N * block_row + 0), N * block_col + 0, 64);
-    write<8>(buf, MZ, (N * block_row + 8), N * block_col + 0, 80);
-    write<8>(buf, MZ, (N * block_row + 0), N * block_col + 8, 72);
-    write<8>(buf, MZ, (N * block_row + 8), N * block_col + 8, 88);
+    write<int, 8, AccessorOutTy>(out, MZ, (N * block_row + 0),
+                                 N * block_col + 0, t00);
+    write<int, 8, AccessorOutTy>(out, MZ, (N * block_row + 8),
+                                 N * block_col + 0, t10);
+    write<int, 8, AccessorOutTy>(out, MZ, (N * block_row + 0),
+                                 N * block_col + 8, t01);
+    write<int, 8, AccessorOutTy>(out, MZ, (N * block_row + 8),
+                                 N * block_col + 8, t11);
 
     // Write the second tile to the transposed location.
-    write<8>(buf, MZ, (N * block_col + 0), N * block_row + 0, 0);
-    write<8>(buf, MZ, (N * block_col + 8), N * block_row + 0, 16);
-    write<8>(buf, MZ, (N * block_col + 0), N * block_row + 8, 8);
-    write<8>(buf, MZ, (N * block_col + 8), N * block_row + 8, 24);
+    write<int, 8, AccessorOutTy>(out, MZ, (N * block_col + 0),
+                                 N * block_row + 0, r00);
+    write<int, 8, AccessorOutTy>(out, MZ, (N * block_col + 8),
+                                 N * block_row + 0, r10);
+    write<int, 8, AccessorOutTy>(out, MZ, (N * block_col + 0),
+                                 N * block_row + 8, r01);
+    write<int, 8, AccessorOutTy>(out, MZ, (N * block_col + 8),
+                                 N * block_row + 8, r11);
   }
 }
 
 bool runTest(unsigned MZ, unsigned block_size) {
   queue q(esimd_test::ESIMDSelector{}, esimd_test::createExceptionHandler(),
           property::queue::enable_profiling{});
-  auto dev = q.get_device();
-  auto ctxt = q.get_context();
-  int *M = static_cast<int *>(malloc_shared(MZ * MZ * sizeof(int), dev, ctxt));
+  int *M = new int[MZ * MZ];
 
   initMatrix(M, MZ);
   cerr << "\nTranspose square matrix of size " << MZ << "\n";
@@ -270,21 +297,37 @@ bool runTest(unsigned MZ, unsigned block_size) {
   try {
     // num_iters + 1, iteration#0 is for warmup
     for (int i = 0; i <= num_iters; ++i) {
+      // make sure that image object has short live-range
+      // than M
+      cl::sycl::image<2> imgM((unsigned int *)M, image_channel_order::rgba,
+                              image_channel_type::unsigned_int32,
+                              range<2>{MZ / 4, MZ});
+
       double etime = 0;
       if (block_size == 16 && MZ >= 16) {
         auto e = q.submit([&](handler &cgh) {
-          cgh.parallel_for<class Transpose16>(
+          auto accInput =
+              imgM.get_access<uint4, cl::sycl::access::mode::read>(cgh);
+          auto accOutput =
+              imgM.get_access<uint4, cl::sycl::access::mode::write>(cgh);
+          cgh.parallel_for<class K16>(
               Range, [=](nd_item<2> ndi) SYCL_ESIMD_KERNEL {
-                transpose16(M, MZ, ndi.get_global_id(0), ndi.get_global_id(1));
+                transpose16(accInput, accOutput, MZ, ndi.get_global_id(0),
+                            ndi.get_global_id(1));
               });
         });
         e.wait();
         etime = esimd_test::report_time("kernel time", e, e);
       } else if (block_size == 8) {
         auto e = q.submit([&](handler &cgh) {
-          cgh.parallel_for<class Transpose08>(
+          auto accInput =
+              imgM.get_access<uint4, cl::sycl::access::mode::read>(cgh);
+          auto accOutput =
+              imgM.get_access<uint4, cl::sycl::access::mode::write>(cgh);
+          cgh.parallel_for<class K08>(
               Range, [=](nd_item<2> ndi) SYCL_ESIMD_KERNEL {
-                transpose8(M, MZ, ndi.get_global_id(0), ndi.get_global_id(1));
+                transpose8(accInput, accOutput, MZ, ndi.get_global_id(0),
+                           ndi.get_global_id(1));
               });
         });
         e.wait();
@@ -298,7 +341,7 @@ bool runTest(unsigned MZ, unsigned block_size) {
     }
   } catch (cl::sycl::exception const &e) {
     std::cout << "SYCL exception caught: " << e.what() << '\n';
-    free(M, ctxt);
+    delete[] M;
     return e.get_cl_code();
   }
 
@@ -320,7 +363,7 @@ bool runTest(unsigned MZ, unsigned block_size) {
 
   // printMatrix("\nTransposed matrix:", M, MZ);
   bool success = checkResult(M, MZ);
-  free(M, ctxt);
+  delete[] M;
   return success;
 }
 

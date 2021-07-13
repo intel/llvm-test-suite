@@ -190,6 +190,7 @@ void testcopyH2DImage() {
             writeAcc.write(int(Item[0]), Data);
           });
     });
+    otherQueue.wait();
     std::cout << "about to destruct 1D" << std::endl;
   } // ~image 1D
 
@@ -224,6 +225,7 @@ void testcopyH2DImage() {
             writeAcc.write(sycl::int2{Item[0], Item[1]}, Data);
           });
     });
+    otherQueue.wait();
     std::cout << "about to destruct 2D" << std::endl;
   } // ~image 2D
 
@@ -260,6 +262,7 @@ void testcopyH2DImage() {
             writeAcc.write(sycl::int4{Item[0], Item[1], Item[2], 0}, Data);
           });
     });
+    otherQueue.wait();
     std::cout << "about to destruct 3D" << std::endl;
   } // ~image 3D
 
@@ -282,6 +285,7 @@ int main() {
 
 // ----------- IMAGES
 
+// clang-format off
 //CHECK: start copyD2H-Image
 //CHECK: -- 1D
 //CHECK: ---> piMemImageCreate(
@@ -322,14 +326,16 @@ int main() {
 //CHECK-DISABLED: image_desc w/h/d : 16 / 1 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4340
 //CHECK-DISABLED: ---> piEnqueueMemImageRead(
 //CHECK-DISABLED: pi_image_region width/height/depth : 16/1/1
-//CHECK-DISABLED: ---> piEnqueueMemImageWrite(
-//CHECK-DISABLED: pi_image_region width/height/depth : 16/1/1
-//CHECK-DISABLED: ---> piMemImageCreate(
-//CHECK-DISABLED: image_desc w/h/d : 16 / 1 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4340
-//CHECK-DISABLED: ---> piEnqueueMemImageRead(
-//CHECK-DISABLED: pi_image_region width/height/depth : 16/1/1
-//CHECK-DISABLED: ---> piEnqueueMemImageWrite(
-//CHECK-DISABLED: pi_image_region width/height/depth : 16/1/1
+// The order of the following calls may vary since some of them are made by a
+// host task (in a separate thread).
+//CHECK-DAG-DISABLED: ---> piMemImageCreate(
+//CHECK-DAG-DISABLED: image_desc w/h/d : 16 / 1 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4340
+//CHECK-DAG-DISABLED: ---> piEnqueueMemImageRead(
+//CHECK-DAG-DISABLED: pi_image_region width/height/depth : 16/1/1
+//CHECK-DAG-DISABLED: ---> piEnqueueMemImageWrite(
+//CHECK-DAG-DISABLED: pi_image_region width/height/depth : 16/1/1
+//CHECK-DAG-DISABLED: ---> piEnqueueMemImageWrite(
+//CHECK-DAG-DISABLED: pi_image_region width/height/depth : 16/1/1
 //CHECK-DISABLED: about to destruct 1D
 //CHECK-DISABLED: ---> piEnqueueMemImageRead(
 //CHECK-DISABLED: pi_image_region width/height/depth : 16/1/1
@@ -342,16 +348,18 @@ int main() {
 //CHECK-DISABLED: image_desc w/h/d : 16 / 5 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4337
 //CHECK-DISABLED: ---> piEnqueueMemImageRead(
 //CHECK-DISABLED: pi_image_region width/height/depth : 16/5/1
-//CHECK-DISABLED: ---> piEnqueueMemImageWrite(
-//CHECK-DISABLED: pi_image_region width/height/depth : 16/5/1
-// CHECK-NEXT-DISABLED: <unknown> : 256
-//CHECK-DISABLED: ---> piMemImageCreate(
-//CHECK-DISABLED: image_desc w/h/d : 16 / 5 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4337
-//CHECK-DISABLED: ---> piEnqueueMemImageRead(
-//CHECK-DISABLED: pi_image_region width/height/depth : 16/5/1
-//CHECK-DISABLED: ---> piEnqueueMemImageWrite(
-//CHECK-DISABLED: pi_image_region width/height/depth : 16/5/1
-// CHECK-NEXT-DISABLED: <unknown> : 256
+// The order of the following calls may vary since some of them are made by a
+// host task (in a separate thread).
+//CHECK-DAG-DISABLED: ---> piMemImageCreate(
+//CHECK-DAG-DISABLED: image_desc w/h/d : 16 / 5 / 1  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4337
+//CHECK-DAG-DISABLED: ---> piEnqueueMemImageRead(
+//CHECK-DAG-DISABLED: pi_image_region width/height/depth : 16/5/1
+//CHECK-DAG-DISABLED: ---> piEnqueueMemImageWrite(
+//CHECK-DAG-DISABLED: pi_image_region width/height/depth : 16/5/1
+//CHECK-DAG-DISABLED: <unknown> : 256
+//CHECK-DAG-DISABLED: ---> piEnqueueMemImageWrite(
+//CHECK-DAG-DISABLED: pi_image_region width/height/depth : 16/5/1
+//CHECK-DAG-DISABLED: <unknown> : 256
 //CHECK-DISABLED: about to destruct 2D
 //CHECK-DISABLED: ---> piEnqueueMemImageRead(
 //CHECK-DISABLED: pi_image_region width/height/depth : 16/5/1
@@ -364,21 +372,24 @@ int main() {
 //CHECK-DISABLED: image_desc w/h/d : 16 / 5 / 3  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4338
 //CHECK-DISABLED: ---> piEnqueueMemImageRead(
 //CHECK-DISABLED: pi_image_region width/height/depth : 16/5/3
-//CHECK-DISABLED: ---> piEnqueueMemImageWrite(
-//CHECK-DISABLED: pi_image_region width/height/depth : 16/5/3
-// CHECK-NEXT-DISABLED: <unknown> : 256
-// CHECK-NEXT-DISABLED: <unknown> : 1280
-//CHECK-DISABLED: ---> piMemImageCreate(
-//CHECK-DISABLED: image_desc w/h/d : 16 / 5 / 3  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4338
-//CHECK-DISABLED: ---> piEnqueueMemImageRead(
-//CHECK-DISABLED: pi_image_region width/height/depth : 16/5/3
-//CHECK-DISABLED: ---> piEnqueueMemImageWrite(
-//CHECK-DISABLED: pi_image_region width/height/depth : 16/5/3
-// CHECK-NEXT-DISABLED: <unknown> : 256
-// CHECK-NEXT-DISABLED: <unknown> : 1280
+// The order of the following calls may vary since some of them are made by a
+// host task (in a separate thread).
+//CHECK-DAG-DISABLED: ---> piMemImageCreate(
+//CHECK-DAG-DISABLED: image_desc w/h/d : 16 / 5 / 3  --  arrSz/row/slice : 0 / 0 / 0  --  num_mip_lvls/num_smpls/image_type : 0 / 0 / 4338
+//CHECK-DAG-DISABLED: ---> piEnqueueMemImageRead(
+//CHECK-DAG-DISABLED: pi_image_region width/height/depth : 16/5/3
+//CHECK-DAG-DISABLED: ---> piEnqueueMemImageWrite(
+//CHECK-DAG-DISABLED: pi_image_region width/height/depth : 16/5/3
+//CHECK-DAG-DISABLED: <unknown> : 256
+//CHECK-DAG-DISABLED: <unknown> : 1280
+//CHECK-DAG-DISABLED: ---> piEnqueueMemImageWrite(
+//CHECK-DAG-DISABLED: pi_image_region width/height/depth : 16/5/3
+//CHECK-DAG-DISABLED: <unknown> : 256
+//CHECK-DAG-DISABLED: <unknown> : 1280
 //CHECK-DISABLED: about to destruct 3D
 //CHECK-DISABLED: ---> piEnqueueMemImageRead(
 //CHECK-DISABLED: pi_image_region width/height/depth : 16/5/3
 // CHECK-NEXT-DISABLED: <unknown> : 256
 // CHECK-NEXT-DISABLED: <unknown> : 1280
 //CHECK-DISABLED: end copyH2D-image
+// clang-format on
