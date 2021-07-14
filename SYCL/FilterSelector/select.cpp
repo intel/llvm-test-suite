@@ -51,7 +51,7 @@ int main() {
       HasOpenCLDevices = true;
     } else if (Backend == backend::cuda) {
       HasCUDADevices = true;
-    } else if (Backedn == backend::rocm) {
+    } else if (Backend == backend::rocm) {
       HasROCmDevices = true;
     }
   }
