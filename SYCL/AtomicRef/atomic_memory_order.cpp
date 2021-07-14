@@ -18,8 +18,7 @@ using namespace sycl::ONEAPI;
 
 template <typename T, memory_order MO> class memory_order_kernel;
 
-template <typename T>
-void acq_rel_test(queue q, size_t N) {
+template <typename T> void acq_rel_test(queue q, size_t N) {
   T a = 0;
   {
     buffer<T> a_buf(&a, 1);
@@ -43,8 +42,7 @@ void acq_rel_test(queue q, size_t N) {
   assert(a == T(N));
 }
 
-template <typename T>
-void seq_cst_test(queue q, size_t N) {
+template <typename T> void seq_cst_test(queue q, size_t N) {
   T a = 0;
   T b = 0;
   {
